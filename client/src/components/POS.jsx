@@ -323,33 +323,33 @@ const POS = () => {
           {cart.map(item => (
             <div key={item.id} className="cart-item">
               <div style={{flex: 1, minWidth: 0}}>
-                <div className="cart-item-name" style={{fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{item.nama_barang}</div>
-                <div className="cart-item-details" style={{marginTop: '6px'}}>
+                <div className="cart-item-name" style={{fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: '700'}}>{item.nama_barang}</div>
+                <div className="cart-item-details" style={{marginTop: '4px', fontSize: '11px', color: '#64748B'}}>
                   Rp {item.harga_jual.toLocaleString('id-ID')}
                 </div>
               </div>
 
               {/* Qty Controls */}
-              <div style={{display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '10px'}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '4px', marginLeft: '6px'}}>
                 <button
                   onClick={(e) => { e.stopPropagation(); updateQty(item.id, -1); }}
-                  style={{padding: '4px 9px', fontSize: '16px', background: '#F1F5F9', color: '#334155', boxShadow: 'none', borderRadius: '8px', lineHeight: 1, minWidth: '30px'}}
+                  style={{padding: '2px 6px', fontSize: '14px', background: '#F1F5F9', color: '#334155', boxShadow: 'none', borderRadius: '6px', lineHeight: 1, minWidth: '24px'}}
                 >−</button>
-                <span style={{fontWeight: '700', fontSize: '15px', minWidth: '24px', textAlign: 'center', color: 'var(--text-dark)'}}>{item.qty}</span>
+                <span style={{fontWeight: '700', fontSize: '13px', minWidth: '20px', textAlign: 'center', color: 'var(--text-dark)'}}>{item.qty}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); updateQty(item.id, 1); }}
-                  style={{padding: '4px 9px', fontSize: '16px', background: 'var(--primary-color)', color: 'white', boxShadow: 'none', borderRadius: '8px', lineHeight: 1, minWidth: '30px'}}
+                  style={{padding: '2px 6px', fontSize: '14px', background: 'var(--primary-color)', color: 'white', boxShadow: 'none', borderRadius: '6px', lineHeight: 1, minWidth: '24px'}}
                 >+</button>
               </div>
 
-              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: '10px', gap: '4px'}}>
-                <div className="cart-item-price" style={{margin: 0, fontSize: '14px'}}>
+              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginLeft: '8px', gap: '4px', minWidth: '70px'}}>
+                <div className="cart-item-price" style={{margin: 0, fontSize: '12px', fontWeight: '800'}}>
                   Rp {item.subtotal.toLocaleString('id-ID')}
                 </div>
                 <button
                   className="danger"
-                  style={{padding: '3px 8px', fontSize: '11px', boxShadow: 'none', borderRadius: '6px'}}
-                  onClick={() => removeFromCart(item.id)}
+                  style={{padding: '2px 8px', fontSize: '10px', boxShadow: 'none', borderRadius: '4px', background: '#FEE2E2', color: '#DC2626', fontWeight: '700'}}
+                  onClick={(e) => { e.stopPropagation(); removeFromCart(item.id); }}
                 >Hapus</button>
               </div>
             </div>
@@ -361,15 +361,15 @@ const POS = () => {
             <span>Subtotal:</span>
             <span>Rp {totalHarga.toLocaleString('id-ID')}</span>
           </div>
-          <div className="cart-row" style={{alignItems: 'center'}}>
-            <span>Diskon:</span>
-            <div style={{position: 'relative', width: '160px'}}>
-              <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748B', fontWeight: '500'}}>Rp</span>
+          <div className="cart-row" style={{alignItems: 'center', gap: '10px'}}>
+            <span style={{flexShrink: 0, width: '60px'}}>Diskon:</span>
+            <div style={{position: 'relative', flex: 1}}>
+              <span style={{position: 'absolute', left: '15px', top: '10px', color: '#64748B', fontWeight: '500'}}>Rp</span>
               <input
                 type="text"
                 value={diskon ? diskon.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
                 onChange={e => setDiskon(Number(e.target.value.replace(/[^0-9]/g, '')))}
-                style={{width: '100%', paddingLeft: '45px', textAlign: 'right', fontWeight: '600', color: 'var(--danger-color)'}}
+                style={{width: '100%', padding: '8px 10px 8px 45px', textAlign: 'right', fontWeight: '600', color: 'var(--danger-color)'}}
                 placeholder="0"
               />
             </div>
@@ -380,35 +380,35 @@ const POS = () => {
               <span>Rp {totalSetelahDiskon.toLocaleString('id-ID')}</span>
             </div>
           )}
-          <div className="cart-row" style={{alignItems: 'center'}}>
-            <span>Metode:</span>
+          <div className="cart-row" style={{alignItems: 'center', gap: '10px'}}>
+            <span style={{flexShrink: 0, width: '60px'}}>Metode:</span>
             <select
               value={metodePembayaran}
               onChange={e => setMetodePembayaran(e.target.value)}
-              style={{width: '160px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', fontWeight: '600'}}
+              style={{flex: 1, padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '12px', fontWeight: '600'}}
             >
               <option value="Tunai">💵 Tunai</option>
               <option value="Transfer Bank">🏦 Transfer Bank</option>
               <option value="QRIS">📱 QRIS</option>
             </select>
           </div>
-          <div className="cart-row" style={{alignItems: 'flex-start'}}>
-            <span style={{marginTop: '12px'}}>Bayar:</span>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end'}}>
-              <div style={{position: 'relative', width: '160px'}}>
-                <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748B', fontWeight: '500'}}>Rp</span>
+          <div className="cart-row" style={{alignItems: 'flex-start', gap: '10px'}}>
+            <span style={{flexShrink: 0, width: '60px', marginTop: '8px'}}>Bayar:</span>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '6px', flex: 1}}>
+              <div style={{position: 'relative', width: '100%'}}>
+                <span style={{position: 'absolute', left: '12px', top: '9px', color: '#64748B', fontWeight: '500'}}>Rp</span>
                 <input
                   type="text"
                   value={amountTendered ? amountTendered.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
                   onChange={e => setAmountTendered(Number(e.target.value.replace(/[^0-9]/g, '')))}
-                  style={{width: '100%', paddingLeft: '45px', textAlign: 'right', fontWeight: '600', color: 'var(--primary-color)'}}
+                  style={{width: '100%', padding: '8px 10px 8px 36px', textAlign: 'right', fontWeight: '600', color: 'var(--primary-color)'}}
                   placeholder="0"
                 />
               </div>
-              <div style={{display: 'flex', gap: '4px', flexWrap: 'wrap', width: '160px', justifyContent: 'flex-end'}}>
-                <button onClick={() => setAmountTendered(totalSetelahDiskon)} style={{fontSize: '11px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>Uang Pas</button>
-                <button onClick={() => setAmountTendered(50000)} style={{fontSize: '11px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>50rb</button>
-                <button onClick={() => setAmountTendered(100000)} style={{fontSize: '11px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>100rb</button>
+              <div style={{display: 'flex', gap: '4px', flexWrap: 'wrap', width: '100%', justifyContent: 'space-between'}}>
+                <button onClick={() => setAmountTendered(totalSetelahDiskon)} style={{flex: 1, fontSize: '10px', padding: '4px 0', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>Pas</button>
+                <button onClick={() => setAmountTendered(50000)} style={{flex: 1, fontSize: '10px', padding: '4px 0', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>50rb</button>
+                <button onClick={() => setAmountTendered(100000)} style={{flex: 1, fontSize: '10px', padding: '4px 0', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>100rb</button>
               </div>
             </div>
           </div>
@@ -420,7 +420,7 @@ const POS = () => {
           </div>
           <button
             className="success"
-            style={{width: '100%', marginTop: '20px', padding: '15px', fontSize: '16px', marginBottom: '10px'}}
+            style={{width: '100%', marginTop: '12px', padding: '10px', fontSize: '14px', marginBottom: '8px'}}
             onClick={checkout}
             disabled={cart.length === 0}
           >
@@ -431,10 +431,10 @@ const POS = () => {
             onClick={handleHoldCart} 
             disabled={cart.length === 0}
             style={{ 
-              width: '100%', padding: '12px', background: cart.length > 0 ? '#FEF2F2' : '#F1F5F9', 
-              color: cart.length > 0 ? '#DC2626' : '#94A3B8', border: 'none', borderRadius: '10px', 
-              fontSize: '14px', fontWeight: '700', cursor: cart.length > 0 ? 'pointer' : 'not-allowed', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' 
+              width: '100%', padding: '8px', background: cart.length > 0 ? '#FEF2F2' : '#F1F5F9', 
+              color: cart.length > 0 ? '#DC2626' : '#94A3B8', border: 'none', borderRadius: '8px', 
+              fontSize: '12px', fontWeight: '700', cursor: cart.length > 0 ? 'pointer' : 'not-allowed', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' 
             }}
           >
             ⏸️ Simpan / Hold Transaksi

@@ -190,9 +190,11 @@ const Inventory = () => {
                     : <span className="badge in-stock">Good</span>}
                 </td>
                 <td>
-                  <button style={{padding: '5px 10px', marginRight: '5px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px'}} onClick={() => openRestockModal(item)}>+ Restock</button>
-                  <button className="secondary" style={{padding: '5px 10px', marginRight: '5px', fontSize: '12px'}} onClick={() => editItem(item)}>Edit</button>
-                  <button className="danger" style={{padding: '5px 10px', fontSize: '12px'}} onClick={() => deleteItem(item.id)}>Hapus</button>
+                  <div style={{display: 'flex', gap: '4px'}}>
+                    <button style={{padding: '6px 10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: '600'}} onClick={() => openRestockModal(item)}>+ Restock</button>
+                    <button className="secondary" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => editItem(item)}>Edit</button>
+                    <button className="danger" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => deleteItem(item.id)}>Hapus</button>
+                  </div>
                 </td>
               </tr>
             ))}
