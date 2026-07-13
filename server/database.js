@@ -21,8 +21,14 @@ function initializeDb() {
             harga_modal INTEGER,
             harga_jual INTEGER,
             stok INTEGER,
+            gambar TEXT,
+            satuan VARCHAR(20) DEFAULT 'pcs',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        // Add columns safely for existing databases (ignores errors if columns exist)
+        db.run(`ALTER TABLE barang ADD COLUMN gambar TEXT`, (err) => {});
+        db.run(`ALTER TABLE barang ADD COLUMN satuan VARCHAR(20) DEFAULT 'pcs'`, (err) => {});
 
         // Table B: transaksi
         db.run(`CREATE TABLE IF NOT EXISTS transaksi (

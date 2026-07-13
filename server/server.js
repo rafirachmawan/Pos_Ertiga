@@ -6,7 +6,8 @@ const app = express();
 const PORT = 3001;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // --- CRUD for Barang (Items) ---
 
@@ -20,9 +21,9 @@ app.get('/api/barang', (req, res) => {
 
 // Add new item
 app.post('/api/barang', (req, res) => {
-    const { barcode, nama_barang, harga_modal, harga_jual, stok } = req.body;
-    const sql = `INSERT INTO barang (barcode, nama_barang, harga_modal, harga_jual, stok) VALUES (?, ?, ?, ?, ?)`;
-    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok], function(err) {
+    const { barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan } = req.body;
+    const sql = `INSERT INTO barang (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok, gambar || '', satuan || 'pcs'], function(err) {
         if (err) return res.status(400).json({ error: err.message });
         res.json({ id: this.lastID, message: "Barang berhasil ditambahkan" });
     });
@@ -31,9 +32,9 @@ app.post('/api/barang', (req, res) => {
 // Update item
 app.put('/api/barang/:id', (req, res) => {
     const { id } = req.params;
-    const { barcode, nama_barang, harga_modal, harga_jual, stok } = req.body;
-    const sql = `UPDATE barang SET barcode = ?, nama_barang = ?, harga_modal = ?, harga_jual = ?, stok = ? WHERE id = ?`;
-    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok, id], function(err) {
+    const { barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan } = req.body;
+    const sql = `UPDATE barang SET barcode = ?, nama_barang = ?, harga_modal = ?, harga_jual = ?, stok = ?, gambar = ?, satuan = ? WHERE id = ?`;
+    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok, gambar || '', satuan || 'pcs', id], function(err) {
         if (err) return res.status(400).json({ error: err.message });
         res.json({ changes: this.changes, message: "Barang berhasil diupdate" });
     });

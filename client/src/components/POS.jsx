@@ -122,31 +122,40 @@ const POS = () => {
         <div className="product-grid">
           {items.map(item => (
             <div key={item.id} className="product-card" onClick={() => addToCart(item)}>
-              <h4 style={{marginBottom: '10px', color: 'var(--text-dark)'}}>{item.nama_barang}</h4>
-              <p style={{color: 'var(--primary-color)', fontWeight: 'bold', fontSize: '18px', marginBottom: '10px'}}>
-                Rp {item.harga_jual.toLocaleString('id-ID')}
-              </p>
-              <span className={`badge ${item.stok > 0 ? 'in-stock' : 'low-stock'}`}>
-                Sisa Stok: {item.stok}
-              </span>
+              <div style={{width: '100%', height: '140px', marginBottom: '15px', borderRadius: '10px', overflow: 'hidden', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                {item.gambar ? (
+                  <img src={item.gambar} alt={item.nama_barang} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                ) : (
+                  <span style={{color: '#94A3B8', fontSize: '14px', fontWeight: '500'}}>No Image</span>
+                )}
+              </div>
+              <h4 style={{minHeight: '44px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', width: '100%'}}>{item.nama_barang}</h4>
+              <div style={{marginTop: 'auto', width: '100%'}}>
+                <p className="price" style={{marginBottom: '10px'}}>
+                  Rp {item.harga_jual.toLocaleString('id-ID')}
+                </p>
+                <span className={`badge ${item.stok > 0 ? 'in-stock' : 'low-stock'}`}>
+                  Sisa Stok: {item.stok} {item.satuan}
+                </span>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       <div className="pos-cart">
-        <h3 style={{marginBottom: '15px', borderBottom: '2px solid #eee', paddingBottom: '10px'}}>Keranjang</h3>
+        <h3 className="cart-title">Keranjang</h3>
         <div className="cart-items">
           {cart.length === 0 ? <p style={{textAlign: 'center', color: '#999', marginTop: '20px'}}>Keranjang masih kosong</p> : null}
           {cart.map(item => (
             <div key={item.id} className="cart-item">
               <div style={{flex: 1}}>
-                <div style={{fontWeight: 600, fontSize: '14px'}}>{item.nama_barang}</div>
-                <div style={{fontSize: '12px', color: '#666'}}>
+                <div className="cart-item-name">{item.nama_barang}</div>
+                <div className="cart-item-details">
                   {item.qty} x Rp {item.harga_jual.toLocaleString('id-ID')}
                 </div>
               </div>
-              <div style={{fontWeight: 'bold', marginRight: '15px'}}>
+              <div className="cart-item-price">
                 Rp {item.subtotal.toLocaleString('id-ID')}
               </div>
               <button className="danger" style={{padding: '5px 10px', fontSize: '12px'}} onClick={() => removeFromCart(item.id)}>X</button>
@@ -161,12 +170,16 @@ const POS = () => {
           </div>
           <div className="cart-row" style={{alignItems: 'center'}}>
             <span>Bayar:</span>
-            <input 
-              type="number" 
-              value={amountTendered || ''} 
-              onChange={e => setAmountTendered(Number(e.target.value))}
-              style={{width: '120px', textAlign: 'right'}}
-            />
+            <div style={{position: 'relative', width: '160px'}}>
+              <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748B', fontWeight: '500'}}>Rp</span>
+              <input 
+                type="text" 
+                value={amountTendered ? amountTendered.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''} 
+                onChange={e => setAmountTendered(Number(e.target.value.replace(/[^0-9]/g, '')))}
+                style={{width: '100%', paddingLeft: '45px', textAlign: 'right', fontWeight: '600', color: 'var(--primary-color)'}}
+                placeholder="0"
+              />
+            </div>
           </div>
           <div className="cart-row grand-total">
             <span>Kembali:</span>

@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
 
+// Helper: Format number to "Rp X.XXX"
+const formatRupiah = (number) => {
+  if (!number && number !== 0) return '';
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+// Helper: Remove non-numeric characters for raw value
+const parseRupiah = (str) => {
+  return Number(str.replace(/[^0-9]/g, ''));
+};
+
 const Inventory = () => {
   const [items, setItems] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0
+    id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: ''
   });
+
+  // Display strings for inputs
+  const [displayHargaModal, setDisplayHargaModal] = useState('');
+  const [displayHargaJual, setDisplayHargaJual] = useState('');
 
   const fetchItems = async () => {
     try {
@@ -21,8 +36,26 @@ const Inventory = () => {
     fetchItems();
   }, []);
 
+  const handleCurrencyChange = (e, field) => {
+    const rawValue = parseRupiah(e.target.value);
+    setFormData({...formData, [field]: rawValue});
+    if (field === 'harga_modal') setDisplayHargaModal(formatRupiah(rawValue));
+    if (field === 'harga_jual') setDisplayHargaJual(formatRupiah(rawValue));
+  };
+
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
+  }
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({...formData, gambar: reader.result});
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -37,11 +70,11 @@ const Inventory = () => {
         body: JSON.stringify(formData)
       });
       if(res.ok) {
-        setIsModalOpen(false);
-        setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0});
+        closeModal();
         fetchItems();
       } else {
-        alert('Gagal menyimpan');
+        const errData = await res.json();
+        alert('Gagal menyimpan: ' + (errData.error || 'Ukuran gambar mungkin terlalu besar'));
       }
     } catch (err) {
       console.error(err);
@@ -50,7 +83,16 @@ const Inventory = () => {
 
   const editItem = (item) => {
     setFormData(item);
+    setDisplayHargaModal(formatRupiah(item.harga_modal));
+    setDisplayHargaJual(formatRupiah(item.harga_jual));
     setIsModalOpen(true);
+  }
+
+  const closeModal = () => {
+    setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: ''});
+    setDisplayHargaModal('');
+    setDisplayHargaJual('');
+    setIsModalOpen(false);
   }
 
   const deleteItem = async (id) => {
@@ -67,7 +109,12 @@ const Inventory = () => {
     <div>
       <div className="header-row">
         <h2>Kelola Barang</h2>
-        <button onClick={() => { setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0}); setIsModalOpen(true); }}>
+        <button onClick={() => {
+          setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: ''});
+          setDisplayHargaModal('');
+          setDisplayHargaJual('');
+          setIsModalOpen(true);
+        }}>
           + Tambah Barang
         </button>
       </div>
@@ -76,6 +123,7 @@ const Inventory = () => {
         <table>
           <thead>
             <tr>
+              <th>Gambar</th>
               <th>Barcode</th>
               <th>Nama Barang</th>
               <th>Harga Modal</th>
@@ -88,11 +136,18 @@ const Inventory = () => {
           <tbody>
             {items.map(item => (
               <tr key={item.id}>
+                <td>
+                  {item.gambar ? (
+                    <img src={item.gambar} alt={item.nama_barang} style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px'}} />
+                  ) : (
+                    <div style={{width: '40px', height: '40px', background: '#e2e8f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#94a3b8'}}>N/A</div>
+                  )}
+                </td>
                 <td>{item.barcode}</td>
                 <td>{item.nama_barang}</td>
-                <td>Rp {item.harga_modal.toLocaleString('id-ID')}</td>
-                <td>Rp {item.harga_jual.toLocaleString('id-ID')}</td>
-                <td>{item.stok}</td>
+                <td>Rp {formatRupiah(item.harga_modal)}</td>
+                <td>Rp {formatRupiah(item.harga_jual)}</td>
+                <td>{item.stok} {item.satuan}</td>
                 <td>
                   {item.stok <= 5 
                     ? <span className="badge low-stock">Low Stock</span> 
@@ -110,11 +165,20 @@ const Inventory = () => {
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content" style={{maxHeight: '90vh', overflowY: 'auto'}}>
             <h3>{formData.id ? 'Edit Barang' : 'Tambah Barang'}</h3>
             <form onSubmit={handleSubmit} style={{marginTop: '20px'}}>
               <div className="form-group">
-                <label>Barcode / SKU</label>
+                <label>Gambar Produk (Opsional)</label>
+                {formData.gambar && (
+                  <div style={{marginBottom: '10px'}}>
+                    <img src={formData.gambar} alt="Preview" style={{height: '100px', borderRadius: '8px', objectFit: 'cover'}} />
+                  </div>
+                )}
+                <input type="file" accept="image/*" onChange={handleImageUpload} style={{padding: '8px'}} />
+              </div>
+              <div className="form-group">
+                <label>Kode Barang / SKU</label>
                 <input name="barcode" value={formData.barcode} onChange={handleChange} required />
               </div>
               <div className="form-group">
@@ -122,19 +186,47 @@ const Inventory = () => {
                 <input name="nama_barang" value={formData.nama_barang} onChange={handleChange} required />
               </div>
               <div className="form-group">
-                <label>Harga Modal</label>
-                <input type="number" name="harga_modal" value={formData.harga_modal} onChange={handleChange} required />
+                <label>Harga Modal (Rp)</label>
+                <div style={{position: 'relative'}}>
+                  <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748b'}}>Rp</span>
+                  <input 
+                    type="text" 
+                    value={displayHargaModal} 
+                    onChange={(e) => handleCurrencyChange(e, 'harga_modal')} 
+                    style={{paddingLeft: '45px'}}
+                    required 
+                  />
+                </div>
               </div>
               <div className="form-group">
-                <label>Harga Jual</label>
-                <input type="number" name="harga_jual" value={formData.harga_jual} onChange={handleChange} required />
+                <label>Harga Jual (Rp)</label>
+                <div style={{position: 'relative'}}>
+                  <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748b'}}>Rp</span>
+                  <input 
+                    type="text" 
+                    value={displayHargaJual} 
+                    onChange={(e) => handleCurrencyChange(e, 'harga_jual')} 
+                    style={{paddingLeft: '45px'}}
+                    required 
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label>Stok Awal</label>
-                <input type="number" name="stok" value={formData.stok} onChange={handleChange} required />
+              <div className="form-group" style={{display: 'flex', gap: '15px'}}>
+                <div style={{flex: 2}}>
+                  <label>Stok Awal</label>
+                  <input type="number" name="stok" value={formData.stok} onChange={handleChange} required />
+                </div>
+                <div style={{flex: 1}}>
+                  <label>Satuan</label>
+                  <select name="satuan" value={formData.satuan} onChange={handleChange} style={{width: '100%'}}>
+                    <option value="pcs">Pcs</option>
+                    <option value="pack">Pack</option>
+                    <option value="lusin">Lusin</option>
+                  </select>
+                </div>
               </div>
               <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px'}}>
-                <button type="button" className="secondary" onClick={() => setIsModalOpen(false)}>Batal</button>
+                <button type="button" className="secondary" onClick={closeModal}>Batal</button>
                 <button type="submit" className="success">Simpan</button>
               </div>
             </form>
