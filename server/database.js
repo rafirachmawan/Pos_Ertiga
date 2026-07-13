@@ -51,6 +51,16 @@ function initializeDb() {
             FOREIGN KEY (transaksi_id) REFERENCES transaksi(id) ON DELETE CASCADE,
             FOREIGN KEY (barang_id) REFERENCES barang(id)
         )`);
+
+        // Table D: stok_masuk
+        db.run(`CREATE TABLE IF NOT EXISTS stok_masuk (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            barang_id INTEGER,
+            qty INTEGER,
+            keterangan TEXT,
+            tanggal TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (barang_id) REFERENCES barang(id)
+        )`);
         
         console.log('Database tables initialized.');
     });

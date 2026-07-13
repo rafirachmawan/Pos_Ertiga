@@ -158,6 +158,42 @@ app.get('/api/laporan/harian', (req, res) => {
     );
 });
 
+// Laporan Mingguan (7 Hari Terakhir) untuk Grafik
+app.get('/api/laporan/mingguan', (req, res) => {
+    db.all(
+        `SELECT 
+            DATE(tanggal_transaksi) as tanggal,
+            SUM(total_harga) as pendapatan,
+            COUNT(id) as transaksi
+         FROM transaksi 
+         WHERE tanggal_transaksi >= date('now', '-6 days')
+         GROUP BY DATE(tanggal_transaksi)
+         ORDER BY tanggal ASC`,
+        [],
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            
+            // Format data to ensure all 7 days exist even if 0
+            const last7Days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().slice(0, 10);
+                
+                const found = rows.find(r => r.tanggal === dateStr);
+                last7Days.push({
+                    tanggal: dateStr,
+                    hari: d.toLocaleDateString('id-ID', { weekday: 'short' }),
+                    pendapatan: found ? found.pendapatan : 0,
+                    transaksi: found ? found.transaksi : 0
+                });
+            }
+            
+            res.json({ data: last7Days });
+        }
+    );
+});
+
 // --- Get Transaction History ---
 
 // Get all transactions
@@ -177,6 +213,58 @@ app.get('/api/transaksi/:id', (req, res) => {
          JOIN barang b ON dt.barang_id = b.id 
          WHERE dt.transaksi_id = ?`,
         [id],
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ data: rows });
+        }
+    );
+});
+
+// --- Stok Masuk ---
+
+app.post('/api/stok-masuk', (req, res) => {
+    const { barang_id, qty, keterangan } = req.body;
+    
+    if (!barang_id || !qty || qty <= 0) {
+        return res.status(400).json({ error: "Data tidak valid" });
+    }
+
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+
+        db.run(
+            `INSERT INTO stok_masuk (barang_id, qty, keterangan) VALUES (?, ?, ?)`,
+            [barang_id, qty, keterangan || 'Restock manual'],
+            function(err) {
+                if (err) {
+                    db.run('ROLLBACK');
+                    return res.status(400).json({ error: err.message });
+                }
+
+                db.run(
+                    `UPDATE barang SET stok = stok + ? WHERE id = ?`,
+                    [qty, barang_id],
+                    function(err) {
+                        if (err) {
+                            db.run('ROLLBACK');
+                            return res.status(400).json({ error: err.message });
+                        }
+                        db.run('COMMIT');
+                        res.json({ message: "Stok berhasil ditambahkan" });
+                    }
+                );
+            }
+        );
+    });
+});
+
+app.get('/api/stok-masuk', (req, res) => {
+    db.all(
+        `SELECT sm.*, b.nama_barang, b.barcode 
+         FROM stok_masuk sm 
+         JOIN barang b ON sm.barang_id = b.id 
+         ORDER BY sm.tanggal DESC`, 
+        [], 
         (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ data: rows });

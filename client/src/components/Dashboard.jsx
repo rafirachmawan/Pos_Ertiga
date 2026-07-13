@@ -12,6 +12,7 @@ const Dashboard = () => {
     total_pendapatan: 0,
     laba_bersih: 0,
   });
+  const [grafik, setGrafik] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,6 +27,13 @@ const Dashboard = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.data) setLaporan(data.data);
+      })
+      .catch(console.error);
+
+    fetch("http://localhost:3001/api/laporan/mingguan")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data) setGrafik(data.data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -33,6 +41,7 @@ const Dashboard = () => {
 
   const totalStok = items.reduce((acc, item) => acc + item.stok, 0);
   const lowStockItems = items.filter((item) => item.stok <= 5);
+  const maxPendapatan = grafik.length > 0 ? Math.max(...grafik.map(g => g.pendapatan), 1) : 1;
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -473,6 +482,57 @@ const Dashboard = () => {
                 </span>
               </div>
             ))}
+          </div>
+
+          {/* Grafik Penjualan */}
+          <div
+            style={{
+              background: "var(--surface-color)",
+              borderRadius: "16px",
+              border: "1px solid var(--border-color)",
+              padding: "20px",
+            }}
+          >
+            <h3
+              style={{
+                fontSize: "14px",
+                fontWeight: "700",
+                color: "var(--secondary-color)",
+                marginBottom: "20px",
+              }}
+            >
+              Grafik 7 Hari Terakhir
+            </h3>
+            
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '120px', gap: '8px', paddingBottom: '10px', borderBottom: '1px solid var(--border-color)' }}>
+              {grafik.map((day, idx) => {
+                const heightPct = (day.pendapatan / maxPendapatan) * 100;
+                return (
+                  <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', group: 'hover' }}>
+                    {day.pendapatan > 0 && (
+                      <span style={{ fontSize: '9px', fontWeight: '700', color: 'var(--primary-color)', marginBottom: '4px', opacity: 0.8 }}>
+                        {formatRupiah(day.pendapatan).replace('Rp ', '')}
+                      </span>
+                    )}
+                    <div style={{ 
+                      width: '100%', 
+                      height: `${Math.max(heightPct, 2)}%`, 
+                      background: idx === 6 ? 'var(--primary-color)' : '#C7D2FE',
+                      borderRadius: '4px 4px 0 0',
+                      transition: 'height 0.3s ease'
+                    }}></div>
+                  </div>
+                )
+              })}
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+              {grafik.map((day, idx) => (
+                <span key={idx} style={{ fontSize: '10px', color: idx === 6 ? 'var(--primary-color)' : 'var(--text-muted)', fontWeight: idx === 6 ? '700' : '500', textAlign: 'center', flex: 1 }}>
+                  {day.hari}
+                </span>
+              ))}
+            </div>
           </div>
 
           {/* Tips */}

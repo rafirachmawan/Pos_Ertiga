@@ -14,6 +14,8 @@ const parseRupiah = (str) => {
 const Inventory = () => {
   const [items, setItems] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
+  const [restockData, setRestockData] = useState({ barang_id: null, qty: 1, keterangan: '' });
   const [formData, setFormData] = useState({
     id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: ''
   });
@@ -95,6 +97,32 @@ const Inventory = () => {
     setIsModalOpen(false);
   }
 
+  const openRestockModal = (item) => {
+    setRestockData({ barang_id: item.id, qty: 1, keterangan: `Restock ${item.nama_barang}` });
+    setIsRestockModalOpen(true);
+  }
+
+  const handleRestockSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('http://localhost:3001/api/stok-masuk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(restockData)
+      });
+      if(res.ok) {
+        setIsRestockModalOpen(false);
+        fetchItems();
+        alert('Stok berhasil ditambahkan!');
+      } else {
+        const errData = await res.json();
+        alert('Gagal menambah stok: ' + (errData.error || 'Terjadi kesalahan'));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   const deleteItem = async (id) => {
     if(!window.confirm('Yakin ingin menghapus barang ini?')) return;
     try {
@@ -154,8 +182,9 @@ const Inventory = () => {
                     : <span className="badge in-stock">Good</span>}
                 </td>
                 <td>
-                  <button className="secondary" style={{padding: '5px 10px', marginRight: '5px'}} onClick={() => editItem(item)}>Edit</button>
-                  <button className="danger" style={{padding: '5px 10px'}} onClick={() => deleteItem(item.id)}>Hapus</button>
+                  <button style={{padding: '5px 10px', marginRight: '5px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px'}} onClick={() => openRestockModal(item)}>+ Restock</button>
+                  <button className="secondary" style={{padding: '5px 10px', marginRight: '5px', fontSize: '12px'}} onClick={() => editItem(item)}>Edit</button>
+                  <button className="danger" style={{padding: '5px 10px', fontSize: '12px'}} onClick={() => deleteItem(item.id)}>Hapus</button>
                 </td>
               </tr>
             ))}
@@ -214,7 +243,8 @@ const Inventory = () => {
               <div className="form-group" style={{display: 'flex', gap: '15px'}}>
                 <div style={{flex: 2}}>
                   <label>Stok Awal</label>
-                  <input type="number" name="stok" value={formData.stok} onChange={handleChange} required />
+                  <input type="number" name="stok" value={formData.stok} onChange={handleChange} required disabled={!!formData.id} />
+                  {formData.id && <small style={{color: '#94a3b8', display: 'block', marginTop: '4px'}}>*Gunakan tombol Restock untuk menambah stok</small>}
                 </div>
                 <div style={{flex: 1}}>
                   <label>Satuan</label>
@@ -228,6 +258,40 @@ const Inventory = () => {
               <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px'}}>
                 <button type="button" className="secondary" onClick={closeModal}>Batal</button>
                 <button type="submit" className="success">Simpan</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isRestockModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{maxWidth: '400px'}}>
+            <h3>📦 Tambah Stok (Restock)</h3>
+            <form onSubmit={handleRestockSubmit} style={{marginTop: '20px'}}>
+              <div className="form-group">
+                <label>Jumlah Tambah (Qty)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  value={restockData.qty} 
+                  onChange={(e) => setRestockData({...restockData, qty: Number(e.target.value)})} 
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label>Keterangan (Opsional)</label>
+                <textarea 
+                  rows="3"
+                  value={restockData.keterangan} 
+                  onChange={(e) => setRestockData({...restockData, keterangan: e.target.value})}
+                  placeholder="Contoh: Barang masuk dari Supplier A"
+                  style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1'}}
+                />
+              </div>
+              <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px'}}>
+                <button type="button" className="secondary" onClick={() => setIsRestockModalOpen(false)}>Batal</button>
+                <button type="submit" className="success" style={{background: '#3b82f6'}}>Simpan Stok</button>
               </div>
             </form>
           </div>
