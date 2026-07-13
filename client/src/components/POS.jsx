@@ -7,6 +7,8 @@ const POS = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [amountTendered, setAmountTendered] = useState(0);
   const [diskon, setDiskon] = useState(0);
+  const [namaPelanggan, setNamaPelanggan] = useState('');
+  const [struk, setStruk] = useState(null); // null = modal tertutup
   const barcodeRef = useRef(null);
 
   useEffect(() => {
@@ -110,6 +112,7 @@ const POS = () => {
       total_bayar: amountTendered,
       total_kembalian: kembalian,
       diskon,
+      nama_pelanggan: namaPelanggan.trim() || 'Umum',
       cart
     };
 
@@ -121,10 +124,22 @@ const POS = () => {
       });
       const data = await res.json();
       if(res.ok) {
-        alert(`Transaksi Berhasil! Nota: ${data.nomor_nota}`);
+        // Simpan data struk sebelum dikosongkan
+        setStruk({
+          nomor_nota: data.nomor_nota,
+          nama_pelanggan: namaPelanggan.trim() || 'Umum',
+          tanggal: new Date().toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          items: [...cart],
+          subtotal: totalHarga,
+          diskon,
+          total: totalSetelahDiskon,
+          bayar: amountTendered,
+          kembalian,
+        });
         setCart([]);
         setAmountTendered(0);
         setDiskon(0);
+        setNamaPelanggan('');
         fetchItems();
       } else {
         alert(data.error || 'Terjadi kesalahan saat checkout');
@@ -212,6 +227,19 @@ const POS = () => {
 
       <div className="pos-cart">
         <h3 className="cart-title">Keranjang</h3>
+
+        {/* Input Nama Pelanggan */}
+        <div style={{ padding: '0 0 12px', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
+          <label style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Nama Pelanggan</label>
+          <input
+            type="text"
+            placeholder="Ketik nama pelanggan (opsional)..."
+            value={namaPelanggan}
+            onChange={e => setNamaPelanggan(e.target.value)}
+            style={{ width: '100%', fontSize: '13px', padding: '8px 12px' }}
+          />
+        </div>
+
         <div className="cart-items">
           {cart.length === 0
             ? <p style={{textAlign: 'center', color: '#999', marginTop: '40px', fontSize: '14px'}}>🛒 Keranjang masih kosong</p>
@@ -305,6 +333,104 @@ const POS = () => {
           </button>
         </div>
       </div>
+      {/* ===== MODAL STRUK ===== */}
+      {struk && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000, backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'white', borderRadius: '20px',
+            width: '360px', maxHeight: '90vh', overflowY: 'auto',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
+            fontFamily: "'Courier New', monospace"
+          }}>
+
+            {/* Header Struk */}
+            <div style={{ background: 'linear-gradient(135deg, #1E293B, #312E81)', color: 'white', borderRadius: '20px 20px 0 0', padding: '24px 20px', textAlign: 'center' }}>
+              <div style={{ fontSize: '28px', marginBottom: '8px' }}>🛍️</div>
+              <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '2px' }}>POS ERTIGA</div>
+              <div style={{ fontSize: '11px', opacity: 0.6, marginTop: '4px' }}>Point of Sale</div>
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed rgba(255,255,255,0.2)', fontSize: '11px', opacity: 0.7 }}>{struk.tanggal}</div>
+              <div style={{ fontSize: '13px', fontWeight: '700', marginTop: '4px', color: '#A5B4FC' }}>{struk.nomor_nota}</div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '20px' }}>
+
+              {/* Info Pelanggan */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px dashed #E2E8F0' }}>
+                <span style={{ color: '#64748B' }}>Pelanggan</span>
+                <span style={{ fontWeight: '700', color: '#1E293B' }}>{struk.nama_pelanggan}</span>
+              </div>
+
+              {/* Daftar Barang */}
+              <div style={{ fontSize: '12px', marginBottom: '16px' }}>
+                <div style={{ fontWeight: '700', color: '#64748B', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', marginBottom: '10px' }}>Rincian Pesanan</div>
+                {struk.items.map((item, i) => (
+                  <div key={i} style={{ marginBottom: '10px' }}>
+                    <div style={{ fontWeight: '600', color: '#1E293B', fontSize: '13px' }}>{item.nama_barang}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px', color: '#64748B' }}>
+                      <span>{item.qty} × Rp {item.harga_jual.toLocaleString('id-ID')}</span>
+                      <span style={{ fontWeight: '600', color: '#1E293B' }}>Rp {item.subtotal.toLocaleString('id-ID')}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Totals */}
+              <div style={{ borderTop: '1px dashed #E2E8F0', paddingTop: '14px', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#64748B' }}>
+                  <span>Subtotal</span>
+                  <span>Rp {struk.subtotal.toLocaleString('id-ID')}</span>
+                </div>
+                {struk.diskon > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#EF4444' }}>
+                    <span>Diskon</span>
+                    <span>− Rp {struk.diskon.toLocaleString('id-ID')}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', fontSize: '16px', color: '#1E293B', paddingTop: '10px', borderTop: '2px solid #1E293B', marginBottom: '12px' }}>
+                  <span>TOTAL</span>
+                  <span>Rp {struk.total.toLocaleString('id-ID')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#64748B' }}>
+                  <span>Bayar</span>
+                  <span>Rp {struk.bayar.toLocaleString('id-ID')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#059669', fontSize: '14px' }}>
+                  <span>Kembali</span>
+                  <span>Rp {struk.kembalian.toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+
+              {/* Footer pesan */}
+              <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #E2E8F0', color: '#94A3B8', fontSize: '11px', lineHeight: 1.8 }}>
+                ✨ Terima kasih sudah berbelanja! ✨
+                <br />Semoga puas dengan produk kami.
+              </div>
+
+              {/* Tombol Aksi */}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                <button
+                  onClick={() => setStruk(null)}
+                  style={{ flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}
+                >
+                  Tutup
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg, #4F46E5, #6366F1)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}
+                >
+                  🖨️ Print
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

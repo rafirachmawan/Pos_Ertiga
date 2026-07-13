@@ -16,6 +16,7 @@ const RiwayatTransaksi = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [printStruk, setPrintStruk] = useState(null); // Data untuk modal print
 
   useEffect(() => {
     fetch('http://localhost:3001/api/transaksi')
@@ -34,8 +35,59 @@ const RiwayatTransaksi = () => {
       .catch(console.error);
   };
 
+  const handlePrintNota = (t) => {
+    setPrintStruk({ ...t, items: detail });
+  };
+
+  const doPrint = () => {
+    window.print();
+  };
+
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+    <div>
+      {/* CSS khusus untuk print — hanya tampilkan struk */}
+      <style>{`
+        @media print {
+          body > * { display: none !important; }
+          #print-struk-area { display: block !important; position: fixed; top: 0; left: 0; width: 100%; }
+        }
+        #print-struk-area { display: none; }
+      `}</style>
+
+      {/* Area Cetak Tersembunyi */}
+      {printStruk && (
+        <div id="print-struk-area" style={{ fontFamily: "'Courier New', monospace", padding: '20px', maxWidth: '320px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '12px', marginBottom: '12px' }}>
+            <div style={{ fontSize: '20px', fontWeight: '800', letterSpacing: '2px' }}>POS ERTIGA</div>
+            <div style={{ fontSize: '11px' }}>Point of Sale</div>
+            <div style={{ fontSize: '11px', marginTop: '6px' }}>{formatDate(printStruk.tanggal_transaksi)}</div>
+            <div style={{ fontSize: '12px', fontWeight: '700' }}>{printStruk.nomor_nota}</div>
+          </div>
+          <div style={{ fontSize: '12px', marginBottom: '10px' }}>
+            Pelanggan: <strong>{printStruk.nama_pelanggan || 'Umum'}</strong>
+          </div>
+          <div style={{ fontSize: '12px', borderBottom: '1px dashed #000', paddingBottom: '10px', marginBottom: '10px' }}>
+            {printStruk.items.map((item, i) => (
+              <div key={i} style={{ marginBottom: '6px' }}>
+                <div>{item.nama_barang}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{item.qty} x Rp {item.harga_jual_saat_ini.toLocaleString('id-ID')}</span>
+                  <span>Rp {item.subtotal.toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total</span><strong>Rp {printStruk.total_harga.toLocaleString('id-ID')}</strong></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Bayar</span><span>Rp {printStruk.total_bayar.toLocaleString('id-ID')}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Kembali</span><span>Rp {printStruk.total_kembalian.toLocaleString('id-ID')}</span></div>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '16px', borderTop: '1px dashed #000', paddingTop: '12px', fontSize: '11px' }}>
+            Terima kasih sudah berbelanja!
+          </div>
+        </div>
+      )}
+
       <div className="header-row" style={{ marginBottom: '30px' }}>
         <div>
           <h2 style={{ fontSize: '28px', fontWeight: '700' }}>Riwayat Transaksi</h2>
@@ -77,6 +129,9 @@ const RiwayatTransaksi = () => {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: '700', fontSize: '16px', color: 'var(--text-dark)', marginBottom: '4px' }}>{t.nomor_nota}</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{formatDate(t.tanggal_transaksi)}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--primary-color)', marginTop: '3px', fontWeight: '600' }}>
+                    👤 {t.nama_pelanggan || 'Umum'}
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right', marginRight: '16px' }}>
                   <div style={{ fontWeight: '700', fontSize: '18px', color: 'var(--primary-color)' }}>{formatRupiah(t.total_harga)}</div>
@@ -116,18 +171,42 @@ const RiwayatTransaksi = () => {
                           ))}
                         </tbody>
                       </table>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '30px', marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Dibayar</div>
-                          <div style={{ fontWeight: '700', fontSize: '16px' }}>{formatRupiah(t.total_bayar)}</div>
+
+                      {/* Footer Detail */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                          Pelanggan: <strong style={{ color: 'var(--text-dark)' }}>{t.nama_pelanggan || 'Umum'}</strong>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total</div>
-                          <div style={{ fontWeight: '700', fontSize: '16px', color: 'var(--primary-color)' }}>{formatRupiah(t.total_harga)}</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Kembalian</div>
-                          <div style={{ fontWeight: '700', fontSize: '16px', color: 'var(--success-color)' }}>{formatRupiah(t.total_kembalian)}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                          <div style={{ display: 'flex', gap: '30px' }}>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Dibayar</div>
+                              <div style={{ fontWeight: '700', fontSize: '16px' }}>{formatRupiah(t.total_bayar)}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total</div>
+                              <div style={{ fontWeight: '700', fontSize: '16px', color: 'var(--primary-color)' }}>{formatRupiah(t.total_harga)}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>Kembalian</div>
+                              <div style={{ fontWeight: '700', fontSize: '16px', color: 'var(--success-color)' }}>{formatRupiah(t.total_kembalian)}</div>
+                            </div>
+                          </div>
+
+                          {/* Tombol Print */}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handlePrintNota(t); }}
+                            style={{
+                              padding: '10px 20px',
+                              background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
+                              color: 'white', border: 'none', borderRadius: '10px',
+                              fontWeight: '700', cursor: 'pointer', fontSize: '13px',
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                              boxShadow: '0 4px 12px rgba(79,70,229,0.3)'
+                            }}
+                          >
+                            🖨️ Print Nota
+                          </button>
                         </div>
                       </div>
                     </>
@@ -136,6 +215,90 @@ const RiwayatTransaksi = () => {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ===== MODAL PREVIEW STRUK ===== */}
+      {printStruk && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000, backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'white', borderRadius: '20px',
+            width: '360px', maxHeight: '90vh', overflowY: 'auto',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
+            fontFamily: "'Courier New', monospace"
+          }}>
+            {/* Header */}
+            <div style={{ background: 'linear-gradient(135deg, #1E293B, #312E81)', color: 'white', borderRadius: '20px 20px 0 0', padding: '24px 20px', textAlign: 'center' }}>
+              <div style={{ fontSize: '28px', marginBottom: '8px' }}>🛍️</div>
+              <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '2px' }}>POS ERTIGA</div>
+              <div style={{ fontSize: '11px', opacity: 0.6, marginTop: '4px' }}>Point of Sale</div>
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed rgba(255,255,255,0.2)', fontSize: '11px', opacity: 0.7 }}>{formatDate(printStruk.tanggal_transaksi)}</div>
+              <div style={{ fontSize: '13px', fontWeight: '700', marginTop: '4px', color: '#A5B4FC' }}>{printStruk.nomor_nota}</div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '20px' }}>
+              {/* Pelanggan */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px dashed #E2E8F0' }}>
+                <span style={{ color: '#64748B' }}>Pelanggan</span>
+                <span style={{ fontWeight: '700', color: '#1E293B' }}>{printStruk.nama_pelanggan || 'Umum'}</span>
+              </div>
+
+              {/* Items */}
+              <div style={{ fontSize: '12px', marginBottom: '16px' }}>
+                <div style={{ fontWeight: '700', color: '#64748B', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', marginBottom: '10px' }}>Rincian Pesanan</div>
+                {printStruk.items.map((item, i) => (
+                  <div key={i} style={{ marginBottom: '10px' }}>
+                    <div style={{ fontWeight: '600', color: '#1E293B', fontSize: '13px' }}>{item.nama_barang}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px', color: '#64748B' }}>
+                      <span>{item.qty} × Rp {item.harga_jual_saat_ini.toLocaleString('id-ID')}</span>
+                      <span style={{ fontWeight: '600', color: '#1E293B' }}>Rp {item.subtotal.toLocaleString('id-ID')}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Totals */}
+              <div style={{ borderTop: '1px dashed #E2E8F0', paddingTop: '14px', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', fontSize: '16px', color: '#1E293B', paddingBottom: '10px', borderBottom: '2px solid #1E293B', marginBottom: '12px' }}>
+                  <span>TOTAL</span>
+                  <span>Rp {printStruk.total_harga.toLocaleString('id-ID')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#64748B' }}>
+                  <span>Bayar</span>
+                  <span>Rp {printStruk.total_bayar.toLocaleString('id-ID')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#059669', fontSize: '14px' }}>
+                  <span>Kembali</span>
+                  <span>Rp {printStruk.total_kembalian.toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #E2E8F0', color: '#94A3B8', fontSize: '11px', lineHeight: 1.8 }}>
+                ✨ Terima kasih sudah berbelanja! ✨<br />Semoga puas dengan produk kami.
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                <button
+                  onClick={() => setPrintStruk(null)}
+                  style={{ flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}
+                >
+                  Tutup
+                </button>
+                <button
+                  onClick={doPrint}
+                  style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg, #4F46E5, #6366F1)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}
+                >
+                  🖨️ Print
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

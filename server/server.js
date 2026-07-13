@@ -62,7 +62,7 @@ app.get('/api/barang/barcode/:barcode', (req, res) => {
 // --- Checkout Transaction ---
 
 app.post('/api/transaksi', (req, res) => {
-    const { total_harga, total_bayar, total_kembalian, cart } = req.body;
+    const { total_harga, total_bayar, total_kembalian, cart, nama_pelanggan } = req.body;
     
     // Generate unique nomor_nota
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -73,8 +73,8 @@ app.post('/api/transaksi', (req, res) => {
         db.run('BEGIN TRANSACTION');
 
         db.run(
-            `INSERT INTO transaksi (nomor_nota, total_harga, total_bayar, total_kembalian) VALUES (?, ?, ?, ?)`,
-            [nomor_nota, total_harga, total_bayar, total_kembalian],
+            `INSERT INTO transaksi (nomor_nota, nama_pelanggan, total_harga, total_bayar, total_kembalian) VALUES (?, ?, ?, ?, ?)`,
+            [nomor_nota, nama_pelanggan || 'Umum', total_harga, total_bayar, total_kembalian],
             function(err) {
                 if (err) {
                     db.run('ROLLBACK');

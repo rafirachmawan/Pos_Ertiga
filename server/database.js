@@ -34,11 +34,15 @@ function initializeDb() {
         db.run(`CREATE TABLE IF NOT EXISTS transaksi (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nomor_nota VARCHAR(50) UNIQUE,
+            nama_pelanggan VARCHAR(100) DEFAULT 'Umum',
             total_harga INTEGER,
             total_bayar INTEGER,
             total_kembalian INTEGER,
             tanggal_transaksi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
+
+        // Add column safely for existing databases
+        db.run(`ALTER TABLE transaksi ADD COLUMN nama_pelanggan VARCHAR(100) DEFAULT 'Umum'`, (err) => {});
 
         // Table C: detail_transaksi
         db.run(`CREATE TABLE IF NOT EXISTS detail_transaksi (
