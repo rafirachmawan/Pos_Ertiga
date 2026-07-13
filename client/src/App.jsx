@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Inventory from './components/Inventory'
 import POS from './components/POS'
 import Dashboard from './components/Dashboard'
@@ -9,6 +9,25 @@ import './index.css'
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [lowStockCount, setLowStockCount] = useState(0);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const fetchStock = () => {
+      fetch('http://localhost:3001/api/barang')
+        .then(res => res.json())
+        .then(data => {
+          if (data.data) {
+            const count = data.data.filter(item => item.stok <= 5).length;
+            setLowStockCount(count);
+          }
+        })
+        .catch(console.error);
+    };
+    
+    fetchStock(); // Fetch on mount/login
+    // Also fetch every time tab changes to keep it updated
+  }, [isLoggedIn, activeTab]);
 
   if (!isLoggedIn) {
     return <Login onLogin={() => setIsLoggedIn(true)} />;
@@ -38,8 +57,13 @@ function App() {
 
         {/* Nav group: Inventory */}
         <div className="sidebar-nav-label" style={{marginTop: '8px'}}>Inventori</div>
-        <div className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')}>
-          <span className="nav-icon">📦</span> Kelola Barang
+        <div className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div><span className="nav-icon">📦</span> Kelola Barang</div>
+          {lowStockCount > 0 && (
+            <div style={{ background: '#EF4444', color: 'white', fontSize: '10px', fontWeight: '800', padding: '2px 6px', borderRadius: '10px', minWidth: '18px', textAlign: 'center' }}>
+              {lowStockCount}
+            </div>
+          )}
         </div>
         <div className={`nav-item ${activeTab === 'riwayat' ? 'active' : ''}`} onClick={() => setActiveTab('riwayat')}>
           <span className="nav-icon">🧾</span> Riwayat Transaksi
