@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const Pengaturan = () => {
   const [form, setForm] = useState({
-    nama_toko: '', alamat: '', telepon: '', catatan_struk: ''
+    nama_toko: '', alamat_toko: '', pesan_struk: ''
   });
   const [kategoriList, setKategoriList] = useState([]);
   const [newKategori, setNewKategori] = useState('');
@@ -14,7 +14,7 @@ const Pengaturan = () => {
       fetch('http://localhost:3001/api/pengaturan').then(r => r.json()),
       fetch('http://localhost:3001/api/kategori').then(r => r.json()),
     ]).then(([p, k]) => {
-      if (p.data) setForm({ nama_toko: p.data.nama_toko || '', alamat: p.data.alamat || '', telepon: p.data.telepon || '', catatan_struk: p.data.catatan_struk || '' });
+      if (p.data) setForm({ nama_toko: p.data.nama_toko || '', alamat_toko: p.data.alamat_toko || '', pesan_struk: p.data.pesan_struk || '' });
       if (k.data) setKategoriList(k.data);
       setLoading(false);
     }).catch(console.error);
@@ -91,9 +91,8 @@ const Pengaturan = () => {
             <div style={{ background: '#F8FAFC', border: '1px dashed var(--border-color)', borderRadius: '12px', padding: '16px', marginBottom: '24px', textAlign: 'center', fontFamily: "'Courier New', monospace" }}>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>Preview Struk</div>
               <div style={{ fontWeight: '800', fontSize: '15px', letterSpacing: '1px' }}>{form.nama_toko || 'NAMA TOKO'}</div>
-              {form.alamat && <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>{form.alamat}</div>}
-              {form.telepon && <div style={{ fontSize: '11px', color: '#64748B' }}>Telp: {form.telepon}</div>}
-              <div style={{ borderTop: '1px dashed #CBD5E1', marginTop: '8px', paddingTop: '8px', fontSize: '11px', color: '#94A3B8' }}>{form.catatan_struk}</div>
+              {form.alamat_toko && <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', whiteSpace: 'pre-wrap' }}>{form.alamat_toko}</div>}
+              <div style={{ borderTop: '1px dashed #CBD5E1', marginTop: '8px', paddingTop: '8px', fontSize: '11px', color: '#94A3B8', whiteSpace: 'pre-wrap' }}>{form.pesan_struk}</div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -102,18 +101,14 @@ const Pengaturan = () => {
                 <input value={form.nama_toko} onChange={e => setForm({...form, nama_toko: e.target.value})} placeholder="POS ERTIGA" required style={{ width: '100%' }} />
               </div>
               <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Alamat</label>
-                <input value={form.alamat} onChange={e => setForm({...form, alamat: e.target.value})} placeholder="Jl. Contoh No. 1, Kota" style={{ width: '100%' }} />
+                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Alamat & Telepon Toko</label>
+                <textarea value={form.alamat_toko} onChange={e => setForm({...form, alamat_toko: e.target.value})} placeholder="Jl. Contoh No. 1&#10;Telp: 08xxxx" rows={2} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', resize: 'vertical' }} />
               </div>
               <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>No. Telepon</label>
-                <input value={form.telepon} onChange={e => setForm({...form, telepon: e.target.value})} placeholder="08xxxxxxxxxx" style={{ width: '100%' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Catatan Struk</label>
+                <label style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Pesan Bawah Struk</label>
                 <textarea
-                  value={form.catatan_struk}
-                  onChange={e => setForm({...form, catatan_struk: e.target.value})}
+                  value={form.pesan_struk}
+                  onChange={e => setForm({...form, pesan_struk: e.target.value})}
                   placeholder="Terima kasih sudah berbelanja!"
                   rows={2}
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', resize: 'vertical' }}

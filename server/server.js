@@ -104,7 +104,7 @@ app.get('/api/barang/barcode/:barcode', (req, res) => {
 // --- Checkout Transaction ---
 
 app.post('/api/transaksi', (req, res) => {
-    const { total_harga, total_bayar, total_kembalian, cart, nama_pelanggan } = req.body;
+    const { total_harga, total_bayar, total_kembalian, cart, nama_pelanggan, metode_pembayaran } = req.body;
     
     // Generate unique nomor_nota
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -115,8 +115,8 @@ app.post('/api/transaksi', (req, res) => {
         db.run('BEGIN TRANSACTION');
 
         db.run(
-            `INSERT INTO transaksi (nomor_nota, nama_pelanggan, total_harga, total_bayar, total_kembalian) VALUES (?, ?, ?, ?, ?)`,
-            [nomor_nota, nama_pelanggan || 'Umum', total_harga, total_bayar, total_kembalian],
+            `INSERT INTO transaksi (nomor_nota, nama_pelanggan, metode_pembayaran, total_harga, total_bayar, total_kembalian) VALUES (?, ?, ?, ?, ?, ?)`,
+            [nomor_nota, nama_pelanggan || 'Umum', metode_pembayaran || 'Tunai', total_harga, total_bayar, total_kembalian],
             function(err) {
                 if (err) {
                     db.run('ROLLBACK');
@@ -172,7 +172,7 @@ app.get('/api/laporan/harian', (req, res) => {
             COALESCE(SUM(total_harga), 0) as total_pendapatan,
             COALESCE(SUM(total_bayar), 0) as total_bayar
          FROM transaksi 
-         WHERE DATE(tanggal_transaksi) = ?`,
+         WHERE DATE(tanggal_transaksi) = ? AND status != 'void'`,
         [today],
         (err, summary) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -183,7 +183,7 @@ app.get('/api/laporan/harian', (req, res) => {
                  FROM detail_transaksi dt
                  JOIN transaksi t ON dt.transaksi_id = t.id
                  JOIN barang b ON dt.barang_id = b.id
-                 WHERE DATE(t.tanggal_transaksi) = ?`,
+                 WHERE DATE(t.tanggal_transaksi) = ? AND t.status != 'void'`,
                 [today],
                 (err2, profitRow) => {
                     if (err2) return res.status(500).json({ error: err2.message });
@@ -208,7 +208,7 @@ app.get('/api/laporan/mingguan', (req, res) => {
             SUM(total_harga) as pendapatan,
             COUNT(id) as transaksi
          FROM transaksi 
-         WHERE tanggal_transaksi >= date('now', '-6 days')
+         WHERE tanggal_transaksi >= date('now', '-6 days') AND status != 'void'
          GROUP BY DATE(tanggal_transaksi)
          ORDER BY tanggal ASC`,
         [],
@@ -243,6 +243,42 @@ app.get('/api/transaksi', (req, res) => {
     db.all(`SELECT * FROM transaksi ORDER BY tanggal_transaksi DESC`, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ data: rows });
+    });
+});
+
+// Void Transaction
+app.put('/api/transaksi/:id/void', (req, res) => {
+    const { id } = req.params;
+    
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        
+        // Cek status transaksi dulu
+        db.get('SELECT status FROM transaksi WHERE id = ?', [id], (err, row) => {
+            if (err) { db.run('ROLLBACK'); return res.status(500).json({ error: err.message }); }
+            if (!row) { db.run('ROLLBACK'); return res.status(404).json({ error: "Transaksi tidak ditemukan" }); }
+            if (row.status === 'void') { db.run('ROLLBACK'); return res.status(400).json({ error: "Transaksi sudah di-void sebelumnya" }); }
+            
+            // Update status ke void
+            db.run('UPDATE transaksi SET status = "void" WHERE id = ?', [id], (err) => {
+                if (err) { db.run('ROLLBACK'); return res.status(500).json({ error: err.message }); }
+                
+                // Kembalikan stok
+                db.all('SELECT barang_id, qty FROM detail_transaksi WHERE transaksi_id = ?', [id], (err, items) => {
+                    if (err) { db.run('ROLLBACK'); return res.status(500).json({ error: err.message }); }
+                    
+                    const stmt = db.prepare('UPDATE barang SET stok = stok + ? WHERE id = ?');
+                    items.forEach(item => {
+                        stmt.run([item.qty, item.barang_id]);
+                    });
+                    stmt.finalize((err) => {
+                        if (err) { db.run('ROLLBACK'); return res.status(500).json({ error: err.message }); }
+                        db.run('COMMIT');
+                        res.json({ message: "Transaksi berhasil dibatalkan (VOID) dan stok telah dikembalikan." });
+                    });
+                });
+            });
+        });
     });
 });
 
@@ -315,9 +351,31 @@ app.get('/api/stok-masuk', (req, res) => {
 });
 
 // --- Backup Database ---
+const fs = require('fs');
+const path = require('path');
 app.get('/api/backup', (req, res) => {
-    const file = path.resolve(__dirname, 'pos_database.sqlite');
-    res.download(file, `backup_pos_ertiga_${new Date().toISOString().slice(0, 10)}.sqlite`);
+    const dbPath = path.resolve(__dirname, 'pos_database.sqlite');
+    res.download(dbPath, `backup_pos_ertiga_${new Date().toISOString().slice(0, 10)}.sqlite`);
+});
+
+// --- Pengaturan Toko ---
+app.get('/api/pengaturan', (req, res) => {
+    db.get('SELECT * FROM pengaturan WHERE id = 1', (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: row });
+    });
+});
+
+app.put('/api/pengaturan', (req, res) => {
+    const { nama_toko, alamat_toko, pesan_struk } = req.body;
+    db.run(
+        `UPDATE pengaturan SET nama_toko = ?, alamat_toko = ?, pesan_struk = ? WHERE id = 1`,
+        [nama_toko, alamat_toko, pesan_struk],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: "Pengaturan berhasil disimpan" });
+        }
+    );
 });
 
 app.listen(PORT, () => {

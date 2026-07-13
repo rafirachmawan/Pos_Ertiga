@@ -20,13 +20,37 @@ const RiwayatTransaksi = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [pengaturan, setPengaturan] = useState({});
 
-  useEffect(() => {
+  const fetchTransaksi = () => {
     fetch('http://localhost:3001/api/transaksi')
       .then(res => res.json())
       .then(data => { if(data.data) setTransaksi(data.data); })
       .catch(console.error);
+  };
+
+  useEffect(() => {
+    fetchTransaksi();
+    fetch('http://localhost:3001/api/pengaturan')
+      .then(res => res.json())
+      .then(data => { if(data.data) setPengaturan(data.data); })
+      .catch(console.error);
   }, []);
+
+  const handleVoid = (id, nota) => {
+    if (!window.confirm(`Yakin ingin membatalkan transaksi ${nota}?\nStok barang akan dikembalikan dan ini tidak bisa diurungkan.`)) return;
+    
+    fetch(`http://localhost:3001/api/transaksi/${id}/void`, { method: 'PUT' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) alert(data.error);
+        else {
+          alert('Transaksi berhasil dibatalkan');
+          fetchTransaksi();
+        }
+      })
+      .catch(console.error);
+  };
 
   const loadDetail = (id) => {
     if (selectedId === id) { setSelectedId(null); setDetail([]); return; }
@@ -71,8 +95,8 @@ const RiwayatTransaksi = () => {
       {printStruk && (
         <div id="print-struk-area" style={{ fontFamily: "'Courier New', monospace", padding: '20px', maxWidth: '320px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', borderBottom: '1px dashed #000', paddingBottom: '12px', marginBottom: '12px' }}>
-            <div style={{ fontSize: '20px', fontWeight: '800', letterSpacing: '2px' }}>POS ERTIGA</div>
-            <div style={{ fontSize: '11px' }}>Point of Sale</div>
+            <div style={{ fontSize: '20px', fontWeight: '800', letterSpacing: '2px' }}>{pengaturan.nama_toko || 'POS ERTIGA'}</div>
+            <div style={{ fontSize: '11px', whiteSpace: 'pre-wrap' }}>{pengaturan.alamat_toko || 'Point of Sale'}</div>
             <div style={{ fontSize: '11px', marginTop: '6px' }}>{formatDate(printStruk.tanggal_transaksi)}</div>
             <div style={{ fontSize: '12px', fontWeight: '700' }}>{printStruk.nomor_nota}</div>
           </div>
@@ -92,11 +116,12 @@ const RiwayatTransaksi = () => {
           </div>
           <div style={{ fontSize: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total</span><strong>Rp {printStruk.total_harga.toLocaleString('id-ID')}</strong></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}><span>Metode</span><span>{printStruk.metode_pembayaran || 'Tunai'}</span></div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Bayar</span><span>Rp {printStruk.total_bayar.toLocaleString('id-ID')}</span></div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Kembali</span><span>Rp {printStruk.total_kembalian.toLocaleString('id-ID')}</span></div>
           </div>
-          <div style={{ textAlign: 'center', marginTop: '16px', borderTop: '1px dashed #000', paddingTop: '12px', fontSize: '11px' }}>
-            Terima kasih sudah berbelanja!
+          <div style={{ textAlign: 'center', marginTop: '16px', borderTop: '1px dashed #000', paddingTop: '12px', fontSize: '11px', whiteSpace: 'pre-wrap' }}>
+            {pengaturan.pesan_struk || 'Terima kasih sudah berbelanja!'}
           </div>
         </div>
       )}
@@ -172,7 +197,10 @@ const RiwayatTransaksi = () => {
                   alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0
                 }}>🧾</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '700', fontSize: '16px', color: 'var(--text-dark)', marginBottom: '4px' }}>{t.nomor_nota}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '16px', color: t.status === 'void' ? 'var(--text-muted)' : 'var(--text-dark)', textDecoration: t.status === 'void' ? 'line-through' : 'none' }}>{t.nomor_nota}</div>
+                    {t.status === 'void' && <span style={{ background: '#FEE2E2', color: '#DC2626', fontSize: '10px', fontWeight: '800', padding: '2px 6px', borderRadius: '4px' }}>VOID</span>}
+                  </div>
                   <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{formatDate(t.tanggal_transaksi)}</div>
                   <div style={{ fontSize: '12px', color: 'var(--primary-color)', marginTop: '3px', fontWeight: '600' }}>
                     👤 {t.nama_pelanggan || 'Umum'}
@@ -220,7 +248,8 @@ const RiwayatTransaksi = () => {
                       {/* Footer Detail */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
                         <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-                          Pelanggan: <strong style={{ color: 'var(--text-dark)' }}>{t.nama_pelanggan || 'Umum'}</strong>
+                          <div>Pelanggan: <strong style={{ color: 'var(--text-dark)' }}>{t.nama_pelanggan || 'Umum'}</strong></div>
+                          <div style={{ marginTop: '4px' }}>Metode: <strong style={{ color: 'var(--text-dark)' }}>{t.metode_pembayaran || 'Tunai'}</strong></div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                           <div style={{ display: 'flex', gap: '30px' }}>
@@ -238,20 +267,35 @@ const RiwayatTransaksi = () => {
                             </div>
                           </div>
 
-                          {/* Tombol Print */}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handlePrintNota(t); }}
-                            style={{
-                              padding: '10px 20px',
-                              background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
-                              color: 'white', border: 'none', borderRadius: '10px',
-                              fontWeight: '700', cursor: 'pointer', fontSize: '13px',
-                              display: 'flex', alignItems: 'center', gap: '6px',
-                              boxShadow: '0 4px 12px rgba(79,70,229,0.3)'
-                            }}
-                          >
-                            🖨️ Print Nota
-                          </button>
+                          {/* Tombol Print & Void */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handlePrintNota(t); }}
+                              style={{
+                                padding: '10px 20px',
+                                background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
+                                color: 'white', border: 'none', borderRadius: '10px',
+                                fontWeight: '700', cursor: 'pointer', fontSize: '13px',
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                boxShadow: '0 4px 12px rgba(79,70,229,0.3)'
+                              }}
+                            >
+                              🖨️ Print Nota
+                            </button>
+                            {t.status !== 'void' && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleVoid(t.id, t.nomor_nota); }}
+                                style={{
+                                  padding: '8px 20px',
+                                  background: '#FEF2F2',
+                                  color: '#DC2626', border: '1px solid #FECACA', borderRadius: '10px',
+                                  fontWeight: '700', cursor: 'pointer', fontSize: '12px',
+                                }}
+                              >
+                                🗑️ Void Transaksi
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </>

@@ -6,6 +6,7 @@ import Login from './components/Login'
 import RiwayatTransaksi from './components/RiwayatTransaksi'
 import Laporan from './components/Laporan'
 import Pengaturan from './components/Pengaturan'
+import RiwayatRestock from './components/RiwayatRestock'
 import './index.css'
 
 function App() {
@@ -73,6 +74,9 @@ function App() {
         <div className={`nav-item ${activeTab === 'riwayat' ? 'active' : ''}`} onClick={() => setActiveTab('riwayat')}>
           <span className="nav-icon">🧾</span> Riwayat Transaksi
         </div>
+        <div className={`nav-item ${activeTab === 'restock' ? 'active' : ''}`} onClick={() => setActiveTab('restock')}>
+          <span className="nav-icon">📦</span> Riwayat Restock
+        </div>
         <div className={`nav-item ${activeTab === 'pengaturan' ? 'active' : ''}`} onClick={() => setActiveTab('pengaturan')}>
           <span className="nav-icon">⚙️</span> Pengaturan
         </div>
@@ -98,6 +102,7 @@ function App() {
         {activeTab === 'laporan' && <Laporan />}
         {activeTab === 'inventory' && <Inventory />}
         {activeTab === 'riwayat' && <RiwayatTransaksi />}
+        {activeTab === 'restock' && <RiwayatRestock />}
         {activeTab === 'pengaturan' && <Pengaturan />}
       </div>
     </div>

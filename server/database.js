@@ -43,6 +43,8 @@ function initializeDb() {
 
         // Add column safely for existing databases
         db.run(`ALTER TABLE transaksi ADD COLUMN nama_pelanggan VARCHAR(100) DEFAULT 'Umum'`, (err) => {});
+        db.run(`ALTER TABLE transaksi ADD COLUMN metode_pembayaran VARCHAR(50) DEFAULT 'Tunai'`, (err) => {});
+        db.run(`ALTER TABLE transaksi ADD COLUMN status VARCHAR(20) DEFAULT 'sukses'`, (err) => {});
 
         // Table C: detail_transaksi
         db.run(`CREATE TABLE IF NOT EXISTS detail_transaksi (
@@ -65,6 +67,21 @@ function initializeDb() {
             tanggal TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (barang_id) REFERENCES barang(id)
         )`);
+
+        // Table E: pengaturan
+        db.run(`CREATE TABLE IF NOT EXISTS pengaturan (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nama_toko VARCHAR(100) DEFAULT 'POS ERTIGA',
+            alamat_toko TEXT DEFAULT 'Alamat Toko Belum Diatur',
+            pesan_struk TEXT DEFAULT 'Terima kasih sudah berbelanja!'
+        )`, () => {
+            // Insert default row if not exists
+            db.get(`SELECT id FROM pengaturan WHERE id = 1`, (err, row) => {
+                if (!row) {
+                    db.run(`INSERT INTO pengaturan (id, nama_toko, alamat_toko, pesan_struk) VALUES (1, 'POS ERTIGA', 'Point of Sale', 'Terima kasih telah berbelanja!')`);
+                }
+            });
+        });
 
         // Table E: kategori
         db.run(`CREATE TABLE IF NOT EXISTS kategori (

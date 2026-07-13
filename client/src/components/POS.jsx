@@ -10,12 +10,16 @@ const POS = () => {
   const [amountTendered, setAmountTendered] = useState(0);
   const [diskon, setDiskon] = useState(0);
   const [namaPelanggan, setNamaPelanggan] = useState('');
+  const [metodePembayaran, setMetodePembayaran] = useState('Tunai');
   const [struk, setStruk] = useState(null); // null = modal tertutup
+  const [heldCarts, setHeldCarts] = useState([]);
+  const [pengaturan, setPengaturan] = useState({});
   const barcodeRef = useRef(null);
 
   useEffect(() => {
     fetchItems();
     fetch('http://localhost:3001/api/kategori').then(r => r.json()).then(d => { if(d.data) setKategoriList(d.data); });
+    fetch('http://localhost:3001/api/pengaturan').then(r => r.json()).then(d => { if(d.data) setPengaturan(d.data); });
     if(barcodeRef.current) barcodeRef.current.focus();
   }, []);
 
@@ -107,6 +111,34 @@ const POS = () => {
   const totalSetelahDiskon = Math.max(0, totalHarga - diskon);
   const kembalian = amountTendered - totalSetelahDiskon;
 
+  // --- HOLD TRANSACTIONS ---
+  const handleHoldCart = () => {
+    if (cart.length === 0) return;
+    const newHold = {
+      id: Date.now(),
+      waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      cart: [...cart],
+      namaPelanggan: namaPelanggan.trim() || 'Pelanggan ' + (heldCarts.length + 1)
+    };
+    setHeldCarts([...heldCarts, newHold]);
+    setCart([]);
+    setNamaPelanggan('');
+    setDiskon(0);
+    setAmountTendered(0);
+  };
+
+  const handleLoadHold = (holdId) => {
+    if (cart.length > 0) {
+      if (!window.confirm('Keranjang saat ini tidak kosong. Pindahkan ke Antrean (Hold) dulu?')) return;
+      handleHoldCart();
+    }
+    const hold = heldCarts.find(h => h.id === holdId);
+    if (!hold) return;
+    setCart(hold.cart);
+    setNamaPelanggan(hold.namaPelanggan.startsWith('Pelanggan ') ? '' : hold.namaPelanggan);
+    setHeldCarts(heldCarts.filter(h => h.id !== holdId));
+  };
+
   const checkout = async () => {
     if (cart.length === 0) return alert('Keranjang kosong');
     if (amountTendered < totalSetelahDiskon) return alert('Uang pembayaran kurang!');
@@ -117,6 +149,7 @@ const POS = () => {
       total_kembalian: kembalian,
       diskon,
       nama_pelanggan: namaPelanggan.trim() || 'Umum',
+      metode_pembayaran: metodePembayaran,
       cart
     };
 
@@ -139,11 +172,13 @@ const POS = () => {
           total: totalSetelahDiskon,
           bayar: amountTendered,
           kembalian,
+          metode_pembayaran: metodePembayaran,
         });
         setCart([]);
         setAmountTendered(0);
         setDiskon(0);
         setNamaPelanggan('');
+        setMetodePembayaran('Tunai');
         fetchItems();
       } else {
         alert(data.error || 'Terjadi kesalahan saat checkout');
@@ -249,7 +284,25 @@ const POS = () => {
       </div>
 
       <div className="pos-cart">
-        <h3 className="cart-title">Keranjang</h3>
+        <div style={{ marginBottom: '20px' }}>
+          <h3 className="cart-title" style={{ margin: 0 }}>Keranjang</h3>
+        </div>
+
+        {/* Daftar Antrean Hold */}
+        {heldCarts.length > 0 && (
+          <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }}>
+            {heldCarts.map((h, i) => (
+              <div 
+                key={h.id} 
+                onClick={() => handleLoadHold(h.id)}
+                style={{ background: '#FFF7ED', border: '1px solid #FED7AA', padding: '8px 12px', borderRadius: '8px', minWidth: '120px', cursor: 'pointer', flexShrink: 0 }}
+              >
+                <div style={{ fontSize: '12px', fontWeight: '700', color: '#9A3412', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{h.namaPelanggan}</div>
+                <div style={{ fontSize: '10px', color: '#EA580C' }}>{h.cart.length} item • {h.waktu}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Input Nama Pelanggan */}
         <div style={{ padding: '0 0 12px', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
@@ -328,16 +381,35 @@ const POS = () => {
             </div>
           )}
           <div className="cart-row" style={{alignItems: 'center'}}>
-            <span>Bayar:</span>
-            <div style={{position: 'relative', width: '160px'}}>
-              <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748B', fontWeight: '500'}}>Rp</span>
-              <input
-                type="text"
-                value={amountTendered ? amountTendered.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
-                onChange={e => setAmountTendered(Number(e.target.value.replace(/[^0-9]/g, '')))}
-                style={{width: '100%', paddingLeft: '45px', textAlign: 'right', fontWeight: '600', color: 'var(--primary-color)'}}
-                placeholder="0"
-              />
+            <span>Metode:</span>
+            <select
+              value={metodePembayaran}
+              onChange={e => setMetodePembayaran(e.target.value)}
+              style={{width: '160px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', fontWeight: '600'}}
+            >
+              <option value="Tunai">💵 Tunai</option>
+              <option value="Transfer Bank">🏦 Transfer Bank</option>
+              <option value="QRIS">📱 QRIS</option>
+            </select>
+          </div>
+          <div className="cart-row" style={{alignItems: 'flex-start'}}>
+            <span style={{marginTop: '12px'}}>Bayar:</span>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end'}}>
+              <div style={{position: 'relative', width: '160px'}}>
+                <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748B', fontWeight: '500'}}>Rp</span>
+                <input
+                  type="text"
+                  value={amountTendered ? amountTendered.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
+                  onChange={e => setAmountTendered(Number(e.target.value.replace(/[^0-9]/g, '')))}
+                  style={{width: '100%', paddingLeft: '45px', textAlign: 'right', fontWeight: '600', color: 'var(--primary-color)'}}
+                  placeholder="0"
+                />
+              </div>
+              <div style={{display: 'flex', gap: '4px', flexWrap: 'wrap', width: '160px', justifyContent: 'flex-end'}}>
+                <button onClick={() => setAmountTendered(totalSetelahDiskon)} style={{fontSize: '11px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>Uang Pas</button>
+                <button onClick={() => setAmountTendered(50000)} style={{fontSize: '11px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>50rb</button>
+                <button onClick={() => setAmountTendered(100000)} style={{fontSize: '11px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: '#F8FAFC', color: 'var(--text-dark)', cursor: 'pointer', fontWeight: '600'}}>100rb</button>
+              </div>
             </div>
           </div>
           <div className="cart-row grand-total">
@@ -348,11 +420,24 @@ const POS = () => {
           </div>
           <button
             className="success"
-            style={{width: '100%', marginTop: '20px', padding: '15px', fontSize: '16px'}}
+            style={{width: '100%', marginTop: '20px', padding: '15px', fontSize: '16px', marginBottom: '10px'}}
             onClick={checkout}
             disabled={cart.length === 0}
           >
             Selesaikan Transaksi
+          </button>
+          
+          <button 
+            onClick={handleHoldCart} 
+            disabled={cart.length === 0}
+            style={{ 
+              width: '100%', padding: '12px', background: cart.length > 0 ? '#FEF2F2' : '#F1F5F9', 
+              color: cart.length > 0 ? '#DC2626' : '#94A3B8', border: 'none', borderRadius: '10px', 
+              fontSize: '14px', fontWeight: '700', cursor: cart.length > 0 ? 'pointer' : 'not-allowed', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' 
+            }}
+          >
+            ⏸️ Simpan / Hold Transaksi
           </button>
         </div>
       </div>
@@ -369,12 +454,11 @@ const POS = () => {
             boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
             fontFamily: "'Courier New', monospace"
           }}>
-
             {/* Header Struk */}
             <div style={{ background: 'linear-gradient(135deg, #1E293B, #312E81)', color: 'white', borderRadius: '20px 20px 0 0', padding: '24px 20px', textAlign: 'center' }}>
               <div style={{ fontSize: '28px', marginBottom: '8px' }}>🛍️</div>
-              <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '2px' }}>POS ERTIGA</div>
-              <div style={{ fontSize: '11px', opacity: 0.6, marginTop: '4px' }}>Point of Sale</div>
+              <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '2px' }}>{pengaturan.nama_toko || 'POS ERTIGA'}</div>
+              <div style={{ fontSize: '11px', opacity: 0.8, marginTop: '4px', whiteSpace: 'pre-wrap' }}>{pengaturan.alamat_toko || 'Point of Sale'}</div>
               <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed rgba(255,255,255,0.2)', fontSize: '11px', opacity: 0.7 }}>{struk.tanggal}</div>
               <div style={{ fontSize: '13px', fontWeight: '700', marginTop: '4px', color: '#A5B4FC' }}>{struk.nomor_nota}</div>
             </div>
@@ -419,6 +503,10 @@ const POS = () => {
                   <span>Rp {struk.total.toLocaleString('id-ID')}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#64748B' }}>
+                  <span>Metode</span>
+                  <span style={{ fontWeight: '600', color: '#1E293B' }}>{struk.metode_pembayaran}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#64748B' }}>
                   <span>Bayar</span>
                   <span>Rp {struk.bayar.toLocaleString('id-ID')}</span>
                 </div>
@@ -428,10 +516,9 @@ const POS = () => {
                 </div>
               </div>
 
-              {/* Footer pesan */}
-              <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #E2E8F0', color: '#94A3B8', fontSize: '11px', lineHeight: 1.8 }}>
-                ✨ Terima kasih sudah berbelanja! ✨
-                <br />Semoga puas dengan produk kami.
+              {/* Footer Struk */}
+              <div style={{ textAlign: 'center', marginTop: '16px', borderTop: '1px dashed #E2E8F0', paddingTop: '12px', fontSize: '11px', color: '#64748B', whiteSpace: 'pre-wrap' }}>
+                {pengaturan.pesan_struk || 'Terima kasih telah berbelanja!'}
               </div>
 
               {/* Tombol Aksi */}
