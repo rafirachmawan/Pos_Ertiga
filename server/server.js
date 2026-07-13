@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const db = require('./database');
 
 const app = express();
@@ -74,21 +75,21 @@ app.delete('/api/kategori/:id', (req, res) => {
 
 // --- Pengaturan Toko ---
 app.get('/api/pengaturan', (req, res) => {
-    db.all(`SELECT kunci, nilai FROM pengaturan`, [], (err, rows) => {
+    db.get(`SELECT * FROM pengaturan WHERE id = 1`, (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
-        const result = {};
-        rows.forEach(r => { result[r.kunci] = r.nilai; });
-        res.json({ data: result });
+        res.json({ data: row });
     });
 });
 app.put('/api/pengaturan', (req, res) => {
-    const updates = req.body; // { kunci: nilai, ... }
-    const stmt = db.prepare(`INSERT OR REPLACE INTO pengaturan (kunci, nilai) VALUES (?, ?)`);
-    Object.entries(updates).forEach(([k, v]) => stmt.run([k, v]));
-    stmt.finalize((err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Pengaturan disimpan' });
-    });
+    const { nama_toko, alamat_toko, pesan_struk } = req.body;
+    db.run(
+        `UPDATE pengaturan SET nama_toko = ?, alamat_toko = ?, pesan_struk = ? WHERE id = 1`,
+        [nama_toko, alamat_toko, pesan_struk],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: 'Pengaturan berhasil disimpan' });
+        }
+    );
 });
 
 // Search item by barcode
@@ -351,32 +352,11 @@ app.get('/api/stok-masuk', (req, res) => {
 });
 
 // --- Backup Database ---
-const fs = require('fs');
-const path = require('path');
 app.get('/api/backup', (req, res) => {
     const dbPath = path.resolve(__dirname, 'pos_database.sqlite');
     res.download(dbPath, `backup_pos_ertiga_${new Date().toISOString().slice(0, 10)}.sqlite`);
 });
 
-// --- Pengaturan Toko ---
-app.get('/api/pengaturan', (req, res) => {
-    db.get('SELECT * FROM pengaturan WHERE id = 1', (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ data: row });
-    });
-});
-
-app.put('/api/pengaturan', (req, res) => {
-    const { nama_toko, alamat_toko, pesan_struk } = req.body;
-    db.run(
-        `UPDATE pengaturan SET nama_toko = ?, alamat_toko = ?, pesan_struk = ? WHERE id = 1`,
-        [nama_toko, alamat_toko, pesan_struk],
-        function(err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: "Pengaturan berhasil disimpan" });
-        }
-    );
-});
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

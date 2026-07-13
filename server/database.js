@@ -68,39 +68,43 @@ function initializeDb() {
             FOREIGN KEY (barang_id) REFERENCES barang(id)
         )`);
 
-        // Table E: pengaturan
-        db.run(`CREATE TABLE IF NOT EXISTS pengaturan (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nama_toko VARCHAR(100) DEFAULT 'POS ERTIGA',
-            alamat_toko TEXT DEFAULT 'Alamat Toko Belum Diatur',
-            pesan_struk TEXT DEFAULT 'Terima kasih sudah berbelanja!'
-        )`, () => {
-            // Insert default row if not exists
-            db.get(`SELECT id FROM pengaturan WHERE id = 1`, (err, row) => {
-                if (!row) {
-                    db.run(`INSERT INTO pengaturan (id, nama_toko, alamat_toko, pesan_struk) VALUES (1, 'POS ERTIGA', 'Point of Sale', 'Terima kasih telah berbelanja!')`);
-                }
-            });
+        // Table E: pengaturan — migrate if schema is old (key-value style)
+        db.all(`PRAGMA table_info(pengaturan)`, (err, columns) => {
+            const hasKunci = columns && columns.some(c => c.name === 'kunci');
+            if (hasKunci) {
+                // Old key-value schema detected — drop and recreate
+                db.run(`DROP TABLE IF EXISTS pengaturan`, () => {
+                    db.run(`CREATE TABLE pengaturan (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nama_toko VARCHAR(100) DEFAULT 'POS ERTIGA',
+                        alamat_toko TEXT DEFAULT 'Alamat Toko Belum Diatur',
+                        pesan_struk TEXT DEFAULT 'Terima kasih sudah berbelanja!'
+                    )`, () => {
+                        db.run(`INSERT INTO pengaturan (id, nama_toko, alamat_toko, pesan_struk) VALUES (1, 'POS ERTIGA', 'Point of Sale', 'Terima kasih telah berbelanja!')`);
+                    });
+                });
+            } else {
+                db.run(`CREATE TABLE IF NOT EXISTS pengaturan (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nama_toko VARCHAR(100) DEFAULT 'POS ERTIGA',
+                    alamat_toko TEXT DEFAULT 'Alamat Toko Belum Diatur',
+                    pesan_struk TEXT DEFAULT 'Terima kasih sudah berbelanja!'
+                )`, () => {
+                    db.get(`SELECT id FROM pengaturan WHERE id = 1`, (err, row) => {
+                        if (!row) {
+                            db.run(`INSERT INTO pengaturan (id, nama_toko, alamat_toko, pesan_struk) VALUES (1, 'POS ERTIGA', 'Point of Sale', 'Terima kasih telah berbelanja!')`);
+                        }
+                    });
+                });
+            }
         });
 
-        // Table E: kategori
+        // Table F: kategori
         db.run(`CREATE TABLE IF NOT EXISTS kategori (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nama_kategori VARCHAR(100) UNIQUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
-
-        // Table F: pengaturan (key-value store)
-        db.run(`CREATE TABLE IF NOT EXISTS pengaturan (
-            kunci VARCHAR(100) PRIMARY KEY,
-            nilai TEXT
-        )`);
-
-        // Default pengaturan toko
-        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('nama_toko', 'POS ERTIGA')`);
-        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('alamat', '')`);
-        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('telepon', '')`);
-        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('catatan_struk', 'Terima kasih sudah berbelanja!')`);
 
         // Add kategori_id to barang safely
         db.run(`ALTER TABLE barang ADD COLUMN kategori_id INTEGER REFERENCES kategori(id)`, (err) => {});
