@@ -18,6 +18,8 @@ const RiwayatTransaksi = () => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [printStruk, setPrintStruk] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     fetch('http://localhost:3001/api/transaksi')
@@ -42,10 +44,17 @@ const RiwayatTransaksi = () => {
 
   const doPrint = () => { window.print(); };
 
-  const filtered = transaksi.filter(t =>
-    t.nomor_nota.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (t.nama_pelanggan || 'Umum').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = transaksi.filter(t => {
+    const matchSearch = t.nomor_nota.toLowerCase().includes(searchQuery.toLowerCase()) || (t.nama_pelanggan || 'Umum').toLowerCase().includes(searchQuery.toLowerCase());
+    let matchDate = true;
+    if (startDate) {
+      matchDate = matchDate && t.tanggal_transaksi.slice(0,10) >= startDate;
+    }
+    if (endDate) {
+      matchDate = matchDate && t.tanggal_transaksi.slice(0,10) <= endDate;
+    }
+    return matchSearch && matchDate;
+  });
 
   return (
     <div>
@@ -99,22 +108,36 @@ const RiwayatTransaksi = () => {
             {filtered.length} dari {transaksi.length} transaksi
           </p>
         </div>
-        {/* Search Bar */}
-        <div style={{ position: 'relative', width: '280px' }}>
-          <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '16px', pointerEvents: 'none' }}>🔍</span>
-          <input
-            type="text"
-            placeholder="Cari nota atau nama pelanggan..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            style={{ width: '100%', paddingLeft: '42px', paddingRight: searchQuery ? '36px' : '14px', fontSize: '13px' }}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', fontSize: '16px', padding: '2px', lineHeight: 1 }}
-            >✕</button>
-          )}
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {/* Date Filter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--surface-color)', padding: '6px 12px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Mulai:</span>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: '4px', fontSize: '13px', border: 'none', outline: 'none' }} />
+            <span style={{ fontSize: '13px', color: 'var(--border-color)' }}>|</span>
+            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Sampai:</span>
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: '4px', fontSize: '13px', border: 'none', outline: 'none' }} />
+            {(startDate || endDate) && (
+               <button onClick={() => { setStartDate(''); setEndDate(''); }} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: '12px', fontWeight: '700' }}>Reset</button>
+            )}
+          </div>
+          
+          {/* Search Bar */}
+          <div style={{ position: 'relative', width: '280px' }}>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '16px', pointerEvents: 'none' }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Cari nota atau nama pelanggan..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ width: '100%', paddingLeft: '42px', paddingRight: searchQuery ? '36px' : '14px', fontSize: '13px', height: '36px' }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', fontSize: '16px', padding: '2px', lineHeight: 1 }}
+              >✕</button>
+            )}
+          </div>
         </div>
       </div>
 

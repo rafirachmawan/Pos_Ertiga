@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const db = require('./database');
 
 const app = express();
@@ -311,6 +312,12 @@ app.get('/api/stok-masuk', (req, res) => {
             res.json({ data: rows });
         }
     );
+});
+
+// --- Backup Database ---
+app.get('/api/backup', (req, res) => {
+    const file = path.resolve(__dirname, 'pos_database.sqlite');
+    res.download(file, `backup_pos_ertiga_${new Date().toISOString().slice(0, 10)}.sqlite`);
 });
 
 app.listen(PORT, () => {

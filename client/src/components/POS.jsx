@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const POS = () => {
   const [items, setItems] = useState([]);
+  const [kategoriList, setKategoriList] = useState([]);
+  const [activeKategori, setActiveKategori] = useState('');
   const [cart, setCart] = useState([]);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +15,7 @@ const POS = () => {
 
   useEffect(() => {
     fetchItems();
+    fetch('http://localhost:3001/api/kategori').then(r => r.json()).then(d => { if(d.data) setKategoriList(d.data); });
     if(barcodeRef.current) barcodeRef.current.focus();
   }, []);
 
@@ -26,11 +29,12 @@ const POS = () => {
     }
   };
 
-  // Filter produk berdasarkan search query
-  const filteredItems = items.filter(item =>
-    item.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.barcode.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter produk berdasarkan search query dan kategori
+  const filteredItems = items.filter(item => {
+    const matchSearch = item.nama_barang.toLowerCase().includes(searchQuery.toLowerCase()) || item.barcode.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchKategori = activeKategori === '' || String(item.kategori_id) === String(activeKategori);
+    return matchSearch && matchKategori;
+  });
 
   const addToCart = (product) => {
     if(product.stok <= 0) {
@@ -180,6 +184,25 @@ const POS = () => {
               <button type="submit">Cari</button>
             </form>
           </div>
+        </div>
+
+        {/* Tab Kategori */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '14px', marginBottom: '14px', borderBottom: '1px solid var(--border-color)' }}>
+          <button
+            onClick={() => setActiveKategori('')}
+            style={{ padding: '6px 14px', fontSize: '13px', fontWeight: '600', borderRadius: '20px', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s', background: activeKategori === '' ? 'var(--primary-color)' : '#F1F5F9', color: activeKategori === '' ? 'white' : 'var(--text-muted)' }}
+          >
+            Semua Produk
+          </button>
+          {kategoriList.map(k => (
+            <button
+              key={k.id}
+              onClick={() => setActiveKategori(String(k.id))}
+              style={{ padding: '6px 14px', fontSize: '13px', fontWeight: '600', borderRadius: '20px', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s', background: activeKategori === String(k.id) ? 'var(--primary-color)' : '#F1F5F9', color: activeKategori === String(k.id) ? 'white' : 'var(--text-muted)' }}
+            >
+              {k.nama_kategori}
+            </button>
+          ))}
         </div>
 
         {/* Hasil pencarian info */}

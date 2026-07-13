@@ -172,6 +172,19 @@ const Pengaturan = () => {
           </div>
         </div>
       </div>
+
+      {/* ===== BAWAH: Database ===== */}
+      <div style={{ marginTop: '24px', background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden', padding: '20px 24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--secondary-color)' }}>💾 Backup Database</h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Unduh seluruh data penjualan, barang, dan pengaturan ke perangkat Anda.</p>
+          </div>
+          <button onClick={() => window.open('http://localhost:3001/api/backup', '_blank')} style={{ padding: '10px 20px', background: '#EEF2FF', color: 'var(--primary-color)', border: '1px solid #C7D2FE', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            ⬇️ Download Backup
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
