@@ -16,7 +16,8 @@ const RiwayatTransaksi = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [detail, setDetail] = useState([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
-  const [printStruk, setPrintStruk] = useState(null); // Data untuk modal print
+  const [printStruk, setPrintStruk] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetch('http://localhost:3001/api/transaksi')
@@ -39,9 +40,12 @@ const RiwayatTransaksi = () => {
     setPrintStruk({ ...t, items: detail });
   };
 
-  const doPrint = () => {
-    window.print();
-  };
+  const doPrint = () => { window.print(); };
+
+  const filtered = transaksi.filter(t =>
+    t.nomor_nota.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.nama_pelanggan || 'Umum').toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div>
@@ -92,24 +96,42 @@ const RiwayatTransaksi = () => {
         <div>
           <h2 style={{ fontSize: '28px', fontWeight: '700' }}>Riwayat Transaksi</h2>
           <p style={{ color: 'var(--text-muted)', marginTop: '6px', fontSize: '15px' }}>
-            {transaksi.length} transaksi ditemukan
+            {filtered.length} dari {transaksi.length} transaksi
           </p>
+        </div>
+        {/* Search Bar */}
+        <div style={{ position: 'relative', width: '280px' }}>
+          <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '16px', pointerEvents: 'none' }}>🔍</span>
+          <input
+            type="text"
+            placeholder="Cari nota atau nama pelanggan..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{ width: '100%', paddingLeft: '42px', paddingRight: searchQuery ? '36px' : '14px', fontSize: '13px' }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', fontSize: '16px', padding: '2px', lineHeight: 1 }}
+            >✕</button>
+          )}
         </div>
       </div>
 
-      {transaksi.length === 0 ? (
+      {filtered.length === 0 ? (
         <div style={{
           textAlign: 'center', padding: '80px 40px',
           background: 'var(--surface-color)', borderRadius: '16px',
           border: '1px solid var(--border-color)', color: 'var(--text-muted)'
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🧾</div>
-          <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>Belum ada transaksi</p>
-          <p style={{ fontSize: '14px' }}>Selesaikan penjualan di menu Transaksi Kasir untuk mulai mencatat.</p>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>{searchQuery ? '🔍' : '🧾'}</div>
+          <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>{searchQuery ? 'Tidak ditemukan' : 'Belum ada transaksi'}</p>
+          <p style={{ fontSize: '14px' }}>{searchQuery ? `Tidak ada transaksi untuk "${searchQuery}"` : 'Selesaikan penjualan di menu Transaksi Kasir untuk mulai mencatat.'}</p>
+          {searchQuery && <button onClick={() => setSearchQuery('')} style={{ marginTop: '14px', padding: '8px 20px', background: '#EEF2FF', color: 'var(--primary-color)', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>Reset Pencarian</button>}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {transaksi.map(t => (
+          {filtered.map(t => (
             <div key={t.id} style={{
               background: 'var(--surface-color)', borderRadius: '16px',
               border: `1px solid ${selectedId === t.id ? 'var(--primary-color)' : 'var(--border-color)'}`,

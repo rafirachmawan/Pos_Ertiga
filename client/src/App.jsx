@@ -4,6 +4,8 @@ import POS from './components/POS'
 import Dashboard from './components/Dashboard'
 import Login from './components/Login'
 import RiwayatTransaksi from './components/RiwayatTransaksi'
+import Laporan from './components/Laporan'
+import Pengaturan from './components/Pengaturan'
 import './index.css'
 
 function App() {
@@ -54,6 +56,9 @@ function App() {
         <div className={`nav-item ${activeTab === 'pos' ? 'active' : ''}`} onClick={() => setActiveTab('pos')}>
           <span className="nav-icon">🛒</span> Transaksi Kasir
         </div>
+        <div className={`nav-item ${activeTab === 'laporan' ? 'active' : ''}`} onClick={() => setActiveTab('laporan')}>
+          <span className="nav-icon">📋</span> Laporan
+        </div>
 
         {/* Nav group: Inventory */}
         <div className="sidebar-nav-label" style={{marginTop: '8px'}}>Inventori</div>
@@ -67,6 +72,9 @@ function App() {
         </div>
         <div className={`nav-item ${activeTab === 'riwayat' ? 'active' : ''}`} onClick={() => setActiveTab('riwayat')}>
           <span className="nav-icon">🧾</span> Riwayat Transaksi
+        </div>
+        <div className={`nav-item ${activeTab === 'pengaturan' ? 'active' : ''}`} onClick={() => setActiveTab('pengaturan')}>
+          <span className="nav-icon">⚙️</span> Pengaturan
         </div>
 
         {/* Footer: User info + Logout */}
@@ -87,8 +95,10 @@ function App() {
       <div className="main-content">
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'pos' && <POS />}
+        {activeTab === 'laporan' && <Laporan />}
         {activeTab === 'inventory' && <Inventory />}
         {activeTab === 'riwayat' && <RiwayatTransaksi />}
+        {activeTab === 'pengaturan' && <Pengaturan />}
       </div>
     </div>
   )

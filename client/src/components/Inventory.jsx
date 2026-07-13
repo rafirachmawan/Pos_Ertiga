@@ -13,11 +13,12 @@ const parseRupiah = (str) => {
 
 const Inventory = () => {
   const [items, setItems] = useState([]);
+  const [kategoriList, setKategoriList] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
   const [restockData, setRestockData] = useState({ barang_id: null, qty: 1, keterangan: '' });
   const [formData, setFormData] = useState({
-    id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: ''
+    id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''
   });
 
   // Display strings for inputs
@@ -36,6 +37,7 @@ const Inventory = () => {
 
   useEffect(() => {
     fetchItems();
+    fetch('http://localhost:3001/api/kategori').then(r => r.json()).then(d => { if(d.data) setKategoriList(d.data); });
   }, []);
 
   const handleCurrencyChange = (e, field) => {
@@ -91,7 +93,7 @@ const Inventory = () => {
   }
 
   const closeModal = () => {
-    setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: ''});
+    setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
     setDisplayHargaModal('');
     setDisplayHargaJual('');
     setIsModalOpen(false);
@@ -138,7 +140,7 @@ const Inventory = () => {
       <div className="header-row">
         <h2>Kelola Barang</h2>
         <button onClick={() => {
-          setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: ''});
+        setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
           setDisplayHargaModal('');
           setDisplayHargaJual('');
           setIsModalOpen(true);
@@ -154,6 +156,7 @@ const Inventory = () => {
               <th>Gambar</th>
               <th>Barcode</th>
               <th>Nama Barang</th>
+              <th>Kategori</th>
               <th>Harga Modal</th>
               <th>Harga Jual</th>
               <th>Stok</th>
@@ -173,6 +176,11 @@ const Inventory = () => {
                 </td>
                 <td>{item.barcode}</td>
                 <td>{item.nama_barang}</td>
+                <td>
+                  {item.nama_kategori
+                    ? <span style={{background:'#EEF2FF',color:'#4F46E5',fontSize:'11px',fontWeight:'700',padding:'3px 8px',borderRadius:'20px'}}>{item.nama_kategori}</span>
+                    : <span style={{color:'#CBD5E1',fontSize:'12px'}}>—</span>}
+                </td>
                 <td>Rp {formatRupiah(item.harga_modal)}</td>
                 <td>Rp {formatRupiah(item.harga_jual)}</td>
                 <td>{item.stok} {item.satuan}</td>
@@ -239,6 +247,14 @@ const Inventory = () => {
                     required 
                   />
                 </div>
+              </div>
+              <div className="form-group">
+                <label>Kategori</label>
+                <select name="kategori_id" value={formData.kategori_id || ''} onChange={handleChange} style={{width: '100%'}}>
+                  <option value="">-- Tanpa Kategori --</option>
+                  {kategoriList.map(k => <option key={k.id} value={k.id}>{k.nama_kategori}</option>)}
+                </select>
+                {kategoriList.length === 0 && <small style={{color:'#94a3b8',marginTop:'4px',display:'block'}}>Belum ada kategori. Tambahkan di menu Pengaturan.</small>}
               </div>
               <div className="form-group" style={{display: 'flex', gap: '15px'}}>
                 <div style={{flex: 2}}>

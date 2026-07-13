@@ -65,9 +65,32 @@ function initializeDb() {
             tanggal TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (barang_id) REFERENCES barang(id)
         )`);
+
+        // Table E: kategori
+        db.run(`CREATE TABLE IF NOT EXISTS kategori (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nama_kategori VARCHAR(100) UNIQUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Table F: pengaturan (key-value store)
+        db.run(`CREATE TABLE IF NOT EXISTS pengaturan (
+            kunci VARCHAR(100) PRIMARY KEY,
+            nilai TEXT
+        )`);
+
+        // Default pengaturan toko
+        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('nama_toko', 'POS ERTIGA')`);
+        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('alamat', '')`);
+        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('telepon', '')`);
+        db.run(`INSERT OR IGNORE INTO pengaturan (kunci, nilai) VALUES ('catatan_struk', 'Terima kasih sudah berbelanja!')`);
+
+        // Add kategori_id to barang safely
+        db.run(`ALTER TABLE barang ADD COLUMN kategori_id INTEGER REFERENCES kategori(id)`, (err) => {});
         
         console.log('Database tables initialized.');
     });
+
 }
 
 module.exports = db;

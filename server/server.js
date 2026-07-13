@@ -11,9 +11,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // --- CRUD for Barang (Items) ---
 
-// Get all items
+// Get all items (with kategori name)
 app.get('/api/barang', (req, res) => {
-    db.all("SELECT * FROM barang ORDER BY created_at DESC", [], (err, rows) => {
+    db.all(`SELECT b.*, k.nama_kategori FROM barang b LEFT JOIN kategori k ON b.kategori_id = k.id ORDER BY b.created_at DESC`, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ data: rows });
     });
@@ -21,9 +21,9 @@ app.get('/api/barang', (req, res) => {
 
 // Add new item
 app.post('/api/barang', (req, res) => {
-    const { barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan } = req.body;
-    const sql = `INSERT INTO barang (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok, gambar || '', satuan || 'pcs'], function(err) {
+    const { barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id } = req.body;
+    const sql = `INSERT INTO barang (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok, gambar || '', satuan || 'pcs', kategori_id || null], function(err) {
         if (err) return res.status(400).json({ error: err.message });
         res.json({ id: this.lastID, message: "Barang berhasil ditambahkan" });
     });
@@ -32,9 +32,9 @@ app.post('/api/barang', (req, res) => {
 // Update item
 app.put('/api/barang/:id', (req, res) => {
     const { id } = req.params;
-    const { barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan } = req.body;
-    const sql = `UPDATE barang SET barcode = ?, nama_barang = ?, harga_modal = ?, harga_jual = ?, stok = ?, gambar = ?, satuan = ? WHERE id = ?`;
-    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok, gambar || '', satuan || 'pcs', id], function(err) {
+    const { barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id } = req.body;
+    const sql = `UPDATE barang SET barcode = ?, nama_barang = ?, harga_modal = ?, harga_jual = ?, stok = ?, gambar = ?, satuan = ?, kategori_id = ? WHERE id = ?`;
+    db.run(sql, [barcode, nama_barang, harga_modal, harga_jual, stok, gambar || '', satuan || 'pcs', kategori_id || null, id], function(err) {
         if (err) return res.status(400).json({ error: err.message });
         res.json({ changes: this.changes, message: "Barang berhasil diupdate" });
     });
@@ -46,6 +46,47 @@ app.delete('/api/barang/:id', (req, res) => {
     db.run(`DELETE FROM barang WHERE id = ?`, id, function(err) {
         if (err) return res.status(400).json({ error: err.message });
         res.json({ changes: this.changes, message: "Barang berhasil dihapus" });
+    });
+});
+
+// --- Kategori ---
+app.get('/api/kategori', (req, res) => {
+    db.all(`SELECT * FROM kategori ORDER BY nama_kategori ASC`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: rows });
+    });
+});
+app.post('/api/kategori', (req, res) => {
+    const { nama_kategori } = req.body;
+    if (!nama_kategori) return res.status(400).json({ error: 'Nama kategori wajib diisi' });
+    db.run(`INSERT INTO kategori (nama_kategori) VALUES (?)`, [nama_kategori], function(err) {
+        if (err) return res.status(400).json({ error: err.message });
+        res.json({ id: this.lastID, nama_kategori, message: 'Kategori ditambahkan' });
+    });
+});
+app.delete('/api/kategori/:id', (req, res) => {
+    db.run(`DELETE FROM kategori WHERE id = ?`, [req.params.id], function(err) {
+        if (err) return res.status(400).json({ error: err.message });
+        res.json({ message: 'Kategori dihapus' });
+    });
+});
+
+// --- Pengaturan Toko ---
+app.get('/api/pengaturan', (req, res) => {
+    db.all(`SELECT kunci, nilai FROM pengaturan`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const result = {};
+        rows.forEach(r => { result[r.kunci] = r.nilai; });
+        res.json({ data: result });
+    });
+});
+app.put('/api/pengaturan', (req, res) => {
+    const updates = req.body; // { kunci: nilai, ... }
+    const stmt = db.prepare(`INSERT OR REPLACE INTO pengaturan (kunci, nilai) VALUES (?, ?)`);
+    Object.entries(updates).forEach(([k, v]) => stmt.run([k, v]));
+    stmt.finalize((err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'Pengaturan disimpan' });
     });
 });
 
@@ -275,3 +316,107 @@ app.get('/api/stok-masuk', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+// --- Laporan Endpoints ---
+
+// Laporan berdasarkan rentang tanggal
+app.get('/api/laporan/range', (req, res) => {
+    const { start, end } = req.query;
+    if (!start || !end) return res.status(400).json({ error: 'Parameter start dan end wajib diisi' });
+
+    db.get(
+        `SELECT 
+            COUNT(id) as total_transaksi,
+            COALESCE(SUM(total_harga), 0) as total_pendapatan,
+            COALESCE(SUM(total_bayar), 0) as total_bayar
+         FROM transaksi 
+         WHERE DATE(tanggal_transaksi) BETWEEN ? AND ?`,
+        [start, end],
+        (err, summary) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            db.get(
+                `SELECT COALESCE(SUM((dt.harga_jual_saat_ini - b.harga_modal) * dt.qty), 0) as laba_bersih
+                 FROM detail_transaksi dt
+                 JOIN transaksi t ON dt.transaksi_id = t.id
+                 JOIN barang b ON dt.barang_id = b.id
+                 WHERE DATE(t.tanggal_transaksi) BETWEEN ? AND ?`,
+                [start, end],
+                (err2, profitRow) => {
+                    if (err2) return res.status(500).json({ error: err2.message });
+                    res.json({
+                        data: {
+                            total_transaksi: summary.total_transaksi,
+                            total_pendapatan: summary.total_pendapatan,
+                            laba_bersih: profitRow.laba_bersih
+                        }
+                    });
+                }
+            );
+        }
+    );
+});
+
+// Laporan bulanan (12 bulan terakhir)
+app.get('/api/laporan/bulanan', (req, res) => {
+    db.all(
+        `SELECT 
+            strftime('%Y-%m', tanggal_transaksi) as bulan,
+            COUNT(id) as total_transaksi,
+            SUM(total_harga) as pendapatan
+         FROM transaksi
+         WHERE tanggal_transaksi >= date('now', '-11 months', 'start of month')
+         GROUP BY strftime('%Y-%m', tanggal_transaksi)
+         ORDER BY bulan ASC`,
+        [],
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            // Ensure all 12 months present
+            const result = [];
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(1);
+                d.setMonth(d.getMonth() - i);
+                const key = d.toISOString().slice(0, 7);
+                const found = rows.find(r => r.bulan === key);
+                result.push({
+                    bulan: key,
+                    label: d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }),
+                    total_transaksi: found ? found.total_transaksi : 0,
+                    pendapatan: found ? found.pendapatan : 0,
+                });
+            }
+            res.json({ data: result });
+        }
+    );
+});
+
+// Top 5 produk terlaris
+app.get('/api/laporan/top-produk', (req, res) => {
+    const { start, end } = req.query;
+    let whereClause = '';
+    let params = [];
+    if (start && end) {
+        whereClause = 'WHERE DATE(t.tanggal_transaksi) BETWEEN ? AND ?';
+        params = [start, end];
+    }
+    db.all(
+        `SELECT b.nama_barang, b.satuan,
+            SUM(dt.qty) as total_terjual,
+            SUM(dt.subtotal) as total_omzet
+         FROM detail_transaksi dt
+         JOIN barang b ON dt.barang_id = b.id
+         JOIN transaksi t ON dt.transaksi_id = t.id
+         ${whereClause}
+         GROUP BY dt.barang_id
+         ORDER BY total_terjual DESC
+         LIMIT 5`,
+        params,
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ data: rows });
+        }
+    );
+});
+
