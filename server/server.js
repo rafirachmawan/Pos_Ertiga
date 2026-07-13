@@ -117,6 +117,32 @@ app.post('/api/transaksi', (req, res) => {
     });
 });
 
+// --- Get Transaction History ---
+
+// Get all transactions
+app.get('/api/transaksi', (req, res) => {
+    db.all(`SELECT * FROM transaksi ORDER BY tanggal_transaksi DESC`, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ data: rows });
+    });
+});
+
+// Get transaction detail by ID
+app.get('/api/transaksi/:id', (req, res) => {
+    const { id } = req.params;
+    db.all(
+        `SELECT dt.*, b.nama_barang, b.barcode 
+         FROM detail_transaksi dt 
+         JOIN barang b ON dt.barang_id = b.id 
+         WHERE dt.transaksi_id = ?`,
+        [id],
+        (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ data: rows });
+        }
+    );
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

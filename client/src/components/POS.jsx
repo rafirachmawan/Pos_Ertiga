@@ -5,6 +5,7 @@ const POS = () => {
   const [cart, setCart] = useState([]);
   const [barcodeInput, setBarcodeInput] = useState('');
   const [amountTendered, setAmountTendered] = useState(0);
+  const [diskon, setDiskon] = useState(0);
   const barcodeRef = useRef(null);
 
   useEffect(() => {
@@ -68,16 +69,18 @@ const POS = () => {
   };
 
   const totalHarga = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  const kembalian = amountTendered - totalHarga;
+  const totalSetelahDiskon = Math.max(0, totalHarga - diskon);
+  const kembalian = amountTendered - totalSetelahDiskon;
 
   const checkout = async () => {
     if (cart.length === 0) return alert('Keranjang kosong');
-    if (amountTendered < totalHarga) return alert('Uang pembayaran kurang!');
+    if (amountTendered < totalSetelahDiskon) return alert('Uang pembayaran kurang!');
 
     const payload = {
-      total_harga: totalHarga,
+      total_harga: totalSetelahDiskon,
       total_bayar: amountTendered,
       total_kembalian: kembalian,
+      diskon,
       cart
     };
 
@@ -92,6 +95,7 @@ const POS = () => {
         alert(`Transaksi Berhasil! Nota: ${data.nomor_nota}`);
         setCart([]);
         setAmountTendered(0);
+        setDiskon(0);
         fetchItems(); // refresh stock
       } else {
         alert(data.error || 'Terjadi kesalahan saat checkout');
@@ -165,9 +169,28 @@ const POS = () => {
         
         <div className="cart-totals">
           <div className="cart-row">
-            <span>Total:</span>
+            <span>Subtotal:</span>
             <span>Rp {totalHarga.toLocaleString('id-ID')}</span>
           </div>
+          <div className="cart-row" style={{alignItems: 'center'}}>
+            <span>Diskon:</span>
+            <div style={{position: 'relative', width: '160px'}}>
+              <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748B', fontWeight: '500'}}>Rp</span>
+              <input
+                type="text"
+                value={diskon ? diskon.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
+                onChange={e => setDiskon(Number(e.target.value.replace(/[^0-9]/g, '')))}
+                style={{width: '100%', paddingLeft: '45px', textAlign: 'right', fontWeight: '600', color: 'var(--danger-color)'}}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          {diskon > 0 && (
+            <div className="cart-row" style={{fontWeight: '700', color: 'var(--text-dark)'}}>
+              <span>Total:</span>
+              <span>Rp {totalSetelahDiskon.toLocaleString('id-ID')}</span>
+            </div>
+          )}
           <div className="cart-row" style={{alignItems: 'center'}}>
             <span>Bayar:</span>
             <div style={{position: 'relative', width: '160px'}}>
