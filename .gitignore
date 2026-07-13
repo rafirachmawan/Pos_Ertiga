@@ -12,6 +12,7 @@ node_modules
 dist
 dist-ssr
 *.local
+release
 
 # Database
 # (Database files will be pushed as requested)

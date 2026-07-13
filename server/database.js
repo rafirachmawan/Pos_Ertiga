@@ -1,7 +1,13 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const dbPath = path.resolve(__dirname, 'pos_database.sqlite');
+// Use custom path from Electron if available, otherwise default to server folder
+let dbPath = path.resolve(__dirname, 'pos_database.sqlite');
+if (process.env.USER_DATA_PATH) {
+    dbPath = path.join(process.env.USER_DATA_PATH, 'pos_database.sqlite');
+}
+
+console.log('Using database path:', dbPath);
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database', err.message);

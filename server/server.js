@@ -11,6 +11,17 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Serve static files from React build
+// Use env variable set by Electron main process if available, else fallback to local path
+const clientDistPath = process.env.CLIENT_DIST_PATH || path.join(__dirname, '../client/dist');
+console.log('Serving static files from:', clientDistPath);
+if (fs.existsSync(clientDistPath)) {
+    app.use(express.static(clientDistPath));
+    console.log('Static files found and registered.');
+} else {
+    console.warn('WARNING: client/dist not found at:', clientDistPath);
+}
+
 // --- CRUD for Barang (Items) ---
 
 // Get all items (with kategori name)
@@ -353,14 +364,16 @@ app.get('/api/stok-masuk', (req, res) => {
 
 // --- Backup Database ---
 app.get('/api/backup', (req, res) => {
-    const dbPath = path.resolve(__dirname, 'pos_database.sqlite');
+    // If running in packaged electron app, dbPath is in APPDATA.
+    // Otherwise default to __dirname. 
+    // We should use the actual path loaded by database.js, but since it's hard to extract, we'll mimic the logic:
+    let dbPath = path.resolve(__dirname, 'pos_database.sqlite');
+    if (process.env.USER_DATA_PATH) {
+        dbPath = path.join(process.env.USER_DATA_PATH, 'pos_database.sqlite');
+    }
     res.download(dbPath, `backup_pos_ertiga_${new Date().toISOString().slice(0, 10)}.sqlite`);
 });
 
-
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
 
 // --- Laporan Endpoints ---
 
@@ -465,3 +478,15 @@ app.get('/api/laporan/top-produk', (req, res) => {
     );
 });
 
+// For any other request, send the React app index.html
+app.use((req, res) => {
+    if (fs.existsSync(clientDistPath)) {
+        res.sendFile(path.join(clientDistPath, 'index.html'));
+    } else {
+        res.status(404).send('Frontend build not found. Please run "npm run build" in the client folder.');
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});

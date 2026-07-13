@@ -1,0 +1,60 @@
+{
+  "name": "pos_ertiga",
+  "version": "1.0.0",
+  "description": "\"# Pos_Ertiga\"",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:client": "cd client && npm install && npm run build",
+    "build": "npm run build:client",
+    "dist": "npm run build && electron-builder"
+  },
+  "build": {
+    "appId": "com.pos.ertiga",
+    "productName": "POS Ertiga",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "server/**/*",
+      "!server/node_modules",
+      "client/dist/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "asarUnpack": [
+      "client/dist/**/*"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafirachmawan/Pos_Ertiga.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rafirachmawan/Pos_Ertiga/issues"
+  },
+  "homepage": "https://github.com/rafirachmawan/Pos_Ertiga#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
+    "wait-on": "^9.0.10"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "sqlite3": "^6.0.1"
+  }
+}
