@@ -117,6 +117,47 @@ app.post('/api/transaksi', (req, res) => {
     });
 });
 
+// --- Laporan Keuangan ---
+
+// Laporan harian: total transaksi, total pendapatan, laba bersih
+app.get('/api/laporan/harian', (req, res) => {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    // Total transaksi & pendapatan hari ini
+    db.get(
+        `SELECT 
+            COUNT(id) as total_transaksi,
+            COALESCE(SUM(total_harga), 0) as total_pendapatan,
+            COALESCE(SUM(total_bayar), 0) as total_bayar
+         FROM transaksi 
+         WHERE DATE(tanggal_transaksi) = ?`,
+        [today],
+        (err, summary) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            // Laba bersih: SUM((harga_jual_saat_ini - harga_modal) * qty) untuk hari ini
+            db.get(
+                `SELECT COALESCE(SUM((dt.harga_jual_saat_ini - b.harga_modal) * dt.qty), 0) as laba_bersih
+                 FROM detail_transaksi dt
+                 JOIN transaksi t ON dt.transaksi_id = t.id
+                 JOIN barang b ON dt.barang_id = b.id
+                 WHERE DATE(t.tanggal_transaksi) = ?`,
+                [today],
+                (err2, profitRow) => {
+                    if (err2) return res.status(500).json({ error: err2.message });
+                    res.json({
+                        data: {
+                            total_transaksi: summary.total_transaksi,
+                            total_pendapatan: summary.total_pendapatan,
+                            laba_bersih: profitRow.laba_bersih
+                        }
+                    });
+                }
+            );
+        }
+    );
+});
+
 // --- Get Transaction History ---
 
 // Get all transactions
