@@ -2,10 +2,16 @@ import React, { useState } from 'react'
 import Inventory from './components/Inventory'
 import POS from './components/POS'
 import Dashboard from './components/Dashboard'
+import Login from './components/Login'
 import './index.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  if (!isLoggedIn) {
+    return <Login onLogin={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <div className="app-container">
@@ -28,6 +34,15 @@ function App() {
           onClick={() => setActiveTab('inventory')}
         >
           📦 Kelola Barang
+        </div>
+        <div style={{marginTop: 'auto'}}>
+          <div
+            className="nav-item"
+            onClick={() => setIsLoggedIn(false)}
+            style={{color: '#F87171'}}
+          >
+            🚪 Keluar
+          </div>
         </div>
       </div>
       <div className="main-content">
