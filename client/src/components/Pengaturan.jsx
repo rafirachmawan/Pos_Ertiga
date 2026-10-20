@@ -16,9 +16,11 @@ const Pengaturan = () => {
   const [form, setForm] = useState(DEFAULT_FORM);
   const [printers, setPrinters] = useState([]);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [backupStatus, setBackupStatus] = useState(null);
+  const [backupLoading, setBackupLoading] = useState(false);
   const [testStruk, setTestStruk] = useState(null);
 
   const loadData = async () => {
@@ -78,8 +80,8 @@ const Pengaturan = () => {
 
   const savePengaturan = async (e) => {
     e.preventDefault();
-
     try {
+      setSaving(true);
       await api('/api/pengaturan', {
         method: 'PUT',
         body: {
@@ -92,38 +94,49 @@ const Pengaturan = () => {
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       alert(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
   const testPrint = () => {
     setTestStruk({
       nomor_nota: 'TEST-PRINTER',
-      nama_pelanggan: 'Tes Printer',
+      nama_pelanggan: 'Tes Kasir',
       tanggal: new Date().toLocaleString('id-ID'),
       items: [
         {
-          nama_barang: 'Contoh Produk',
+          nama_barang: 'Contoh Produk A',
           qty: 1,
+          harga_jual: 15000,
+          subtotal: 15000,
+        },
+        {
+          nama_barang: 'Contoh Produk B',
+          qty: 2,
           harga_jual: 10000,
-          subtotal: 10000,
+          subtotal: 20000,
         },
       ],
-      subtotal: 10000,
+      subtotal: 35000,
       diskon: 0,
-      total: 10000,
-      bayar: 10000,
-      kembalian: 0,
+      total: 35000,
+      bayar: 50000,
+      kembalian: 15000,
       metode_pembayaran: 'Tunai',
     });
   };
 
   const runBackup = async () => {
     try {
+      setBackupLoading(true);
       const result = await api('/api/backup/run', { method: 'POST' });
       setBackupStatus(result.data?.status || null);
       showMessage('Backup lokal berhasil dibuat.');
     } catch (err) {
       alert(err.message);
+    } finally {
+      setBackupLoading(false);
     }
   };
 
@@ -146,295 +159,519 @@ const Pengaturan = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-        Memuat pengaturan...
+      <div style={{ padding: '60px', textAlign: 'center', color: '#94A3B8', fontSize: '13.5px' }}>
+        Memuat data pengaturan...
       </div>
     );
   }
 
   return (
     <div>
-      <div style={{ marginBottom: '28px' }}>
-        <h2 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--secondary-color)' }}>
-          Pengaturan
-        </h2>
-        <p style={{ color: 'var(--text-muted)', marginTop: '4px', fontSize: '14px' }}>
-          Konfigurasi informasi toko, printer, dan backup
-        </p>
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '18px',
+          gap: '16px',
+          flexWrap: 'wrap',
+        }}
+      >
+        <div>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#0F172A', letterSpacing: '-0.02em', margin: 0 }}>
+            Pengaturan
+          </h2>
+          <p style={{ color: '#64748B', marginTop: '3px', fontSize: '13px', margin: 0 }}>
+            Konfigurasi identitas toko, format struk, printer kasir, dan backup database
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {saved && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: '#ECFDF5',
+                color: '#059669',
+                border: '1px solid #A7F3D0',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '600',
+              }}
+            >
+              <span>✓</span> Tersimpan!
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={testPrint}
+            style={{
+              height: '34px',
+              padding: '0 14px',
+              background: '#FFFFFF',
+              color: '#334155',
+              border: '1px solid #CBD5E1',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '12.5px',
+            }}
+          >
+            Tes Cetak Struk
+          </button>
+
+          <button
+            type="button"
+            onClick={savePengaturan}
+            disabled={saving}
+            style={{
+              height: '34px',
+              padding: '0 16px',
+              background: '#0F172A',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              fontSize: '12.5px',
+              opacity: saving ? 0.7 : 1,
+            }}
+          >
+            {saving ? 'Menyimpan...' : 'Simpan Pengaturan'}
+          </button>
+        </div>
       </div>
 
       {message && (
         <div
           style={{
-            background: '#D1FAE5',
-            color: '#065F46',
+            background: '#F0FDF4',
+            color: '#166534',
+            border: '1px solid #BBF7D0',
             padding: '10px 16px',
-            borderRadius: '10px',
-            marginBottom: '16px',
+            borderRadius: '8px',
+            marginBottom: '18px',
             fontSize: '13px',
-            fontWeight: '600',
+            fontWeight: '500',
           }}
         >
           {message}
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px' }}>
-        <div
-          style={{
-            background: 'var(--surface-color)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '16px',
-            overflow: 'hidden',
-          }}
-        >
+      {/* Main 2-Column Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.45fr 1fr', gap: '22px', alignItems: 'start' }}>
+        
+        {/* Left Column: Form Settings */}
+        <form onSubmit={savePengaturan} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          
+          {/* Card 1: Informasi Toko */}
           <div
             style={{
-              padding: '20px 24px',
-              borderBottom: '1px solid var(--border-color)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              background: '#FFFFFF',
+              borderRadius: '10px',
+              border: '1px solid #E2E8F0',
+              padding: '20px 22px',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
             }}
           >
-            <div>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--secondary-color)' }}>
-                ⚙️ Informasi Toko & Struk
+            <div style={{ marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
+                Informasi Toko
               </h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Tampil di header dan footer struk
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: 0 }}>
+                Identitas toko yang dicetak pada bagian kepala (header) struk
               </p>
             </div>
-            {saved && (
-              <span
-                style={{
-                  background: '#D1FAE5',
-                  color: '#065F46',
-                  fontSize: '12px',
-                  fontWeight: '700',
-                  padding: '5px 14px',
-                  borderRadius: '20px',
-                }}
-              >
-                ✓ Tersimpan!
-              </span>
-            )}
-          </div>
 
-          <form onSubmit={savePengaturan} style={{ padding: '24px' }}>
-            <div
-              style={{
-                background: '#F8FAFC',
-                border: '1px dashed var(--border-color)',
-                borderRadius: '12px',
-                padding: '16px',
-                marginBottom: '24px',
-                textAlign: 'center',
-                fontFamily: "'Courier New', monospace",
-              }}
-            >
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px' }}>
-                Preview Struk
-              </div>
-              <div style={{ fontWeight: '800', fontSize: '15px', letterSpacing: '1px' }}>
-                {form.nama_toko || 'NAMA TOKO'}
-              </div>
-              {form.alamat_toko && (
-                <div
-                  style={{
-                    fontSize: '11px',
-                    color: '#64748B',
-                    marginTop: '2px',
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
-                  {form.alamat_toko}
-                </div>
-              )}
-              <div
-                style={{
-                  borderTop: '1px dashed #CBD5E1',
-                  marginTop: '8px',
-                  paddingTop: '8px',
-                  fontSize: '11px',
-                  color: '#94A3B8',
-                  whiteSpace: 'pre-wrap',
-                }}
-              >
-                {form.pesan_struk}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={labelStyle}>Nama Toko *</label>
+                <label style={labelStyle}>
+                  Nama Toko <span style={{ color: '#EF4444' }}>*</span>
+                </label>
                 <input
+                  type="text"
+                  required
                   value={form.nama_toko}
                   onChange={(e) => setForm({ ...form, nama_toko: e.target.value })}
-                  placeholder="POS ERTIGA"
-                  required
-                  style={{ width: '100%' }}
+                  placeholder="Contoh: POS ERTIGA"
+                  style={inputStyle}
                 />
               </div>
+
               <div>
-                <label style={labelStyle}>Alamat & Telepon Toko</label>
+                <label style={labelStyle}>Alamat & Kontak Toko</label>
                 <textarea
+                  rows={2}
                   value={form.alamat_toko}
                   onChange={(e) => setForm({ ...form, alamat_toko: e.target.value })}
-                  placeholder="Jl. Contoh No. 1&#10;Telp: 08xxxx"
-                  rows={2}
-                  style={textareaStyle}
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>Pesan Bawah Struk</label>
-                <textarea
-                  value={form.pesan_struk}
-                  onChange={(e) => setForm({ ...form, pesan_struk: e.target.value })}
-                  placeholder="Terima kasih sudah berbelanja!"
-                  rows={2}
+                  placeholder="Jl. Raya Utama No. 123&#10;Telp: 0812-3456-7890"
                   style={textareaStyle}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label style={labelStyle}>Catatan / Pesan Kaki Struk</label>
+                <textarea
+                  rows={2}
+                  value={form.pesan_struk}
+                  onChange={(e) => setForm({ ...form, pesan_struk: e.target.value })}
+                  placeholder="Terima kasih atas kunjungan Anda!&#10;Barang yang sudah dibeli tidak dapat ditukar."
+                  style={textareaStyle}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Konfigurasi Printer Struk */}
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: '10px',
+              border: '1px solid #E2E8F0',
+              padding: '20px 22px',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            }}
+          >
+            <div style={{ marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
+                Konfigurasi Printer
+              </h3>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: 0 }}>
+                Pengaturan perangkat pencetak struk kasir thermal
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px' }}>
                 <div>
-                  <label style={labelStyle}>Printer</label>
+                  <label style={labelStyle}>Pilihan Printer</label>
                   <select
                     value={form.printer_name}
                     onChange={(e) => setForm({ ...form, printer_name: e.target.value })}
-                    style={{ width: '100%' }}
+                    style={inputStyle}
                   >
-                    <option value="">Printer default Windows</option>
+                    <option value="">Printer Default Sistem Windows</option>
                     {printers.map((printer) => (
                       <option key={printer.name} value={printer.name}>
-                        {printer.displayName || printer.name}
-                        {printer.isDefault ? ' (Default)' : ''}
+                        {printer.displayName || printer.name} {printer.isDefault ? '(Default)' : ''}
                       </option>
                     ))}
                   </select>
                   {!window.pos && (
-                    <small style={{ color: '#94A3B8', display: 'block', marginTop: '4px' }}>
-                      Daftar printer tersedia saat aplikasi Electron berjalan.
-                    </small>
+                    <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '4px' }}>
+                      Pilihan printer spesifik aktif pada mode desktop Electron.
+                    </div>
                   )}
                 </div>
+
                 <div>
-                  <label style={labelStyle}>Lebar Kertas</label>
+                  <label style={labelStyle}>Lebar Kertas Thermal</label>
                   <select
                     value={form.lebar_struk}
-                    onChange={(e) =>
-                      setForm({ ...form, lebar_struk: Number(e.target.value) })
-                    }
-                    style={{ width: '100%' }}
+                    onChange={(e) => setForm({ ...form, lebar_struk: Number(e.target.value) })}
+                    style={inputStyle}
                   >
-                    <option value={58}>58 mm</option>
-                    <option value={80}>80 mm</option>
+                    <option value={58}>58 mm (Struk Kecil)</option>
+                    <option value={80}>80 mm (Struk Standar)</option>
                   </select>
                 </div>
               </div>
 
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '13px',
-                  color: 'var(--text-dark)',
-                  cursor: 'pointer',
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={Number(form.auto_print) === 1}
-                  onChange={(e) =>
-                    setForm({ ...form, auto_print: e.target.checked ? 1 : 0 })
-                  }
-                />
-                Cetak struk otomatis setelah transaksi
-              </label>
-
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <button
-                  type="submit"
+              {/* Checkbox auto print */}
+              <div style={{ paddingTop: '4px' }}>
+                <label
                   style={{
-                    flex: 1,
-                    minWidth: '180px',
-                    padding: '12px',
-                    background: 'linear-gradient(135deg, var(--primary-color), #6366F1)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '10px',
-                    fontWeight: '700',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '13px',
+                    color: '#334155',
                     cursor: 'pointer',
-                    fontSize: '14px',
+                    fontWeight: '500',
                   }}
                 >
-                  💾 Simpan Pengaturan
-                </button>
-                <button
-                  type="button"
-                  onClick={testPrint}
-                  style={{
-                    padding: '12px 20px',
-                    background: '#EEF2FF',
-                    color: 'var(--primary-color)',
-                    border: '1px solid #C7D2FE',
-                    borderRadius: '10px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                  }}
-                >
-                  🖨️ Tes Print
-                </button>
+                  <input
+                    type="checkbox"
+                    checked={Number(form.auto_print) === 1}
+                    onChange={(e) => setForm({ ...form, auto_print: e.target.checked ? 1 : 0 })}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  Cetak struk secara otomatis saat transaksi selesai
+                </label>
               </div>
             </div>
-          </form>
-        </div>
+          </div>
 
-        <div
-          style={{
-            background: 'var(--surface-color)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '16px',
-            padding: '20px 24px',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <div>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--secondary-color)' }}>
-                💾 Backup Database
-              </h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                Backup lokal otomatis disimpan sebagai .sql.gz dan disimpan maksimal{' '}
-                {backupStatus?.maxLocalBackups || 7} file.
-              </p>
-              {backupStatus?.lastBackupAt && (
-                <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Backup terakhir: {new Date(backupStatus.lastBackupAt).toLocaleString('id-ID')}
-                </p>
-              )}
-            </div>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {window.pos?.openDataFolder && (
-                <button
-                  type="button"
-                  onClick={openDataFolder}
-                  style={secondaryButtonStyle}
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                padding: '10px 22px',
+                background: '#0F172A',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                fontSize: '13px',
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              {saving ? 'Menyimpan...' : 'Simpan Pengaturan'}
+            </button>
+
+            <button
+              type="button"
+              onClick={testPrint}
+              style={{
+                padding: '10px 18px',
+                background: '#FFFFFF',
+                color: '#334155',
+                border: '1px solid #CBD5E1',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '13px',
+              }}
+            >
+              Tes Cetak Struk
+            </button>
+          </div>
+
+        </form>
+
+        {/* Right Column: Receipt Preview & Backup Management */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          
+          {/* Live Thermal Receipt Preview */}
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: '10px',
+              border: '1px solid #E2E8F0',
+              overflow: 'hidden',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            }}
+          >
+            <div style={{ padding: '14px 18px', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>
+                  Pratinjau Struk Kasir
+                </span>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: '#64748B',
+                    background: '#FFFFFF',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid #E2E8F0',
+                  }}
                 >
-                  📂 Buka Folder Data
-                </button>
-              )}
-              <button type="button" onClick={runBackup} style={primaryButtonStyle}>
-                🗄️ Backup Sekarang
-              </button>
-              <button type="button" onClick={downloadRawBackup} style={secondaryButtonStyle}>
-                ⬇️ Database Mentah
-              </button>
+                  {form.lebar_struk} mm
+                </span>
+              </div>
+            </div>
+
+            {/* Receipt Paper Simulation */}
+            <div style={{ padding: '20px', background: '#F1F5F9', display: 'flex', justifyContent: 'center' }}>
+              <div
+                style={{
+                  width: form.lebar_struk === 58 ? '220px' : '260px',
+                  background: '#FFFFFF',
+                  padding: '16px',
+                  borderRadius: '4px',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07)',
+                  fontFamily: 'monospace',
+                  fontSize: '11px',
+                  color: '#1E293B',
+                  lineHeight: '1.4',
+                  borderTop: '2px dashed #94A3B8',
+                  borderBottom: '2px dashed #94A3B8',
+                  transition: 'width 0.2s ease',
+                }}
+              >
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                  <div style={{ fontWeight: '800', fontSize: '13px', color: '#0F172A' }}>
+                    {form.nama_toko || 'NAMA TOKO'}
+                  </div>
+                  {form.alamat_toko ? (
+                    <div style={{ fontSize: '10px', color: '#64748B', marginTop: '2px', whiteSpace: 'pre-line' }}>
+                      {form.alamat_toko}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '10px', color: '#CBD5E1', marginTop: '2px' }}>
+                      Alamat toko belum diatur
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ borderBottom: '1px dashed #CBD5E1', margin: '8px 0' }} />
+
+                {/* Sample items */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px' }}>
+                  <span>Contoh Produk A</span>
+                  <span>15.000</span>
+                </div>
+                <div style={{ fontSize: '9.5px', color: '#64748B' }}>1 x 15.000</div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px', marginTop: '4px' }}>
+                  <span>Contoh Produk B</span>
+                  <span>20.000</span>
+                </div>
+                <div style={{ fontSize: '9.5px', color: '#64748B' }}>2 x 10.000</div>
+
+                <div style={{ borderBottom: '1px dashed #CBD5E1', margin: '8px 0' }} />
+
+                {/* Summary */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700' }}>
+                  <span>TOTAL</span>
+                  <span>Rp 35.000</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748B', marginTop: '2px' }}>
+                  <span>TUNAI</span>
+                  <span>Rp 50.000</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#64748B' }}>
+                  <span>KEMBALI</span>
+                  <span>Rp 15.000</span>
+                </div>
+
+                <div style={{ borderBottom: '1px dashed #CBD5E1', margin: '8px 0' }} />
+
+                {/* Footer Message */}
+                <div style={{ textAlign: 'center', fontSize: '10px', color: '#64748B', whiteSpace: 'pre-line' }}>
+                  {form.pesan_struk || 'Terima kasih atas kunjungan Anda!'}
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Backup Database Card */}
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: '10px',
+              border: '1px solid #E2E8F0',
+              padding: '18px 20px',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            }}
+          >
+            <div style={{ marginBottom: '12px' }}>
+              <h3 style={{ fontSize: '14.5px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
+                Pencadangan Database
+              </h3>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: 0 }}>
+                Cadangkan data transaksi, produk, dan laporan secara berkala
+              </p>
+            </div>
+
+            {backupStatus?.lastBackupAt ? (
+              <div
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  marginBottom: '14px',
+                  fontSize: '11.5px',
+                  color: '#475569',
+                }}
+              >
+                <div>Backup terakhir: <strong>{new Date(backupStatus.lastBackupAt).toLocaleString('id-ID')}</strong></div>
+                <div style={{ color: '#94A3B8', marginTop: '2px' }}>
+                  Disimpan maksimal {backupStatus?.maxLocalBackups || 7} arsip lokal.
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  marginBottom: '14px',
+                  fontSize: '11.5px',
+                  color: '#94A3B8',
+                }}
+              >
+                Belum ada rekaman pencadangan otomatis.
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={runBackup}
+                disabled={backupLoading}
+                style={{
+                  width: '100%',
+                  padding: '8px 14px',
+                  background: '#0F172A',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '12.5px',
+                  fontWeight: '600',
+                  cursor: backupLoading ? 'not-allowed' : 'pointer',
+                  opacity: backupLoading ? 0.7 : 1,
+                }}
+              >
+                {backupLoading ? 'Memproses Backup...' : 'Backup Database Sekarang'}
+              </button>
+
+              <div style={{ display: 'grid', gridTemplateColumns: window.pos?.openDataFolder ? '1fr 1fr' : '1fr', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={downloadRawBackup}
+                  style={{
+                    padding: '8px 12px',
+                    background: '#FFFFFF',
+                    color: '#334155',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Unduh File .sqlite
+                </button>
+
+                {window.pos?.openDataFolder && (
+                  <button
+                    type="button"
+                    onClick={openDataFolder}
+                    style={{
+                      padding: '8px 12px',
+                      background: '#FFFFFF',
+                      color: '#334155',
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Buka Folder Data
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
         </div>
+
       </div>
 
       <ReceiptPrintPortal
@@ -448,43 +685,35 @@ const Pengaturan = () => {
 
 const labelStyle = {
   fontSize: '12px',
-  fontWeight: '700',
-  color: 'var(--text-muted)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.5px',
+  fontWeight: '600',
+  color: '#475569',
   display: 'block',
   marginBottom: '6px',
 };
 
+const inputStyle = {
+  width: '100%',
+  height: '36px',
+  padding: '0 12px',
+  borderRadius: '8px',
+  border: '1px solid #CBD5E1',
+  fontSize: '13px',
+  color: '#0F172A',
+  background: '#FFFFFF',
+  boxSizing: 'border-box',
+};
+
 const textareaStyle = {
   width: '100%',
-  padding: '10px 14px',
+  padding: '8px 12px',
   borderRadius: '8px',
-  border: '1px solid var(--border-color)',
-  fontSize: '14px',
+  border: '1px solid #CBD5E1',
+  fontSize: '13px',
+  color: '#0F172A',
+  background: '#FFFFFF',
+  boxSizing: 'border-box',
   resize: 'vertical',
-};
-
-const primaryButtonStyle = {
-  padding: '10px 18px',
-  background: '#EEF2FF',
-  color: 'var(--primary-color)',
-  border: '1px solid #C7D2FE',
-  borderRadius: '10px',
-  fontWeight: '700',
-  cursor: 'pointer',
-  fontSize: '13px',
-};
-
-const secondaryButtonStyle = {
-  padding: '10px 18px',
-  background: '#F8FAFC',
-  color: 'var(--text-dark)',
-  border: '1px solid var(--border-color)',
-  borderRadius: '10px',
-  fontWeight: '700',
-  cursor: 'pointer',
-  fontSize: '13px',
+  fontFamily: 'inherit',
 };
 
 export default Pengaturan;

@@ -59,9 +59,12 @@ router.get(
     const rows = await all(
       `SELECT sm.*,
               COALESCE(b.nama_barang, 'Barang dihapus') AS nama_barang,
-              COALESCE(b.barcode, '-') AS barcode
+              COALESCE(b.barcode, '-') AS barcode,
+              COALESCE(b.satuan, 'pcs') AS satuan,
+              k.nama_kategori
        FROM stok_masuk sm
        LEFT JOIN barang b ON sm.barang_id = b.id
+       LEFT JOIN kategori k ON b.kategori_id = k.id
        ORDER BY sm.tanggal DESC, sm.id DESC`
     );
     res.json({ data: rows });

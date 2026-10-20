@@ -50,129 +50,99 @@ const Dashboard = () => {
 
   return (
     <div>
-      {/* ===== HERO STRIP ===== */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #1E293B 0%, #312E81 100%)",
-          borderRadius: "20px",
-          padding: "36px 40px",
-          marginBottom: "32px",
-          color: "white",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Dekor */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-40px",
-            right: "-40px",
-            width: "200px",
-            height: "200px",
-            background: "rgba(255,255,255,0.04)",
-            borderRadius: "50%",
-          }}
-        ></div>
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-60px",
-            right: "120px",
-            width: "150px",
-            height: "150px",
-            background: "rgba(99,102,241,0.15)",
-            borderRadius: "50%",
-          }}
-        ></div>
-
-        <p
-          style={{
-            fontSize: "13px",
-            color: "rgba(255,255,255,0.5)",
-            marginBottom: "4px",
-          }}
-        >
-          {today}
-        </p>
-        <h2
-          style={{
-            color: "white",
-            fontSize: "24px",
-            fontWeight: "700",
-            marginBottom: "36px",
-          }}
-        >
-          Selamat datang, <span style={{ color: "#A5B4FC" }}>Admin</span>{" "}
-        </h2>
-
-        {/* Metrics Row */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
-            paddingTop: "28px",
-          }}
-        >
-          {[
-            {
-              label: "Transaksi Hari Ini",
-              value: loading ? "—" : `${laporan.total_transaksi} Nota`,
-              accent: "#818CF8",
-            },
-            {
-              label: "Total Pendapatan",
-              value: loading ? "—" : formatRupiah(laporan.total_pendapatan),
-              accent: "#34D399",
-            },
-            {
-              label: "Laba Bersih",
-              value: loading ? "—" : formatRupiah(laporan.laba_bersih),
-              accent: laporan.laba_bersih < 0 ? "#F87171" : "#34D399",
-            },
-            {
-              label: "Total Produk",
-              value: `${items.length} Varian`,
-              accent: "#FBBF24",
-            },
-          ].map((m, i, arr) => (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                paddingRight: i < arr.length - 1 ? "32px" : 0,
-                marginRight: i < arr.length - 1 ? "32px" : 0,
-                borderRight:
-                  i < arr.length - 1
-                    ? "1px solid rgba(255,255,255,0.1)"
-                    : "none",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "11px",
-                  color: "rgba(255,255,255,0.45)",
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                  marginBottom: "10px",
-                }}
-              >
-                {m.label}
-              </p>
-              <p
-                style={{
-                  fontSize: "24px",
-                  fontWeight: "800",
-                  color: m.accent,
-                  lineHeight: 1,
-                }}
-              >
-                {m.value}
-              </p>
-            </div>
-          ))}
+      {/* Header Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#0F172A', letterSpacing: '-0.02em', margin: 0 }}>
+            Dashboard
+          </h2>
+          <p style={{ fontSize: '13px', color: '#64748B', marginTop: '4px', margin: '4px 0 0 0' }}>
+            Ringkasan transaksi dan pergerakan stok toko hari ini
+          </p>
         </div>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          padding: '6px 14px',
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: '8px',
+          fontSize: '12px',
+          fontWeight: '600',
+          color: '#475569'
+        }}>
+          {today}
+        </div>
+      </div>
+
+      {/* 4 Clean Metric Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '16px',
+        marginBottom: '28px'
+      }}>
+        {[
+          {
+            label: "Transaksi Hari Ini",
+            value: loading ? "—" : `${laporan.total_transaksi} Nota`,
+            sub: "Total nota kasir",
+          },
+          {
+            label: "Total Pendapatan",
+            value: loading ? "—" : formatRupiah(laporan.total_pendapatan),
+            sub: "Omzet kotor hari ini",
+          },
+          {
+            label: "Laba Bersih",
+            value: loading ? "—" : formatRupiah(laporan.laba_bersih),
+            sub: "Margin keuntungan",
+          },
+          {
+            label: "Total Produk",
+            value: `${items.length} Varian`,
+            sub: `${totalStok} unit fisik terdata`,
+          },
+        ].map((m, i) => (
+          <div
+            key={i}
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '12px',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+            }}
+          >
+            <p style={{
+              fontSize: '11px',
+              fontWeight: '700',
+              color: '#64748B',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '8px'
+            }}>
+              {m.label}
+            </p>
+            <p style={{
+              fontSize: '22px',
+              fontWeight: '800',
+              color: '#0F172A',
+              letterSpacing: '-0.02em',
+              marginBottom: '6px',
+              lineHeight: 1.2
+            }}>
+              {m.value}
+            </p>
+            <p style={{
+              fontSize: '12px',
+              color: '#94A3B8',
+              margin: 0
+            }}>
+              {m.sub}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* ===== BODY: 2 KOLOM ===== */}
@@ -225,15 +195,16 @@ const Dashboard = () => {
             {lowStockItems.length > 0 && (
               <span
                 style={{
-                  background: "#FEE2E2",
+                  background: "#FEF2F2",
                   color: "#DC2626",
+                  border: "1px solid #FEE2E2",
                   fontSize: "12px",
-                  fontWeight: "700",
-                  padding: "4px 12px",
-                  borderRadius: "20px",
+                  fontWeight: "600",
+                  padding: "3px 10px",
+                  borderRadius: "6px",
                 }}
               >
-                ⚠️ {lowStockItems.length} stok kritis
+                {lowStockItems.length} stok kritis
               </span>
             )}
           </div>
@@ -246,8 +217,7 @@ const Dashboard = () => {
                 color: "var(--text-muted)",
               }}
             >
-              <div style={{ fontSize: "36px", marginBottom: "12px" }}>📦</div>
-              <p style={{ fontWeight: "600" }}>Belum ada produk</p>
+              <p style={{ fontWeight: "600", fontSize: "14px" }}>Belum ada produk terdaftar</p>
             </div>
           ) : (
             <div>
@@ -296,34 +266,18 @@ const Dashboard = () => {
                       gap: "12px",
                     }}
                   >
-                    {item.gambar ? (
+                    {item.gambar && (
                       <img
                         src={item.gambar}
                         alt={item.nama_barang}
                         style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "8px",
+                          width: "34px",
+                          height: "34px",
+                          borderRadius: "6px",
                           objectFit: "cover",
                           flexShrink: 0,
                         }}
                       />
-                    ) : (
-                      <div
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "8px",
-                          background: "#EEF2FF",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "14px",
-                          flexShrink: 0,
-                        }}
-                      >
-                        🏷️
-                      </div>
                     )}
                     <div>
                       <p
@@ -379,12 +333,13 @@ const Dashboard = () => {
                   {item.stok === 0 ? (
                     <span
                       style={{
-                        background: "#FEE2E2",
+                        background: "#FEF2F2",
                         color: "#DC2626",
+                        border: "1px solid #FEE2E2",
                         fontSize: "11px",
-                        fontWeight: "700",
-                        padding: "3px 10px",
-                        borderRadius: "20px",
+                        fontWeight: "600",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
                         width: "fit-content",
                       }}
                     >
@@ -393,12 +348,13 @@ const Dashboard = () => {
                   ) : item.stok <= 5 ? (
                     <span
                       style={{
-                        background: "#FEF9C3",
-                        color: "#A16207",
+                        background: "#FFFBEB",
+                        color: "#B45309",
+                        border: "1px solid #FEF3C7",
                         fontSize: "11px",
-                        fontWeight: "700",
-                        padding: "3px 10px",
-                        borderRadius: "20px",
+                        fontWeight: "600",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
                         width: "fit-content",
                       }}
                     >
@@ -407,12 +363,13 @@ const Dashboard = () => {
                   ) : (
                     <span
                       style={{
-                        background: "#D1FAE5",
-                        color: "#065F46",
+                        background: "#ECFDF5",
+                        color: "#059669",
+                        border: "1px solid #D1FAE5",
                         fontSize: "11px",
-                        fontWeight: "700",
-                        padding: "3px 10px",
-                        borderRadius: "20px",
+                        fontWeight: "600",
+                        padding: "2px 8px",
+                        borderRadius: "6px",
                         width: "fit-content",
                       }}
                     >
@@ -551,7 +508,7 @@ const Dashboard = () => {
                 marginBottom: "8px",
               }}
             >
-              💡 Tips
+              Tips Operasional
             </p>
             <p style={{ fontSize: "12px", color: "#4338CA", lineHeight: 1.6 }}>
               Gunakan <strong>Scan Barcode</strong> di kasir untuk kecepatan

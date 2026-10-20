@@ -13,7 +13,12 @@ router.get(
   '/',
   asyncHandler(async (req, res) => {
     const rows = await all(
-      'SELECT * FROM kategori ORDER BY nama_kategori ASC'
+      `SELECT k.*, 
+              COUNT(CASE WHEN b.aktif = 1 AND b.deleted_at IS NULL THEN b.id END) AS total_produk
+       FROM kategori k
+       LEFT JOIN barang b ON b.kategori_id = k.id
+       GROUP BY k.id
+       ORDER BY k.nama_kategori ASC`
     );
     res.json({ data: rows });
   })

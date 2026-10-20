@@ -159,91 +159,177 @@ const Inventory = () => {
     }
   };
 
+  // Shared button base style
+  const actionBtn = {
+    padding: '5px 10px',
+    fontSize: '11.5px',
+    fontWeight: '600',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    border: '1px solid #E2E8F0',
+    boxShadow: 'none',
+    transition: 'all 0.15s ease'
+  };
+
   return (
     <div>
-      <div className="header-row">
-        <h2>Kelola Barang</h2>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#0F172A', letterSpacing: '-0.02em', margin: 0 }}>Kelola Barang</h2>
+          <p style={{ color: '#64748B', marginTop: '4px', fontSize: '13px' }}>Kelola inventaris dan stok produk</p>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '12px',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-            }}
-          >
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '12.5px',
+            color: '#64748B',
+            cursor: 'pointer',
+            fontWeight: '500'
+          }}>
             <input
               type="checkbox"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
+              style={{ boxShadow: 'none' }}
             />
             Tampilkan nonaktif
           </label>
-          <button onClick={() => {
-          setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
-            setDisplayHargaModal('');
-            setDisplayHargaJual('');
-            setIsModalOpen(true);
-          }}>
+          <button
+            onClick={() => {
+              setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
+              setDisplayHargaModal('');
+              setDisplayHargaJual('');
+              setIsModalOpen(true);
+            }}
+            style={{
+              padding: '8px 16px',
+              background: '#0F172A',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '12.5px',
+              boxShadow: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
             + Tambah Barang
           </button>
         </div>
       </div>
 
-      <div className="table-container">
-        <table>
+      {/* Table */}
+      <div style={{
+        background: '#FFFFFF',
+        border: '1px solid #E2E8F0',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+      }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th>Gambar</th>
-              <th>Barcode</th>
-              <th>Nama Barang</th>
-              <th>Kategori</th>
-              <th>Harga Modal</th>
-              <th>Harga Jual</th>
-              <th>Stok</th>
-              <th>Status</th>
-              <th>Aksi</th>
+              {['Gambar','Barcode','Nama Barang','Kategori','Harga Modal','Harga Jual','Stok','Status','Aksi'].map(h => (
+                <th key={h} style={{
+                  padding: '12px 16px',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  color: '#94A3B8',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  textAlign: 'left',
+                  borderBottom: '1px solid #E2E8F0',
+                  background: '#FAFBFC'
+                }}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {items.map(item => (
-              <tr key={item.id} style={{ opacity: item.aktif ? 1 : 0.55 }}>
-                <td>
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={9} style={{ padding: '48px 16px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
+                  Belum ada data barang
+                </td>
+              </tr>
+            ) : items.map(item => (
+              <tr key={item.id} style={{ opacity: item.aktif ? 1 : 0.5, transition: 'opacity 0.15s' }}>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9' }}>
                   {item.gambar ? (
-                    <img src={item.gambar} alt={item.nama_barang} style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px'}} />
+                    <img src={item.gambar} alt={item.nama_barang} style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '6px', display: 'block' }} />
                   ) : (
-                    <div style={{width: '40px', height: '40px', background: '#e2e8f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#94a3b8'}}>N/A</div>
+                    <div style={{ width: '36px', height: '36px', background: '#F1F5F9', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
                   )}
                 </td>
-                <td>{item.barcode}</td>
-                <td>{item.nama_barang}</td>
-                <td>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9', fontSize: '12.5px', fontWeight: '500', color: '#64748B', fontFamily: 'monospace' }}>
+                  {item.barcode}
+                </td>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9', fontSize: '13px', fontWeight: '600', color: '#0F172A' }}>
+                  {item.nama_barang}
+                </td>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9' }}>
                   {item.nama_kategori
-                    ? <span style={{background:'#EEF2FF',color:'#4F46E5',fontSize:'11px',fontWeight:'700',padding:'3px 8px',borderRadius:'20px'}}>{item.nama_kategori}</span>
-                    : <span style={{color:'#CBD5E1',fontSize:'12px'}}>—</span>}
+                    ? <span style={{ background: '#F1F5F9', color: '#475569', fontSize: '11px', fontWeight: '600', padding: '2px 8px', borderRadius: '4px' }}>{item.nama_kategori}</span>
+                    : <span style={{ color: '#CBD5E1', fontSize: '12px' }}>—</span>}
                 </td>
-                <td>Rp {formatRupiah(item.harga_modal)}</td>
-                <td>Rp {formatRupiah(item.harga_jual)}</td>
-                <td>{item.stok} {item.satuan}</td>
-                <td>
-                  {!item.aktif
-                    ? <span className="badge" style={{ background: '#E2E8F0', color: '#475569' }}>Nonaktif</span>
-                    : item.stok <= 5
-                      ? <span className="badge low-stock">Low Stock</span>
-                      : <span className="badge in-stock">Good</span>}
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9', fontSize: '12.5px', color: '#64748B' }}>
+                  Rp {formatRupiah(item.harga_modal)}
                 </td>
-                <td>
-                  <div style={{display: 'flex', gap: '4px'}}>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9', fontSize: '12.5px', fontWeight: '700', color: '#0F172A' }}>
+                  Rp {formatRupiah(item.harga_jual)}
+                </td>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9', fontSize: '12.5px', fontWeight: '600', color: item.stok <= 5 ? '#DC2626' : '#0F172A' }}>
+                  {item.stok} {item.satuan}
+                </td>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9' }}>
+                  {!item.aktif ? (
+                    <span style={{
+                      fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '4px',
+                      background: '#F1F5F9', color: '#64748B'
+                    }}>Nonaktif</span>
+                  ) : item.stok <= 5 ? (
+                    <span style={{
+                      fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '4px',
+                      background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA'
+                    }}>Stok Rendah</span>
+                  ) : (
+                    <span style={{
+                      fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '4px',
+                      background: '#F0FDF4', color: '#15803D', border: '1px solid #BBF7D0'
+                    }}>Tersedia</span>
+                  )}
+                </td>
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9' }}>
+                  <div style={{ display: 'flex', gap: '4px' }}>
                     {item.aktif ? (
                       <>
-                        <button style={{padding: '6px 10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: '600'}} onClick={() => openRestockModal(item)}>+ Restock</button>
-                        <button className="secondary" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => editItem(item)}>Edit</button>
-                        <button className="danger" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => deleteItem(item.id)}>Hapus</button>
+                        <button
+                          onClick={() => openRestockModal(item)}
+                          style={{ ...actionBtn, background: '#FFFFFF', color: '#2563EB', borderColor: '#BFDBFE' }}
+                        >Restock</button>
+                        <button
+                          onClick={() => editItem(item)}
+                          style={{ ...actionBtn, background: '#FFFFFF', color: '#475569' }}
+                        >Edit</button>
+                        <button
+                          onClick={() => deleteItem(item.id)}
+                          style={{ ...actionBtn, background: '#FFFFFF', color: '#DC2626', borderColor: '#FECACA' }}
+                        >Hapus</button>
                       </>
                     ) : (
-                      <button className="success" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => restoreItem(item.id)}>Aktifkan</button>
+                      <button
+                        onClick={() => restoreItem(item.id)}
+                        style={{ ...actionBtn, background: '#0F172A', color: '#FFFFFF', borderColor: '#0F172A' }}
+                      >Aktifkan</button>
                     )}
                   </div>
                 </td>
@@ -253,114 +339,129 @@ const Inventory = () => {
         </table>
       </div>
 
+      {/* Modal Tambah/Edit */}
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{maxHeight: '90vh', overflowY: 'auto'}}>
-            <h3>{formData.id ? 'Edit Barang' : 'Tambah Barang'}</h3>
-            <form onSubmit={handleSubmit} style={{marginTop: '20px'}}>
+          <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto', padding: '28px 32px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A', margin: '0 0 20px 0' }}>{formData.id ? 'Edit Barang' : 'Tambah Barang Baru'}</h3>
+            <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Gambar Produk (Opsional)</label>
                 {formData.gambar && (
-                  <div style={{marginBottom: '10px'}}>
-                    <img src={formData.gambar} alt="Preview" style={{height: '100px', borderRadius: '8px', objectFit: 'cover'}} />
+                  <div style={{ marginBottom: '10px' }}>
+                    <img src={formData.gambar} alt="Preview" style={{ height: '80px', borderRadius: '8px', objectFit: 'cover' }} />
                   </div>
                 )}
-                <input type="file" accept="image/*" onChange={handleImageUpload} style={{padding: '8px'}} />
+                <input type="file" accept="image/*" onChange={handleImageUpload} style={{ padding: '8px', boxShadow: 'none' }} />
               </div>
               <div className="form-group">
                 <label>Kode Barang / SKU</label>
-                <input name="barcode" value={formData.barcode} onChange={handleChange} required />
+                <input name="barcode" value={formData.barcode} onChange={handleChange} required style={{ boxShadow: 'none' }} />
               </div>
               <div className="form-group">
                 <label>Nama Barang</label>
-                <input name="nama_barang" value={formData.nama_barang} onChange={handleChange} required />
+                <input name="nama_barang" value={formData.nama_barang} onChange={handleChange} required style={{ boxShadow: 'none' }} />
               </div>
               <div className="form-group">
                 <label>Harga Modal (Rp)</label>
-                <div style={{position: 'relative'}}>
-                  <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748b'}}>Rp</span>
-                  <input 
-                    type="text" 
-                    value={displayHargaModal} 
-                    onChange={(e) => handleCurrencyChange(e, 'harga_modal')} 
-                    style={{paddingLeft: '45px'}}
-                    required 
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '15px', top: '14px', color: '#94A3B8', fontSize: '14px' }}>Rp</span>
+                  <input
+                    type="text"
+                    value={displayHargaModal}
+                    onChange={(e) => handleCurrencyChange(e, 'harga_modal')}
+                    style={{ paddingLeft: '45px', boxShadow: 'none' }}
+                    required
                   />
                 </div>
               </div>
               <div className="form-group">
                 <label>Harga Jual (Rp)</label>
-                <div style={{position: 'relative'}}>
-                  <span style={{position: 'absolute', left: '15px', top: '14px', color: '#64748b'}}>Rp</span>
-                  <input 
-                    type="text" 
-                    value={displayHargaJual} 
-                    onChange={(e) => handleCurrencyChange(e, 'harga_jual')} 
-                    style={{paddingLeft: '45px'}}
-                    required 
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '15px', top: '14px', color: '#94A3B8', fontSize: '14px' }}>Rp</span>
+                  <input
+                    type="text"
+                    value={displayHargaJual}
+                    onChange={(e) => handleCurrencyChange(e, 'harga_jual')}
+                    style={{ paddingLeft: '45px', boxShadow: 'none' }}
+                    required
                   />
                 </div>
               </div>
               <div className="form-group">
                 <label>Kategori</label>
-                <select name="kategori_id" value={formData.kategori_id || ''} onChange={handleChange} style={{width: '100%'}}>
+                <select name="kategori_id" value={formData.kategori_id || ''} onChange={handleChange} style={{ width: '100%', boxShadow: 'none' }}>
                   <option value="">-- Tanpa Kategori --</option>
                   {kategoriList.map(k => <option key={k.id} value={k.id}>{k.nama_kategori}</option>)}
                 </select>
-                {kategoriList.length === 0 && <small style={{color:'#94a3b8',marginTop:'4px',display:'block'}}>Belum ada kategori. Tambahkan di menu Pengaturan.</small>}
+                {kategoriList.length === 0 && <small style={{ color: '#94A3B8', marginTop: '4px', display: 'block' }}>Belum ada kategori. Tambahkan di menu Master Data.</small>}
               </div>
-              <div className="form-group" style={{display: 'flex', gap: '15px'}}>
-                <div style={{flex: 2}}>
+              <div className="form-group" style={{ display: 'flex', gap: '15px' }}>
+                <div style={{ flex: 2 }}>
                   <label>Stok Awal</label>
-                  <input type="number" name="stok" value={formData.stok} onChange={handleChange} required disabled={!!formData.id} />
-                  {formData.id && <small style={{color: '#94a3b8', display: 'block', marginTop: '4px'}}>*Gunakan tombol Restock untuk menambah stok</small>}
+                  <input type="number" name="stok" value={formData.stok} onChange={handleChange} required disabled={!!formData.id} style={{ boxShadow: 'none' }} />
+                  {formData.id && <small style={{ color: '#94A3B8', display: 'block', marginTop: '4px' }}>Gunakan tombol Restock untuk menambah stok</small>}
                 </div>
-                <div style={{flex: 1}}>
+                <div style={{ flex: 1 }}>
                   <label>Satuan</label>
-                  <select name="satuan" value={formData.satuan} onChange={handleChange} style={{width: '100%'}}>
+                  <select name="satuan" value={formData.satuan} onChange={handleChange} style={{ width: '100%', boxShadow: 'none' }}>
                     <option value="pcs">Pcs</option>
                     <option value="pack">Pack</option>
                     <option value="lusin">Lusin</option>
                   </select>
                 </div>
               </div>
-              <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px'}}>
-                <button type="button" className="secondary" onClick={closeModal}>Batal</button>
-                <button type="submit" className="success">Simpan</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E2E8F0' }}>
+                <button type="button" onClick={closeModal} style={{
+                  padding: '9px 18px', background: '#FFFFFF', color: '#475569', border: '1px solid #E2E8F0',
+                  borderRadius: '8px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', boxShadow: 'none'
+                }}>Batal</button>
+                <button type="submit" style={{
+                  padding: '9px 18px', background: '#0F172A', color: '#FFFFFF', border: 'none',
+                  borderRadius: '8px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', boxShadow: 'none'
+                }}>Simpan</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* Modal Restock */}
       {isRestockModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{maxWidth: '400px'}}>
-            <h3>📦 Tambah Stok (Restock)</h3>
-            <form onSubmit={handleRestockSubmit} style={{marginTop: '20px'}}>
+          <div className="modal-content" style={{ maxWidth: '420px', padding: '28px 32px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A', margin: '0 0 20px 0' }}>Tambah Stok (Restock)</h3>
+            <form onSubmit={handleRestockSubmit}>
               <div className="form-group">
                 <label>Jumlah Tambah (Qty)</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   min="1"
-                  value={restockData.qty} 
-                  onChange={(e) => setRestockData({...restockData, qty: Number(e.target.value)})} 
-                  required 
+                  value={restockData.qty}
+                  onChange={(e) => setRestockData({...restockData, qty: Number(e.target.value)})}
+                  required
+                  style={{ boxShadow: 'none' }}
                 />
               </div>
               <div className="form-group">
                 <label>Keterangan (Opsional)</label>
-                <textarea 
+                <textarea
                   rows="3"
-                  value={restockData.keterangan} 
+                  value={restockData.keterangan}
                   onChange={(e) => setRestockData({...restockData, keterangan: e.target.value})}
                   placeholder="Contoh: Barang masuk dari Supplier A"
-                  style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1'}}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '13px', fontFamily: 'inherit', resize: 'vertical', boxShadow: 'none' }}
                 />
               </div>
-              <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px'}}>
-                <button type="button" className="secondary" onClick={() => setIsRestockModalOpen(false)}>Batal</button>
-                <button type="submit" className="success" style={{background: '#3b82f6'}}>Simpan Stok</button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E2E8F0' }}>
+                <button type="button" onClick={() => setIsRestockModalOpen(false)} style={{
+                  padding: '9px 18px', background: '#FFFFFF', color: '#475569', border: '1px solid #E2E8F0',
+                  borderRadius: '8px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', boxShadow: 'none'
+                }}>Batal</button>
+                <button type="submit" style={{
+                  padding: '9px 18px', background: '#2563EB', color: '#FFFFFF', border: 'none',
+                  borderRadius: '8px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', boxShadow: 'none'
+                }}>Simpan Stok</button>
               </div>
             </form>
           </div>

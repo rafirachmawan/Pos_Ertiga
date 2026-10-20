@@ -43,7 +43,6 @@ function App() {
 
         {/* Logo */}
         <div className="sidebar-logo">
-          <div className="sidebar-logo-icon">🛍️</div>
           <div>
             <div className="sidebar-logo-title">POS ERTIGA</div>
             <div className="sidebar-logo-sub">Point of Sale</div>
@@ -53,49 +52,48 @@ function App() {
         {/* Nav group: Main */}
         <div className="sidebar-nav-label">Menu Utama</div>
         <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-          <span className="nav-icon">📊</span> Dashboard
+          Dashboard
         </div>
         <div className={`nav-item ${activeTab === 'pos' ? 'active' : ''}`} onClick={() => setActiveTab('pos')}>
-          <span className="nav-icon">🛒</span> Transaksi Kasir
+          Transaksi Kasir
         </div>
         <div className={`nav-item ${activeTab === 'laporan' ? 'active' : ''}`} onClick={() => setActiveTab('laporan')}>
-          <span className="nav-icon">📋</span> Laporan
+          Laporan
         </div>
 
         {/* Nav group: Inventory */}
-        <div className="sidebar-nav-label" style={{marginTop: '8px'}}>Inventori</div>
+        <div className="sidebar-nav-label" style={{marginTop: '16px'}}>Inventori</div>
         <div className={`nav-item ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div><span className="nav-icon">📦</span> Kelola Barang</div>
+          <span>Kelola Barang</span>
           {lowStockCount > 0 && (
-            <div style={{ background: '#EF4444', color: 'white', fontSize: '10px', fontWeight: '800', padding: '2px 6px', borderRadius: '10px', minWidth: '18px', textAlign: 'center' }}>
+            <span style={{ background: '#EF4444', color: 'white', fontSize: '10px', fontWeight: '700', padding: '2px 7px', borderRadius: '6px' }}>
               {lowStockCount}
-            </div>
+            </span>
           )}
         </div>
         <div className={`nav-item ${activeTab === 'riwayat' ? 'active' : ''}`} onClick={() => setActiveTab('riwayat')}>
-          <span className="nav-icon">🧾</span> Riwayat Transaksi
+          Riwayat Transaksi
         </div>
         <div className={`nav-item ${activeTab === 'restock' ? 'active' : ''}`} onClick={() => setActiveTab('restock')}>
-          <span className="nav-icon">📦</span> Riwayat Restock
+          Riwayat Restock
         </div>
         <div className={`nav-item ${activeTab === 'master' ? 'active' : ''}`} onClick={() => setActiveTab('master')}>
-          <span className="nav-icon">📁</span> Master Data
+          Master Data
         </div>
         <div className={`nav-item ${activeTab === 'pengaturan' ? 'active' : ''}`} onClick={() => setActiveTab('pengaturan')}>
-          <span className="nav-icon">⚙️</span> Pengaturan
+          Pengaturan
         </div>
 
         {/* Footer: User info + Logout */}
         <div className="sidebar-footer">
           <div className="sidebar-user">
-            <div className="sidebar-avatar">A</div>
             <div>
               <div className="sidebar-username">Administrator</div>
               <div className="sidebar-role">Super Admin</div>
             </div>
           </div>
           <div className="nav-item sidebar-logout" onClick={() => setIsLoggedIn(false)}>
-            <span className="nav-icon">🚪</span> Keluar
+            Keluar
           </div>
         </div>
 
