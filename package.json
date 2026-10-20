@@ -5,6 +5,9 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "dev:server": "node server/server.js",
+    "dev:client": "npm --prefix client run dev",
+    "dev": "concurrently -k \"npm:dev:server\" \"npm:dev:client\"",
     "build:client": "cd client && npm install && npm run build",
     "build": "npm run build:client",
     "dist": "npm run build && electron-builder"
@@ -17,8 +20,12 @@
     },
     "files": [
       "main.js",
+      "preload.js",
       "server/**/*",
-      "!server/node_modules",
+      "!server/node_modules/**",
+      "!server/*.sqlite",
+      "!server/*.sqlite-*",
+      "!server/backups/**",
       "client/dist/**/*"
     ],
     "win": {
@@ -30,6 +37,7 @@
       "createDesktopShortcut": true
     },
     "asarUnpack": [
+      "**/node_modules/sqlite3/**",
       "client/dist/**/*"
     ]
   },

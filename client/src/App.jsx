@@ -8,6 +8,7 @@ import Laporan from './components/Laporan'
 import Pengaturan from './components/Pengaturan'
 import RiwayatRestock from './components/RiwayatRestock'
 import Master from './components/Master'
+import { api } from './lib/api'
 import './index.css'
 
 function App() {
@@ -18,11 +19,10 @@ function App() {
   useEffect(() => {
     if (!isLoggedIn) return;
     const fetchStock = () => {
-      fetch('http://localhost:3001/api/barang')
-        .then(res => res.json())
+      api('/api/barang')
         .then(data => {
           if (data.data) {
-            const count = data.data.filter(item => item.stok <= 5).length;
+            const count = data.data.filter(item => Number(item.stok) <= 5).length;
             setLowStockCount(count);
           }
         })

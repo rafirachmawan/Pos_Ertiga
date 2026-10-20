@@ -14,8 +14,15 @@ dist-ssr
 *.local
 release
 
-# Database
-# (Database files will be pushed as requested)
+# Database & Backups
+server/*.sqlite
+server/*.sqlite-*
+server/backups/
+backups/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
 
 # Editor directories and files
 .vscode/*

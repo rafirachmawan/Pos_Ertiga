@@ -1,17 +1,29 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { api } from '../lib/api';
+import { localDateKey, firstOfMonthKey } from '../lib/date';
 
 const fmt = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
-const today = () => new Date().toISOString().slice(0, 10);
-const firstOfMonth = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
-};
+const today = () => localDateKey();
+const firstOfMonth = () => firstOfMonthKey();
 
 const QUICK_FILTERS = [
-  { label: 'Hari Ini',   getRange: () => ({ s: today(), e: today() }) },
-  { label: '7 Hari',     getRange: () => { const d = new Date(); d.setDate(d.getDate()-6); return { s: d.toISOString().slice(0,10), e: today() }; } },
-  { label: 'Bulan Ini',  getRange: () => ({ s: firstOfMonth(), e: today() }) },
-  { label: 'Tahun Ini',  getRange: () => ({ s: `${new Date().getFullYear()}-01-01`, e: today() }) },
+  { label: 'Hari Ini', getRange: () => ({ s: today(), e: today() }) },
+  {
+    label: '7 Hari',
+    getRange: () => {
+      const d = new Date();
+      d.setDate(d.getDate() - 6);
+      return { s: localDateKey(d), e: today() };
+    },
+  },
+  { label: 'Bulan Ini', getRange: () => ({ s: firstOfMonth(), e: today() }) },
+  {
+    label: 'Tahun Ini',
+    getRange: () => ({
+      s: `${new Date().getFullYear()}-01-01`,
+      e: today(),
+    }),
+  },
 ];
 
 const Laporan = () => {
@@ -27,15 +39,19 @@ const Laporan = () => {
   const fetchAll = useCallback(async (s, e) => {
     setLoading(true);
     try {
+      const query = `start=${encodeURIComponent(s)}&end=${encodeURIComponent(e)}`;
       const [r1, r2, r3] = await Promise.all([
-        fetch(`http://localhost:3001/api/laporan/range?start=${s}&end=${e}`).then(r => r.json()),
-        fetch('http://localhost:3001/api/laporan/bulanan').then(r => r.json()),
-        fetch(`http://localhost:3001/api/laporan/top-produk?start=${s}&end=${e}`).then(r => r.json()),
+        api(`/api/laporan/range?${query}`),
+        api('/api/laporan/bulanan'),
+        api(`/api/laporan/top-produk?${query}`),
       ]);
       if (r1.data) setSummary(r1.data);
       if (r2.data) setBulanan(r2.data);
       if (r3.data) setTopProduk(r3.data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
     setLoading(false);
   }, []);
 

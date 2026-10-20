@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { api } from "../lib/api";
 
 const formatRupiah = (number) => {
   if (!number && number !== 0) return "Rp 0";
@@ -16,30 +17,28 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/barang")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data) setItems(data.data);
-      })
-      .catch(console.error);
+    const load = async () => {
+      try {
+        const [barang, harian, mingguan] = await Promise.all([
+          api("/api/barang"),
+          api("/api/laporan/harian"),
+          api("/api/laporan/mingguan"),
+        ]);
 
-    fetch("http://localhost:3001/api/laporan/harian")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data) setLaporan(data.data);
-      })
-      .catch(console.error);
-
-    fetch("http://localhost:3001/api/laporan/mingguan")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data) setGrafik(data.data);
+        if (barang.data) setItems(barang.data);
+        if (harian.data) setLaporan(harian.data);
+        if (mingguan.data) setGrafik(mingguan.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      }
+    };
+
+    load();
   }, []);
 
-  const totalStok = items.reduce((acc, item) => acc + item.stok, 0);
+  const totalStok = items.reduce((acc, item) => acc + Number(item.stok || 0), 0);
   const lowStockItems = items.filter((item) => item.stok <= 5);
   const maxPendapatan = grafik.length > 0 ? Math.max(...grafik.map(g => g.pendapatan), 1) : 1;
   const today = new Date().toLocaleDateString("id-ID", {

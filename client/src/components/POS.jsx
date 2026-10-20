@@ -1,4 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { api } from '../lib/api';
+import { Receipt, ReceiptPrintPortal } from './Receipt';
+import { printCurrentReceipt } from '../lib/print';
+
+const makeClientRef = () =>
+  typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const POS = () => {
   const [items, setItems] = useState([]);
@@ -15,20 +23,36 @@ const POS = () => {
   const [heldCarts, setHeldCarts] = useState([]);
   const [pengaturan, setPengaturan] = useState({});
   const barcodeRef = useRef(null);
+  const clientRefRef = useRef(null);
 
   useEffect(() => {
     fetchItems();
-    fetch('http://localhost:3001/api/kategori').then(r => r.json()).then(d => { if(d.data) setKategoriList(d.data); });
-    fetch('http://localhost:3001/api/pengaturan').then(r => r.json()).then(d => { if(d.data) setPengaturan(d.data); });
-    if(barcodeRef.current) barcodeRef.current.focus();
+    Promise.all([api('/api/kategori'), api('/api/pengaturan')])
+      .then(([kategori, setting]) => {
+        if (kategori.data) setKategoriList(kategori.data);
+        if (setting.data) setPengaturan(setting.data);
+      })
+      .catch((err) => console.error(err));
+    if (barcodeRef.current) barcodeRef.current.focus();
   }, []);
+
+  useEffect(() => {
+    if (!struk || !Number(pengaturan.auto_print)) return undefined;
+
+    const timer = setTimeout(() => {
+      printCurrentReceipt({
+        lebar: Number(pengaturan.lebar_struk) || 80,
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [struk, pengaturan.auto_print, pengaturan.lebar_struk]);
 
   const fetchItems = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/barang');
-      const data = await res.json();
-      if(data.data) setItems(data.data);
-    } catch(err) {
+      const data = await api('/api/barang');
+      if (data.data) setItems(data.data);
+    } catch (err) {
       console.error(err);
     }
   };
@@ -89,17 +113,12 @@ const POS = () => {
     if (!barcodeInput) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/api/barang/barcode/${barcodeInput}`);
-      if(res.ok) {
-        const data = await res.json();
-        addToCart(data.data);
-        setBarcodeInput('');
-      } else {
-        alert('Barang tidak ditemukan');
-        setBarcodeInput('');
-      }
-    } catch(err) {
-      console.error(err);
+      const data = await api(`/api/barang/barcode/${encodeURIComponent(barcodeInput)}`);
+      addToCart(data.data);
+      setBarcodeInput('');
+    } catch (err) {
+      alert(err.message || 'Barang tidak ditemukan');
+      setBarcodeInput('');
     }
   };
 
@@ -141,52 +160,62 @@ const POS = () => {
 
   const checkout = async () => {
     if (cart.length === 0) return alert('Keranjang kosong');
+    if (diskon > totalHarga) return alert('Diskon melebihi subtotal!');
     if (amountTendered < totalSetelahDiskon) return alert('Uang pembayaran kurang!');
 
+    // client_ref membuat checkout idempoten: klik ganda / retry tidak
+    // menghasilkan nota dan potongan stok ganda.
+    if (!clientRefRef.current) clientRefRef.current = makeClientRef();
+
     const payload = {
-      total_harga: totalSetelahDiskon,
       total_bayar: amountTendered,
-      total_kembalian: kembalian,
       diskon,
       nama_pelanggan: namaPelanggan.trim() || 'Umum',
       metode_pembayaran: metodePembayaran,
-      cart
+      client_ref: clientRefRef.current,
+      cart: cart.map((item) => ({ id: item.id, qty: item.qty })),
     };
 
     try {
-      const res = await fetch('http://localhost:3001/api/transaksi', {
+      const data = await api('/api/transaksi', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: payload,
       });
-      const data = await res.json();
-      if(res.ok) {
-        // Simpan data struk sebelum dikosongkan
-        setStruk({
-          nomor_nota: data.nomor_nota,
-          nama_pelanggan: namaPelanggan.trim() || 'Umum',
-          tanggal: new Date().toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-          items: [...cart],
-          subtotal: totalHarga,
-          diskon,
-          total: totalSetelahDiskon,
-          bayar: amountTendered,
-          kembalian,
-          metode_pembayaran: metodePembayaran,
-        });
-        setCart([]);
-        setAmountTendered(0);
-        setDiskon(0);
-        setNamaPelanggan('');
-        setMetodePembayaran('Tunai');
-        fetchItems();
-      } else {
-        alert(data.error || 'Terjadi kesalahan saat checkout');
-      }
-    } catch(err) {
-      console.error(err);
+
+      // Simpan data struk sebelum keranjang dikosongkan.
+      setStruk({
+        nomor_nota: data.nomor_nota,
+        nama_pelanggan: namaPelanggan.trim() || 'Umum',
+        tanggal: new Date().toLocaleString('id-ID', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        items: [...cart],
+        subtotal: data.subtotal ?? totalHarga,
+        diskon: data.diskon ?? diskon,
+        total: data.total_harga ?? totalSetelahDiskon,
+        bayar: data.total_bayar ?? amountTendered,
+        kembalian: data.total_kembalian ?? kembalian,
+        metode_pembayaran: metodePembayaran,
+      });
+
+      clientRefRef.current = null;
+      setCart([]);
+      setAmountTendered(0);
+      setDiskon(0);
+      setNamaPelanggan('');
+      setMetodePembayaran('Tunai');
+      fetchItems();
+    } catch (err) {
+      alert(err.message || 'Terjadi kesalahan saat checkout');
     }
   };
+
+  const handlePrint = () =>
+    printCurrentReceipt({ lebar: Number(pengaturan.lebar_struk) || 80 });
 
   return (
     <div className="pos-layout">
@@ -443,104 +472,76 @@ const POS = () => {
       </div>
       {/* ===== MODAL STRUK ===== */}
       {struk && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 1000, backdropFilter: 'blur(4px)'
-        }}>
-          <div style={{
-            background: 'white', borderRadius: '20px',
-            width: '360px', maxHeight: '90vh', overflowY: 'auto',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
-            fontFamily: "'Courier New', monospace"
-          }}>
-            {/* Header Struk */}
-            <div style={{ background: 'linear-gradient(135deg, #1E293B, #312E81)', color: 'white', borderRadius: '20px 20px 0 0', padding: '24px 20px', textAlign: 'center' }}>
-              <div style={{ fontSize: '28px', marginBottom: '8px' }}>🛍️</div>
-              <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '2px' }}>{pengaturan.nama_toko || 'POS ERTIGA'}</div>
-              <div style={{ fontSize: '11px', opacity: 0.8, marginTop: '4px', whiteSpace: 'pre-wrap' }}>{pengaturan.alamat_toko || 'Point of Sale'}</div>
-              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed rgba(255,255,255,0.2)', fontSize: '11px', opacity: 0.7 }}>{struk.tanggal}</div>
-              <div style={{ fontSize: '13px', fontWeight: '700', marginTop: '4px', color: '#A5B4FC' }}>{struk.nomor_nota}</div>
-            </div>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            backdropFilter: 'blur(4px)',
+            padding: '16px',
+          }}
+        >
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '20px',
+              width: '380px',
+              maxWidth: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.3)',
+              padding: '16px',
+            }}
+          >
+            <Receipt data={struk} pengaturan={pengaturan} preview />
 
-            {/* Body */}
-            <div style={{ padding: '20px' }}>
-
-              {/* Info Pelanggan */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px dashed #E2E8F0' }}>
-                <span style={{ color: '#64748B' }}>Pelanggan</span>
-                <span style={{ fontWeight: '700', color: '#1E293B' }}>{struk.nama_pelanggan}</span>
-              </div>
-
-              {/* Daftar Barang */}
-              <div style={{ fontSize: '12px', marginBottom: '16px' }}>
-                <div style={{ fontWeight: '700', color: '#64748B', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px', marginBottom: '10px' }}>Rincian Pesanan</div>
-                {struk.items.map((item, i) => (
-                  <div key={i} style={{ marginBottom: '10px' }}>
-                    <div style={{ fontWeight: '600', color: '#1E293B', fontSize: '13px' }}>{item.nama_barang}</div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px', color: '#64748B' }}>
-                      <span>{item.qty} × Rp {item.harga_jual.toLocaleString('id-ID')}</span>
-                      <span style={{ fontWeight: '600', color: '#1E293B' }}>Rp {item.subtotal.toLocaleString('id-ID')}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Totals */}
-              <div style={{ borderTop: '1px dashed #E2E8F0', paddingTop: '14px', fontSize: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#64748B' }}>
-                  <span>Subtotal</span>
-                  <span>Rp {struk.subtotal.toLocaleString('id-ID')}</span>
-                </div>
-                {struk.diskon > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#EF4444' }}>
-                    <span>Diskon</span>
-                    <span>− Rp {struk.diskon.toLocaleString('id-ID')}</span>
-                  </div>
-                )}
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', fontSize: '16px', color: '#1E293B', paddingTop: '10px', borderTop: '2px solid #1E293B', marginBottom: '12px' }}>
-                  <span>TOTAL</span>
-                  <span>Rp {struk.total.toLocaleString('id-ID')}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#64748B' }}>
-                  <span>Metode</span>
-                  <span style={{ fontWeight: '600', color: '#1E293B' }}>{struk.metode_pembayaran}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', color: '#64748B' }}>
-                  <span>Bayar</span>
-                  <span>Rp {struk.bayar.toLocaleString('id-ID')}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: '#059669', fontSize: '14px' }}>
-                  <span>Kembali</span>
-                  <span>Rp {struk.kembalian.toLocaleString('id-ID')}</span>
-                </div>
-              </div>
-
-              {/* Footer Struk */}
-              <div style={{ textAlign: 'center', marginTop: '16px', borderTop: '1px dashed #E2E8F0', paddingTop: '12px', fontSize: '11px', color: '#64748B', whiteSpace: 'pre-wrap' }}>
-                {pengaturan.pesan_struk || 'Terima kasih telah berbelanja!'}
-              </div>
-
-              {/* Tombol Aksi */}
-              <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                <button
-                  onClick={() => setStruk(null)}
-                  style={{ flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}
-                >
-                  Tutup
-                </button>
-                <button
-                  onClick={() => window.print()}
-                  style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg, #4F46E5, #6366F1)', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}
-                >
-                  🖨️ Print
-                </button>
-              </div>
-
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+              <button
+                onClick={() => setStruk(null)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: '#F1F5F9',
+                  color: '#475569',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                }}
+              >
+                Tutup
+              </button>
+              <button
+                onClick={handlePrint}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                }}
+              >
+                🖨️ Print
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      <ReceiptPrintPortal
+        data={struk}
+        pengaturan={pengaturan}
+        lebar={Number(pengaturan.lebar_struk) || 80}
+      />
     </div>
   );
 };

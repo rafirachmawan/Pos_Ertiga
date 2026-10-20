@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../lib/api';
 
 const Master = () => {
   const [kategoriList, setKategoriList] = useState([]);
@@ -6,9 +7,8 @@ const Master = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/kategori')
-      .then(r => r.json())
-      .then(k => {
+    api('/api/kategori')
+      .then((k) => {
         if (k.data) setKategoriList(k.data);
         setLoading(false);
       })
@@ -19,25 +19,29 @@ const Master = () => {
     e.preventDefault();
     if (!newKategori.trim()) return;
     try {
-      const res = await fetch('http://localhost:3001/api/kategori', {
+      const data = await api('/api/kategori', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama_kategori: newKategori.trim() })
+        body: { nama_kategori: newKategori.trim() },
       });
-      const data = await res.json();
-      if (res.ok) {
-        setKategoriList([...kategoriList, { id: data.id, nama_kategori: data.nama_kategori }].sort((a,b) => a.nama_kategori.localeCompare(b.nama_kategori)));
-        setNewKategori('');
-      } else { alert(data.error); }
-    } catch (err) { console.error(err); }
+      setKategoriList(
+        [...kategoriList, { id: data.id, nama_kategori: data.nama_kategori }].sort(
+          (a, b) => a.nama_kategori.localeCompare(b.nama_kategori)
+        )
+      );
+      setNewKategori('');
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   const deleteKategori = async (id, nama) => {
     if (!window.confirm(`Hapus kategori "${nama}"? Produk yang menggunakan kategori ini akan menjadi tanpa kategori.`)) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/kategori/${id}`, { method: 'DELETE' });
-      if (res.ok) setKategoriList(kategoriList.filter(k => k.id !== id));
-    } catch (err) { console.error(err); }
+      await api(`/api/kategori/${id}`, { method: 'DELETE' });
+      setKategoriList(kategoriList.filter((k) => k.id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat data master...</div>;

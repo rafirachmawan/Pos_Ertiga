@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-
-const formatDate = (dateStr) => {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) +
-    ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-};
+import { api } from '../lib/api';
+import { formatDateTime } from '../lib/date';
 
 const RiwayatRestock = () => {
   const [stokMasuk, setStokMasuk] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/stok-masuk')
-      .then(res => res.json())
-      .then(data => { if(data.data) setStokMasuk(data.data); })
+    api('/api/stok-masuk')
+      .then((data) => {
+        if (data.data) setStokMasuk(data.data);
+      })
       .catch(console.error);
   }, []);
 
@@ -72,14 +69,14 @@ const RiwayatRestock = () => {
             ) : (
               filtered.map((sm, i) => (
                 <tr key={sm.id} style={{ borderBottom: i === filtered.length - 1 ? 'none' : '1px solid var(--border-color)', background: i % 2 === 0 ? 'white' : '#F8FAFC' }}>
-                  <td style={{ padding: '16px 24px', fontSize: '13px', color: 'var(--text-muted)' }}>{formatDate(sm.tanggal)}</td>
+                  <td style={{ padding: '16px 24px', fontSize: '13px', color: 'var(--text-muted)' }}>{formatDateTime(sm.tanggal)}</td>
                   <td style={{ padding: '16px 24px' }}>
                     <div style={{ fontWeight: '600', color: 'var(--text-dark)', fontSize: '14px' }}>{sm.nama_barang}</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{sm.barcode}</div>
                   </td>
                   <td style={{ padding: '16px 24px' }}>
                     <span style={{ background: '#ECFDF5', color: '#059669', padding: '4px 10px', borderRadius: '20px', fontSize: '13px', fontWeight: '700' }}>
-                      +{sm.jumlah}
+                      +{sm.qty}
                     </span>
                   </td>
                   <td style={{ padding: '16px 24px', fontSize: '13px', color: 'var(--text-muted)' }}>{sm.keterangan || '-'}</td>

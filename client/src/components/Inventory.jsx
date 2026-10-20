@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../lib/api';
 
 // Helper: Format number to "Rp X.XXX"
 const formatRupiah = (number) => {
@@ -14,6 +15,7 @@ const parseRupiah = (str) => {
 const Inventory = () => {
   const [items, setItems] = useState([]);
   const [kategoriList, setKategoriList] = useState([]);
+  const [showInactive, setShowInactive] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
   const [restockData, setRestockData] = useState({ barang_id: null, qty: 1, keterangan: '' });
@@ -27,18 +29,22 @@ const Inventory = () => {
 
   const fetchItems = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/barang');
-      const data = await res.json();
-      if(data.data) setItems(data.data);
-    } catch(err) {
+      const data = await api(`/api/barang${showInactive ? '?semua=1' : ''}`);
+      if (data.data) setItems(data.data);
+    } catch (err) {
       console.error(err);
+      alert(err.message);
     }
   };
 
   useEffect(() => {
     fetchItems();
-    fetch('http://localhost:3001/api/kategori').then(r => r.json()).then(d => { if(d.data) setKategoriList(d.data); });
-  }, []);
+    api('/api/kategori')
+      .then((d) => {
+        if (d.data) setKategoriList(d.data);
+      })
+      .catch(console.error);
+  }, [showInactive]);
 
   const handleCurrencyChange = (e, field) => {
     const rawValue = parseRupiah(e.target.value);
@@ -51,37 +57,54 @@ const Inventory = () => {
     setFormData({...formData, [e.target.name]: e.target.value});
   }
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({...formData, gambar: reader.result});
+  const compressImage = (file, maxSize = 900, quality = 0.82) =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      image.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(objectUrl);
+        resolve(canvas.toDataURL('image/jpeg', quality));
       };
-      reader.readAsDataURL(file);
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Gambar tidak dapat dibaca'));
+      };
+
+      image.src = objectUrl;
+    });
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const compressed = await compressImage(file);
+      setFormData((current) => ({ ...current, gambar: compressed }));
+    } catch (err) {
+      alert(err.message);
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const url = formData.id ? `http://localhost:3001/api/barang/${formData.id}` : 'http://localhost:3001/api/barang';
+    const url = formData.id ? `/api/barang/${formData.id}` : '/api/barang';
     const method = formData.id ? 'PUT' : 'POST';
 
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if(res.ok) {
-        closeModal();
-        fetchItems();
-      } else {
-        const errData = await res.json();
-        alert('Gagal menyimpan: ' + (errData.error || 'Ukuran gambar mungkin terlalu besar'));
-      }
+      await api(url, { method, body: formData });
+      closeModal();
+      fetchItems();
     } catch (err) {
-      console.error(err);
+      alert('Gagal menyimpan: ' + err.message);
     }
   };
 
@@ -107,46 +130,66 @@ const Inventory = () => {
   const handleRestockSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:3001/api/stok-masuk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(restockData)
-      });
-      if(res.ok) {
-        setIsRestockModalOpen(false);
-        fetchItems();
-        alert('Stok berhasil ditambahkan!');
-      } else {
-        const errData = await res.json();
-        alert('Gagal menambah stok: ' + (errData.error || 'Terjadi kesalahan'));
-      }
+      await api('/api/stok-masuk', { method: 'POST', body: restockData });
+      setIsRestockModalOpen(false);
+      fetchItems();
+      alert('Stok berhasil ditambahkan!');
     } catch (err) {
-      console.error(err);
+      alert('Gagal menambah stok: ' + err.message);
     }
-  }
+  };
 
   const deleteItem = async (id) => {
-    if(!window.confirm('Yakin ingin menghapus barang ini?')) return;
+    if (!window.confirm('Yakin ingin menghapus barang ini?')) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/barang/${id}`, { method: 'DELETE' });
-      if(res.ok) fetchItems();
-    } catch(err) {
-      console.error(err);
+      const result = await api(`/api/barang/${id}`, { method: 'DELETE' });
+      alert(result.message || 'Barang dihapus');
+      fetchItems();
+    } catch (err) {
+      alert(err.message);
     }
-  }
+  };
+
+  const restoreItem = async (id) => {
+    try {
+      await api(`/api/barang/${id}/restore`, { method: 'POST' });
+      fetchItems();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   return (
     <div>
       <div className="header-row">
         <h2>Kelola Barang</h2>
-        <button onClick={() => {
-        setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
-          setDisplayHargaModal('');
-          setDisplayHargaJual('');
-          setIsModalOpen(true);
-        }}>
-          + Tambah Barang
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '12px',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+            />
+            Tampilkan nonaktif
+          </label>
+          <button onClick={() => {
+          setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
+            setDisplayHargaModal('');
+            setDisplayHargaJual('');
+            setIsModalOpen(true);
+          }}>
+            + Tambah Barang
+          </button>
+        </div>
       </div>
 
       <div className="table-container">
@@ -166,7 +209,7 @@ const Inventory = () => {
           </thead>
           <tbody>
             {items.map(item => (
-              <tr key={item.id}>
+              <tr key={item.id} style={{ opacity: item.aktif ? 1 : 0.55 }}>
                 <td>
                   {item.gambar ? (
                     <img src={item.gambar} alt={item.nama_barang} style={{width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px'}} />
@@ -185,15 +228,23 @@ const Inventory = () => {
                 <td>Rp {formatRupiah(item.harga_jual)}</td>
                 <td>{item.stok} {item.satuan}</td>
                 <td>
-                  {item.stok <= 5 
-                    ? <span className="badge low-stock">Low Stock</span> 
-                    : <span className="badge in-stock">Good</span>}
+                  {!item.aktif
+                    ? <span className="badge" style={{ background: '#E2E8F0', color: '#475569' }}>Nonaktif</span>
+                    : item.stok <= 5
+                      ? <span className="badge low-stock">Low Stock</span>
+                      : <span className="badge in-stock">Good</span>}
                 </td>
                 <td>
                   <div style={{display: 'flex', gap: '4px'}}>
-                    <button style={{padding: '6px 10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: '600'}} onClick={() => openRestockModal(item)}>+ Restock</button>
-                    <button className="secondary" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => editItem(item)}>Edit</button>
-                    <button className="danger" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => deleteItem(item.id)}>Hapus</button>
+                    {item.aktif ? (
+                      <>
+                        <button style={{padding: '6px 10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: '600'}} onClick={() => openRestockModal(item)}>+ Restock</button>
+                        <button className="secondary" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => editItem(item)}>Edit</button>
+                        <button className="danger" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => deleteItem(item.id)}>Hapus</button>
+                      </>
+                    ) : (
+                      <button className="success" style={{padding: '6px 10px', fontSize: '11px', fontWeight: '600', borderRadius: '6px'}} onClick={() => restoreItem(item.id)}>Aktifkan</button>
+                    )}
                   </div>
                 </td>
               </tr>

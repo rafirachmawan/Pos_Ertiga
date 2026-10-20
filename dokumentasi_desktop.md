@@ -75,3 +75,28 @@ Jika proses *coding* sudah selesai dan Anda ingin membuat versi `.exe` yang baru
    ```
 3. Tunggu hingga proses selesai (biasanya memakan waktu sekitar 1-2 menit).
 4. Installer `.exe` yang baru akan otomatis muncul di dalam folder `release/` dan siap digunakan!
+
+---
+
+## 5. Ringkasan Pembaruan & Hardening Sistem (Paket A sampai D)
+
+Aplikasi telah diperbarui dengan standar keamanan dan keandalan tingkat produksi:
+
+1. **Keamanan Electron (Hardening):**
+   - Mengaktifkan `contextIsolation: true`, `nodeIntegration: false`, dan `sandbox: true`.
+   - Komunikasi antara antarmuka React dan sistem operasi dibatasi melalui `preload.js` menggunakan `contextBridge` (`window.pos`).
+   - Server Express dibatasi hanya menerima koneksi dari `127.0.0.1` (localhost loopback) untuk mencegah akses tidak sah dari perangkat lain di jaringan lokal.
+   - Mengaktifkan `requestSingleInstanceLock()` agar kasir tidak dapat membuka aplikasi dua kali secara bersamaan.
+
+2. **Migration Runner Otomatis:**
+   - Skema database dikelola melalui `server/migrations.js` menggunakan SQLite `PRAGMA user_version`.
+   - Setiap pembaruan skema otomatis membuat salinan cadangan (*pre-migration backup*) sebelum migrasi diterapkan.
+
+3. **Cetak Thermal Mandiri:**
+   - Komponen `Receipt.jsx` dan `@media print` khusus memastikan hanya struk belanja yang dicetak (bukan seluruh layar aplikasi).
+   - Mendukung format kertas 58 mm dan 80 mm, serta pencetakan langsung (*silent print*) ke printer thermal default.
+
+4. **Cadangan Google Drive Otomatis:**
+   - Menyediakan pencadangan database terkompresi ke Google Drive toko via OAuth2 resmi.
+   - Status cadangan dapat dipantau langsung di menu Pengaturan.
+

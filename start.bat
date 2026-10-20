@@ -1,5 +1,5 @@
 @echo off
-echo Starting POS System...
-start cmd /k "cd server && npm start"
-start cmd /k "cd client && npm run dev"
-echo Both servers are starting! The frontend will be available at http://localhost:5173
+echo Memulai POS Ertiga (Mode Pengembangan)...
+start cmd /k "node server/server.js"
+start cmd /k "npm --prefix client run dev"
+echo Backend dan Frontend sedang dijalankan! Frontend akan tersedia di http://localhost:5173
