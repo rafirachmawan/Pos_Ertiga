@@ -41,6 +41,10 @@ function normalizeBarang(body) {
     if (kategoriId <= 0) kategoriId = null;
   }
 
+  const beratGram = Math.max(0, toInt(body.berat_gram, 0));
+  const tampilOnline =
+    body.tampil_online === undefined ? 1 : Number(body.tampil_online) ? 1 : 0;
+
   return {
     barcode,
     nama_barang: namaBarang,
@@ -50,6 +54,8 @@ function normalizeBarang(body) {
     gambar,
     satuan: String(body.satuan || 'pcs').slice(0, 20),
     kategori_id: kategoriId,
+    berat_gram: beratGram,
+    tampil_online: tampilOnline,
   };
 }
 
@@ -62,7 +68,7 @@ router.get(
 
     const columns = ringkas
       ? `b.id, b.barcode, b.nama_barang, b.harga_modal, b.harga_jual,
-         b.stok, b.satuan, b.kategori_id, b.aktif, b.created_at`
+         b.stok, b.satuan, b.kategori_id, b.berat_gram, b.tampil_online, b.aktif, b.created_at`
       : 'b.*';
 
     const where = showAll ? '' : 'WHERE b.aktif = 1';
@@ -106,8 +112,8 @@ router.post(
     try {
       const result = await run(
         `INSERT INTO barang
-         (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id, berat_gram, tampil_online)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.barcode,
           data.nama_barang,
@@ -117,6 +123,8 @@ router.post(
           data.gambar,
           data.satuan,
           data.kategori_id,
+          data.berat_gram,
+          data.tampil_online,
         ]
       );
 
@@ -155,7 +163,7 @@ router.put(
       const result = await run(
         `UPDATE barang
          SET barcode = ?, nama_barang = ?, harga_modal = ?, harga_jual = ?,
-             stok = ?, gambar = ?, satuan = ?, kategori_id = ?
+             stok = ?, gambar = ?, satuan = ?, kategori_id = ?, berat_gram = ?, tampil_online = ?
          WHERE id = ?`,
         [
           data.barcode,
@@ -166,6 +174,8 @@ router.put(
           data.gambar,
           data.satuan,
           data.kategori_id,
+          data.berat_gram,
+          data.tampil_online,
           id,
         ]
       );

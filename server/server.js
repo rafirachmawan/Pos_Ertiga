@@ -16,6 +16,7 @@ const transaksiRoutes = require('./routes/transaksi');
 const laporanRoutes = require('./routes/laporan');
 const stokMasukRoutes = require('./routes/stokMasuk');
 const backupRoutes = require('./routes/backup');
+const publicRoutes = require('./routes/public');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -28,6 +29,10 @@ const allowedOrigins = new Set([
   'http://localhost:3001',
   'http://127.0.0.1:5173',
   'http://localhost:5173',
+  'http://127.0.0.1:5174',
+  'http://localhost:5174',
+  'http://127.0.0.1:5175',
+  'http://localhost:5175',
 ]);
 
 app.disable('x-powered-by');
@@ -37,11 +42,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS hanya dibutuhkan saat development (Vite di port 5173).
+// CORS untuk development Vite (POS di 5173, Web Storefront di 5174/5175).
 if (!isPackaged) {
   app.use(
     cors({
-      origin: ['http://127.0.0.1:5173', 'http://localhost:5173'],
+      origin: [
+        'http://127.0.0.1:5173',
+        'http://localhost:5173',
+        'http://127.0.0.1:5174',
+        'http://localhost:5174',
+        'http://127.0.0.1:5175',
+        'http://localhost:5175',
+      ],
     })
   );
 }
@@ -110,6 +122,7 @@ app.use('/api/transaksi', transaksiRoutes);
 app.use('/api/laporan', laporanRoutes);
 app.use('/api/stok-masuk', stokMasukRoutes);
 app.use('/api/backup', backupRoutes);
+app.use('/api/public', publicRoutes);
 
 // Endpoint API yang tidak dikenal harus tetap JSON.
 app.use('/api', (req, res) => {

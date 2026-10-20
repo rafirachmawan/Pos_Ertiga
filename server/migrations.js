@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 3;
+const LATEST_VERSION = 4;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -151,6 +151,8 @@ async function createBaselineTables(db) {
       gambar TEXT,
       satuan VARCHAR(20) DEFAULT 'pcs',
       kategori_id INTEGER REFERENCES kategori(id),
+      berat_gram INTEGER NOT NULL DEFAULT 0,
+      tampil_online INTEGER NOT NULL DEFAULT 1,
       aktif INTEGER NOT NULL DEFAULT 1,
       deleted_at TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -306,6 +308,28 @@ const migrations = [
       await run(
         db,
         `CREATE INDEX IF NOT EXISTS idx_barang_kategori ON barang(kategori_id)`
+      );
+    },
+  },
+  {
+    version: 4,
+    name: 'ecommerce preparation (berat_gram & tampil_online)',
+    async up(db) {
+      await addColumnIfMissing(
+        db,
+        'barang',
+        'berat_gram',
+        'INTEGER NOT NULL DEFAULT 0'
+      );
+      await addColumnIfMissing(
+        db,
+        'barang',
+        'tampil_online',
+        'INTEGER NOT NULL DEFAULT 1'
+      );
+      await run(
+        db,
+        `CREATE INDEX IF NOT EXISTS idx_barang_tampil_online ON barang(tampil_online)`
       );
     },
   },

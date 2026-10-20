@@ -12,6 +12,20 @@ const parseRupiah = (str) => {
   return Number(str.replace(/[^0-9]/g, ''));
 };
 
+const DEFAULT_FORM_DATA = {
+  id: null,
+  barcode: '',
+  nama_barang: '',
+  harga_modal: 0,
+  harga_jual: 0,
+  stok: 0,
+  satuan: 'pcs',
+  gambar: '',
+  kategori_id: '',
+  berat_gram: 200,
+  tampil_online: 1,
+};
+
 const Inventory = () => {
   const [items, setItems] = useState([]);
   const [kategoriList, setKategoriList] = useState([]);
@@ -19,9 +33,7 @@ const Inventory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
   const [restockData, setRestockData] = useState({ barang_id: null, qty: 1, keterangan: '' });
-  const [formData, setFormData] = useState({
-    id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''
-  });
+  const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
 
   // Display strings for inputs
   const [displayHargaModal, setDisplayHargaModal] = useState('');
@@ -109,14 +121,18 @@ const Inventory = () => {
   };
 
   const editItem = (item) => {
-    setFormData(item);
+    setFormData({
+      ...item,
+      berat_gram: item.berat_gram ?? 0,
+      tampil_online: item.tampil_online !== undefined ? item.tampil_online : 1,
+    });
     setDisplayHargaModal(formatRupiah(item.harga_modal));
     setDisplayHargaJual(formatRupiah(item.harga_jual));
     setIsModalOpen(true);
   }
 
   const closeModal = () => {
-    setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
+    setFormData(DEFAULT_FORM_DATA);
     setDisplayHargaModal('');
     setDisplayHargaJual('');
     setIsModalOpen(false);
@@ -199,7 +215,7 @@ const Inventory = () => {
           </label>
           <button
             onClick={() => {
-              setFormData({id: null, barcode: '', nama_barang: '', harga_modal: 0, harga_jual: 0, stok: 0, satuan: 'pcs', gambar: '', kategori_id: ''});
+              setFormData(DEFAULT_FORM_DATA);
               setDisplayHargaModal('');
               setDisplayHargaJual('');
               setIsModalOpen(true);
@@ -273,8 +289,26 @@ const Inventory = () => {
                 <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9', fontSize: '12.5px', fontWeight: '500', color: '#64748B', fontFamily: 'monospace' }}>
                   {item.barcode}
                 </td>
-                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9', fontSize: '13px', fontWeight: '600', color: '#0F172A' }}>
-                  {item.nama_barang}
+                <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>{item.nama_barang}</span>
+                    {Number(item.tampil_online) === 1 && (
+                      <span
+                        title={`Tampil di toko online • ${item.berat_gram || 0}g`}
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          background: '#EFF6FF',
+                          color: '#2563EB',
+                          border: '1px solid #BFDBFE',
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        Online{item.berat_gram ? ` · ${item.berat_gram}g` : ''}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td style={{ padding: '10px 16px', borderBottom: '1px solid #F1F5F9' }}>
                   {item.nama_kategori
@@ -411,6 +445,61 @@ const Inventory = () => {
                   </select>
                 </div>
               </div>
+
+              {/* Pengaturan E-Commerce / Toko Online */}
+              <div
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  marginTop: '16px',
+                }}
+              >
+                <div style={{ fontSize: '12.5px', fontWeight: '700', color: '#0F172A', marginBottom: '8px' }}>
+                  Katalog Toko Online (E-Commerce)
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px', alignItems: 'center' }}>
+                  <div>
+                    <label style={{ fontSize: '11.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
+                      Berat Produk (gram)
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="number"
+                        min="0"
+                        name="berat_gram"
+                        value={formData.berat_gram ?? 0}
+                        onChange={handleChange}
+                        placeholder="Contoh: 250"
+                        style={{ width: '100%', height: '36px', fontSize: '13px', paddingRight: '46px', boxSizing: 'border-box', boxShadow: 'none' }}
+                      />
+                      <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', color: '#94A3B8' }}>
+                        gram
+                      </span>
+                    </div>
+                    <small style={{ fontSize: '11px', color: '#94A3B8', marginTop: '3px', display: 'block' }}>
+                      Digunakan untuk hitung ongkir kurir
+                    </small>
+                  </div>
+
+                  <div style={{ paddingTop: '4px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#334155', cursor: 'pointer', fontWeight: '600' }}>
+                      <input
+                        type="checkbox"
+                        checked={Number(formData.tampil_online) === 1}
+                        onChange={(e) => setFormData({ ...formData, tampil_online: e.target.checked ? 1 : 0 })}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      Tampil di Website
+                    </label>
+                    <small style={{ fontSize: '11px', color: '#94A3B8', marginTop: '3px', display: 'block' }}>
+                      {Number(formData.tampil_online) === 1 ? 'Siap disinkronkan ke katalog web' : 'Hanya dijual di toko fisik'}
+                    </small>
+                  </div>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E2E8F0' }}>
                 <button type="button" onClick={closeModal} style={{
                   padding: '9px 18px', background: '#FFFFFF', color: '#475569', border: '1px solid #E2E8F0',
