@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 4;
+const LATEST_VERSION = 9;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -73,6 +73,7 @@ async function createPengaturanTable(db) {
       nama_toko VARCHAR(100) DEFAULT 'POS ERTIGA',
       alamat_toko TEXT DEFAULT 'Alamat Toko Belum Diatur',
       pesan_struk TEXT DEFAULT 'Terima kasih sudah berbelanja!',
+      telepon VARCHAR(30) DEFAULT '',
       printer_name TEXT DEFAULT '',
       lebar_struk INTEGER NOT NULL DEFAULT 80,
       auto_print INTEGER NOT NULL DEFAULT 0
@@ -331,6 +332,484 @@ const migrations = [
         db,
         `CREATE INDEX IF NOT EXISTS idx_barang_tampil_online ON barang(tampil_online)`
       );
+    },
+  },
+  {
+    version: 5,
+    name: 'store contact (telepon in pengaturan)',
+    async up(db) {
+      await addColumnIfMissing(
+        db,
+        'pengaturan',
+        'telepon',
+        "VARCHAR(30) DEFAULT ''"
+      );
+    },
+  },
+  {
+    version: 6,
+    name: 'banner slider management',
+    async up(db) {
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS banners (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          judul VARCHAR(200) NOT NULL DEFAULT '',
+          subjudul VARCHAR(300) DEFAULT '',
+          badge VARCHAR(100) DEFAULT '',
+          gambar TEXT DEFAULT '',
+          warna_bg VARCHAR(200) DEFAULT 'linear-gradient(135deg, #0A4D2E 0%, #03AC0E 100%)',
+          warna_accent VARCHAR(30) DEFAULT '#FFD700',
+          link TEXT DEFAULT '',
+          urutan INTEGER NOT NULL DEFAULT 0,
+          aktif INTEGER NOT NULL DEFAULT 1,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+      await run(
+        db,
+        `CREATE INDEX IF NOT EXISTS idx_banners_aktif ON banners(aktif)`
+      );
+      await run(
+        db,
+        `CREATE INDEX IF NOT EXISTS idx_banners_urutan ON banners(urutan)`
+      );
+
+      // Seed 3 banner default agar langsung tampil
+      const count = await get(db, `SELECT COUNT(*) AS total FROM banners`);
+      if (!count || count.total === 0) {
+        await run(
+          db,
+          `INSERT INTO banners (judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            'Diskon Spesial Koleksi Fashion & Apparel',
+            'Koleksi Kaos Distro, Hijab Muslimah & Aksesoris Terlengkap',
+            'PROMO BULAN INI',
+            '',
+            'linear-gradient(135deg, #0A4D2E 0%, #03AC0E 100%)',
+            '#FFD700',
+            '',
+            0,
+            1,
+          ]
+        );
+        await run(
+          db,
+          `INSERT INTO banners (judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            'Top-Up Pulsa, Data & Token PLN Kilat',
+            'Isi ulang all operator 24 Jam & bayar tagihan dengan harga grosir',
+            'LAYANAN DIGITAL',
+            '',
+            'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)',
+            '#93C5FD',
+            '',
+            1,
+            1,
+          ]
+        );
+        await run(
+          db,
+          `INSERT INTO banners (judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            'Investasi Logam Mulia Emas 24K Asli',
+            'Antam & Mini Gold bersertifikat resmi, melayani jual & buyback',
+            'HEMAT & BERKAH',
+            '',
+            'linear-gradient(135deg, #78350F 0%, #D97706 100%)',
+            '#FDE68A',
+            '',
+            2,
+            1,
+          ]
+        );
+      }
+    },
+  },
+  {
+    version: 7,
+    name: 'product description (deskripsi in barang)',
+    async up(db) {
+      await addColumnIfMissing(db, 'barang', 'deskripsi', "TEXT DEFAULT ''");
+    },
+  },
+  {
+    version: 8,
+    name: 'logam mulia kategori and items',
+    async up(db) {
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS logam_mulia_kategori (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nama_merk VARCHAR(100) NOT NULL,
+          keterangan TEXT DEFAULT '',
+          urutan INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS logam_mulia_item (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          kategori_id INTEGER NOT NULL REFERENCES logam_mulia_kategori(id) ON DELETE CASCADE,
+          gramatur VARCHAR(50) NOT NULL,
+          harga_jual REAL NOT NULL DEFAULT 0,
+          harga_beli REAL DEFAULT 0,
+          stok INTEGER DEFAULT 1,
+          deskripsi TEXT DEFAULT '',
+          gambar TEXT DEFAULT '',
+          is_favorit INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+
+      // Seed initial data if table empty
+      const existing = await get(db, `SELECT COUNT(*) as total FROM logam_mulia_kategori`);
+      if (!existing || existing.total === 0) {
+        const resAntam = await run(
+          db,
+          `INSERT INTO logam_mulia_kategori (nama_merk, keterangan, urutan, aktif) VALUES (?, ?, ?, ?)`,
+          ['Antam Logam Mulia', 'Emas batangan murni 24 Karat kemurnian 999.9% bersertifikat resmi LBMA & CertiCard', 0, 1]
+        );
+        const resMini = await run(
+          db,
+          `INSERT INTO logam_mulia_kategori (nama_merk, keterangan, urutan, aktif) VALUES (?, ?, ?, ?)`,
+          ['Mini Gold', 'Sarana menabung emas mulai dari gramatur mikro bersertifikat resmi 24K', 1, 1]
+        );
+        const resUbs = await run(
+          db,
+          `INSERT INTO logam_mulia_kategori (nama_merk, keterangan, urutan, aktif) VALUES (?, ?, ?, ?)`,
+          ['UBS Gold', 'Emas batangan PT Untung Bersama Sejahtera kemurnian 99.99% segel hologram', 2, 1]
+        );
+
+        // Seed Antam items
+        const antamId = resAntam.lastID;
+        const antamItems = [
+          ['0.5 gr', 790000, 710000, 8, 'CertiCard Redesigned Press resmi Antam 2024 kemurnian 99.99%', 1],
+          ['1.0 gr', 1485000, 1350000, 10, 'CertiCard kemurnian 99.99% terakreditasi LBMA resmi Antam', 1],
+          ['2.0 gr', 2920000, 2680000, 5, 'Emas batangan 2 gram press segel resmi Antam kemurnian 999.9', 0],
+          ['5.0 gr', 7220000, 6650000, 3, 'Emas batangan 5 gram segel CertiCard resmi kemurnian 99.99%', 0],
+          ['10.0 gr', 14350000, 13200000, 2, 'Emas batangan 10 gram press segel resmi Antam investasi premium', 0],
+        ];
+        for (const [gram, hj, hb, stk, desc, fav] of antamItems) {
+          await run(
+            db,
+            `INSERT INTO logam_mulia_item (kategori_id, gramatur, harga_jual, harga_beli, stok, deskripsi, is_favorit, aktif)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+            [antamId, gram, hj, hb, stk, desc, fav]
+          );
+        }
+
+        // Seed Mini Gold items
+        const miniId = resMini.lastID;
+        const miniItems = [
+          ['0.025 gr', 48000, 40000, 25, 'Mini Gold Black Series kemurnian 24K 99.9% bersertifikat', 0],
+          ['0.05 gr', 92000, 78000, 20, 'Mini Gold Souvenir Series kemurnian 24K 99.9% bersertifikat', 0],
+          ['0.1 gr', 175000, 150000, 15, 'Mini Gold Classic 0.1 gram kemurnian 24 Karat bersertifikat', 1],
+          ['0.25 gr', 415000, 360000, 10, 'Mini Gold White Series 0.25 gram kemurnian 24K bersertifikat', 0],
+          ['0.5 gr', 780000, 700000, 6, 'Mini Gold Reguler 0.5 gram kemurnian 24 Karat bersertifikat', 1],
+        ];
+        for (const [gram, hj, hb, stk, desc, fav] of miniItems) {
+          await run(
+            db,
+            `INSERT INTO logam_mulia_item (kategori_id, gramatur, harga_jual, harga_beli, stok, deskripsi, is_favorit, aktif)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+            [miniId, gram, hj, hb, stk, desc, fav]
+          );
+        }
+
+        // Seed UBS items
+        const ubsId = resUbs.lastID;
+        const ubsItems = [
+          ['0.5 gr', 785000, 705000, 5, 'UBS Gold kemurnian 99.99% segel press hologram resmi', 0],
+          ['1.0 gr', 1475000, 1340000, 8, 'UBS Gold 1 gram kemurnian 99.99% hologram resmi bergaransi', 1],
+          ['2.0 gr', 2900000, 2660000, 4, 'UBS Gold 2 gram kemurnian 99.99% segel resmi PT UBS', 0],
+          ['5.0 gr', 7180000, 6610000, 2, 'UBS Gold 5 gram kemurnian 99.99% segel resmi PT UBS', 0],
+        ];
+        for (const [gram, hj, hb, stk, desc, fav] of ubsItems) {
+          await run(
+            db,
+            `INSERT INTO logam_mulia_item (kategori_id, gramatur, harga_jual, harga_beli, stok, deskripsi, is_favorit, aktif)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+            [ubsId, gram, hj, hb, stk, desc, fav]
+          );
+        }
+      }
+    },
+  },
+  {
+    version: 9,
+    name: 'smm booster sosmed platform layanan paket',
+    async up(db) {
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS smm_platform (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nama_platform TEXT NOT NULL,
+          slug TEXT,
+          color TEXT DEFAULT '#000000',
+          icon TEXT DEFAULT '',
+          deskripsi TEXT DEFAULT '',
+          urutan INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS smm_layanan (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          platform_id INTEGER NOT NULL,
+          nama_layanan TEXT NOT NULL,
+          target_type TEXT DEFAULT 'Link / Username',
+          deskripsi TEXT DEFAULT '',
+          urutan INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (platform_id) REFERENCES smm_platform(id) ON DELETE CASCADE
+        )`
+      );
+
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS smm_paket (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          layanan_id INTEGER NOT NULL,
+          jumlah_order INTEGER NOT NULL,
+          harga_jual REAL NOT NULL,
+          harga_modal REAL DEFAULT 0,
+          is_popular INTEGER DEFAULT 0,
+          deskripsi TEXT DEFAULT '',
+          urutan INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (layanan_id) REFERENCES smm_layanan(id) ON DELETE CASCADE
+        )`
+      );
+
+      await run(db, `CREATE INDEX IF NOT EXISTS idx_smm_layanan_platform ON smm_layanan(platform_id)`);
+      await run(db, `CREATE INDEX IF NOT EXISTS idx_smm_paket_layanan ON smm_paket(layanan_id)`);
+
+      // Seed default platforms, services, and packages if empty
+      const existing = await get(db, `SELECT COUNT(*) as total FROM smm_platform`);
+      if (!existing || existing.total === 0) {
+        // 1. TikTok
+        const resTt = await run(
+          db,
+          `INSERT INTO smm_platform (nama_platform, slug, color, icon, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, ?, 1)`,
+          ['TikTok', 'tiktok', '#000000', 'tiktok', 'Follower, Like Video & Viral Views TikTok Terpercaya', 0]
+        );
+        const ttId = resTt.lastID;
+
+        // TikTok Layanan 1: Followers
+        const resTtFol = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [ttId, 'TikTok Followers (Aktif / HQ)', 'Username / Profil TikTok (Contoh: @akun_kamu)', 'Akun real & mix aktif untuk naikkan kredibilitas profil', 0]
+        );
+        const ttFolId = resTtFol.lastID;
+        const ttFolPaket = [
+          [250, 25000, 18000, 0],
+          [500, 45000, 32000, 0],
+          [1000, 79000, 58000, 1],
+          [2500, 185000, 140000, 0],
+          [5000, 350000, 270000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of ttFolPaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [ttFolId, qty, hj, hb, pop]
+          );
+        }
+
+        // TikTok Layanan 2: Views
+        const resTtView = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [ttId, 'TikTok Video Views (Cepat & Viral)', 'Link Video TikTok (URL VT)', 'Proses super cepat langsung FYP masuk bertahap', 1]
+        );
+        const ttViewId = resTtView.lastID;
+        const ttViewPaket = [
+          [5000, 10000, 5000, 0],
+          [10000, 18000, 9000, 1],
+          [50000, 75000, 40000, 0],
+          [100000, 135000, 75000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of ttViewPaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [ttViewId, qty, hj, hb, pop]
+          );
+        }
+
+        // TikTok Layanan 3: Likes
+        const resTtLike = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [ttId, 'TikTok Likes Video', 'Link Video TikTok (URL VT)', 'Like organik stabil untuk tingkatkan interaksi video', 2]
+        );
+        const ttLikeId = resTtLike.lastID;
+        const ttLikePaket = [
+          [200, 15000, 8000, 0],
+          [500, 30000, 16000, 1],
+          [1000, 55000, 30000, 0],
+          [2500, 125000, 70000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of ttLikePaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [ttLikeId, qty, hj, hb, pop]
+          );
+        }
+
+        // 2. Instagram
+        const resIg = await run(
+          db,
+          `INSERT INTO smm_platform (nama_platform, slug, color, icon, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, ?, 1)`,
+          ['Instagram', 'instagram', '#E1306C', 'instagram', 'Followers Real/Mix, Likes Foto & Reels Views Instagram', 1]
+        );
+        const igId = resIg.lastID;
+
+        // IG Layanan 1: Followers
+        const resIgFol = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [igId, 'Instagram Followers (Real / Mix)', 'Username Profil IG (Contoh: @akun_kamu)', 'Peningkatan follower aman tanpa password', 0]
+        );
+        const igFolId = resIgFol.lastID;
+        const igFolPaket = [
+          [250, 28000, 19000, 0],
+          [500, 50000, 35000, 0],
+          [1000, 89000, 65000, 1],
+          [2500, 210000, 155000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of igFolPaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [igFolId, qty, hj, hb, pop]
+          );
+        }
+
+        // IG Layanan 2: Likes
+        const resIgLike = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [igId, 'Instagram Likes Postingan/Reels', 'Link Foto / Reels Instagram', 'Like masuk cepat dan natural', 1]
+        );
+        const igLikeId = resIgLike.lastID;
+        const igLikePaket = [
+          [250, 12000, 6000, 0],
+          [500, 22000, 12000, 1],
+          [1000, 38000, 20000, 0],
+          [2500, 85000, 48000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of igLikePaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [igLikeId, qty, hj, hb, pop]
+          );
+        }
+
+        // IG Layanan 3: Reels Views
+        const resIgView = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [igId, 'Instagram Reels Views', 'Link Reels Instagram', 'Bantu Reels masuk explore dan rekomendasi IG', 2]
+        );
+        const igViewId = resIgView.lastID;
+        const igViewPaket = [
+          [2000, 12000, 6000, 0],
+          [5000, 25000, 13000, 1],
+          [10000, 45000, 24000, 0],
+          [25000, 95000, 52000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of igViewPaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [igViewId, qty, hj, hb, pop]
+          );
+        }
+
+        // 3. YouTube
+        const resYt = await run(
+          db,
+          `INSERT INTO smm_platform (nama_platform, slug, color, icon, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, ?, 1)`,
+          ['YouTube', 'youtube', '#FF0000', 'youtube', 'Penambahan Jam Tayang, Views & Subscribers Channel YouTube', 2]
+        );
+        const ytId = resYt.lastID;
+
+        // YT Layanan 1: Views
+        const resYtView = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [ytId, 'YouTube Views Video', 'Link Video YouTube', 'High retention views aman algoritma YouTube', 0]
+        );
+        const ytViewId = resYtView.lastID;
+        const ytViewPaket = [
+          [1000, 45000, 28000, 0],
+          [2500, 105000, 68000, 1],
+          [5000, 195000, 125000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of ytViewPaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [ytViewId, qty, hj, hb, pop]
+          );
+        }
+
+        // YT Layanan 2: Subs
+        const resYtSub = await run(
+          db,
+          `INSERT INTO smm_layanan (platform_id, nama_layanan, target_type, deskripsi, urutan, aktif)
+           VALUES (?, ?, ?, ?, ?, 1)`,
+          [ytId, 'YouTube Subscribers', 'Link Channel YouTube', 'Subscribers permanen untuk syarat monetisasi', 1]
+        );
+        const ytSubId = resYtSub.lastID;
+        const ytSubPaket = [
+          [100, 65000, 45000, 0],
+          [250, 155000, 105000, 1],
+          [500, 295000, 205000, 0],
+        ];
+        for (const [qty, hj, hb, pop] of ytSubPaket) {
+          await run(
+            db,
+            `INSERT INTO smm_paket (layanan_id, jumlah_order, harga_jual, harga_modal, is_popular, aktif)
+             VALUES (?, ?, ?, ?, ?, 1)`,
+            [ytSubId, qty, hj, hb, pop]
+          );
+        }
+      }
     },
   },
 ];

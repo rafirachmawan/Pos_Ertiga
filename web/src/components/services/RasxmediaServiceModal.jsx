@@ -75,32 +75,33 @@ export default function RasxmediaServiceModal({ isOpen, onClose, storeInfo }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)',
+            background: '#FFFFFF',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '10px',
-                background: '#7C3AED',
-                color: '#FFFFFF',
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: '#F8FAFC',
+                color: '#7C3AED',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                boxShadow: '0 4px 10px rgba(124, 58, 237, 0.3)',
+                border: '1px solid #E2E8F0',
               }}
             >
-              🚀
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#4C1D95' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0F172A' }}>
                 Rasxmedia SMM Booster
               </h3>
-              <p style={{ margin: 0, fontSize: '11.5px', color: '#6D28D9' }}>
+              <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B' }}>
                 Followers, Likes & Views TikTok, Instagram, YouTube
               </p>
             </div>
@@ -110,8 +111,8 @@ export default function RasxmediaServiceModal({ isOpen, onClose, storeInfo }) {
             style={{
               background: 'transparent',
               border: 'none',
-              fontSize: '20px',
-              color: '#6D28D9',
+              fontSize: '18px',
+              color: '#94A3B8',
               cursor: 'pointer',
               padding: '4px',
             }}

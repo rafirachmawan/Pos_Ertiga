@@ -48,6 +48,58 @@ export const DIGITAL_SERVICES_META = [
   },
 ];
 
+// Khusus Kartu Layanan di Bagian "Top Up & Tagihan PPOB" (Beli pulsa, paket internet, pembayaran listrik PLN, e-wallet)
+export const PPOB_SERVICES_META = [
+  {
+    id: 'pulsa',
+    title: 'Pembelian Pulsa',
+    tagline: 'Pulsa All Operator',
+    description: 'Isi ulang pulsa Telkomsel, Indosat, XL, Tri, Axis, dan Smartfren proses instan.',
+    badge: 'Semua Operator',
+    badgeColor: '#2563EB',
+    bgColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
+    icon: '📱',
+    actionText: 'Beli Pulsa →',
+  },
+  {
+    id: 'paket_data',
+    title: 'Paket Internet',
+    tagline: 'Kuota Harian & Bulanan',
+    description: 'Pilihan kuota data internet hemat all operator 24 jam langsung aktif ke nomor Anda.',
+    badge: 'Kuota Hemat',
+    badgeColor: '#059669',
+    bgColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+    icon: '🌐',
+    actionText: 'Beli Paket Internet →',
+  },
+  {
+    id: 'listrik',
+    title: 'Pembayaran Listrik PLN',
+    tagline: 'Token & Tagihan PLN',
+    description: 'Beli token listrik PLN prabayar dan pembayaran tagihan listrik pascabayar 24 jam.',
+    badge: 'PLN 24 Jam',
+    badgeColor: '#D97706',
+    bgColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+    icon: '⚡',
+    actionText: 'Beli Token / Bayar →',
+  },
+  {
+    id: 'ewallet',
+    title: 'Top-Up E-Wallet & Tagihan',
+    tagline: 'DANA, OVO, GoPay, ShopeePay',
+    description: 'Isi saldo dompet digital DANA, GoPay, OVO, ShopeePay dan pembayaran tagihan lainnya.',
+    badge: 'Proses Instan',
+    badgeColor: '#7C3AED',
+    bgColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+    icon: '💳',
+    actionText: 'Top-Up Saldo →',
+  },
+];
+
 // 1. Data Jual Beli Emas
 export const GOLD_DATA = {
   brands: ['Mini Gold', 'Antam Logam Mulia', 'UBS Gold'],
@@ -121,8 +173,30 @@ export const PPOB_DATA = {
       },
     },
     {
+      id: 'paket_data',
+      name: 'Paket Internet',
+      providers: ['Telkomsel', 'Indosat', 'XL'],
+      items: {
+        'Telkomsel': [
+          { nominal: 'Maxstream 10 GB (30 Hari)', price: 38000 },
+          { nominal: 'Internet OMG! 14 GB (30 Hari)', price: 68000 },
+          { nominal: 'Internet Sakti 30 GB (30 Hari)', price: 95000 },
+        ],
+        'Indosat': [
+          { nominal: 'Freedom Internet 7 GB (30 Hari)', price: 32000 },
+          { nominal: 'Freedom Internet 18 GB (30 Hari)', price: 58000 },
+          { nominal: 'Freedom Internet 42 GB (30 Hari)', price: 98000 },
+        ],
+        'XL': [
+          { nominal: 'Xtra Combo Flex 12 GB (30 Hari)', price: 42000 },
+          { nominal: 'Xtra Combo Flex 26 GB (30 Hari)', price: 65000 },
+          { nominal: 'Xtra Combo Flex 55 GB (30 Hari)', price: 105000 },
+        ],
+      },
+    },
+    {
       id: 'listrik',
-      name: 'Token Listrik PLN',
+      name: 'Pembayaran Listrik PLN',
       providers: ['PLN Prabayar'],
       items: {
         'PLN Prabayar': [
@@ -160,28 +234,6 @@ export const PPOB_DATA = {
           { nominal: 'Saldo 20.000', price: 21500 },
           { nominal: 'Saldo 50.000', price: 51500 },
           { nominal: 'Saldo 100.000', price: 101500 },
-        ],
-      },
-    },
-    {
-      id: 'paket_data',
-      name: 'Paket Kuota Data',
-      providers: ['Telkomsel', 'Indosat', 'XL'],
-      items: {
-        'Telkomsel': [
-          { nominal: 'Maxstream 10 GB (30 Hari)', price: 38000 },
-          { nominal: 'Internet OMG! 14 GB (30 Hari)', price: 68000 },
-          { nominal: 'Internet Sakti 30 GB (30 Hari)', price: 95000 },
-        ],
-        'Indosat': [
-          { nominal: 'Freedom Internet 7 GB (30 Hari)', price: 32000 },
-          { nominal: 'Freedom Internet 18 GB (30 Hari)', price: 58000 },
-          { nominal: 'Freedom Internet 42 GB (30 Hari)', price: 98000 },
-        ],
-        'XL': [
-          { nominal: 'Xtra Combo Flex 12 GB (30 Hari)', price: 42000 },
-          { nominal: 'Xtra Combo Flex 26 GB (30 Hari)', price: 65000 },
-          { nominal: 'Xtra Combo Flex 55 GB (30 Hari)', price: 105000 },
         ],
       },
     },

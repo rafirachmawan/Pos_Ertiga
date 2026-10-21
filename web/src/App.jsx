@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Navbar from './components/Navbar';
-import HeroBanner from './components/HeroBanner';
+import MarketplaceHero from './components/MarketplaceHero';
+import MarketplaceQuickIcons from './components/MarketplaceQuickIcons';
+import FlashSaleSection from './components/FlashSaleSection';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
 import ProductDetailModal from './components/ProductDetailModal';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import Footer from './components/Footer';
-import ServiceTabNavigation from './components/ServiceTabNavigation';
 import DigitalServicesSection from './components/DigitalServicesSection';
+import LogamMuliaSection from './components/LogamMuliaSection';
+import SmmSection from './components/SmmSection';
 import { fetchTokoInfo, fetchPublicCategories, fetchPublicProducts } from './lib/api';
 import { formatRupiah } from './lib/format';
 
@@ -18,11 +21,37 @@ export default function App() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter, Search & Sort
-  const [activeMainTab, setActiveMainTab] = useState('products'); // 'products' | 'digital'
+  // Filter, Search, Tab & Sort
+  const [activeMainTab, setActiveMainTab] = useState('products');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
+  const [activeDigitalModal, setActiveDigitalModal] = useState(null);
+
+  const productsSectionRef = useRef(null);
+
+  // Helper untuk membuka modal atau scroll ke section
+  const handleOpenDigitalModal = (serviceId) => {
+    if (serviceId === 'rasxmedia' || serviceId === 'smm') {
+      const el = document.getElementById('booster-sosmed-section');
+      if (el) {
+        const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        window.scrollTo({ top, behavior: 'smooth' });
+        return;
+      }
+    }
+    if (serviceId === 'emas') {
+      const el = document.getElementById('logam-mulia-section');
+      if (el) {
+        const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        window.scrollTo({ top, behavior: 'smooth' });
+        return;
+      }
+    }
+    setActiveDigitalModal(serviceId);
+  };
 
   // Cart State with localStorage persistence
   const [cart, setCart] = useState(() => {
@@ -76,6 +105,14 @@ export default function App() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
+  const scrollToProducts = () => {
+    if (productsSectionRef.current) {
+      const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 140;
+      const elementTop = productsSectionRef.current.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: elementTop - headerHeight - 10, behavior: 'smooth' });
+    }
+  };
+
   // Add to cart handler
   const handleAddToCart = (product, addQty = 1) => {
     setCart((prev) => {
@@ -88,7 +125,7 @@ export default function App() {
       }
       return [...prev, { ...product, qty: Math.min(product.stok, addQty) }];
     });
-    showToast(`"${product.nama_barang}" berhasil ditambahkan`);
+    showToast(`${product.nama_barang} berhasil masuk keranjang`);
   };
 
   // Update qty in cart
@@ -114,8 +151,9 @@ export default function App() {
     const list = products.filter((p) => {
       const matchCategory =
         selectedCategory === null || p.kategori_id === selectedCategory;
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       const matchSearch =
+        !q ||
         (p.nama_barang || '').toLowerCase().includes(q) ||
         (p.nama_kategori || '').toLowerCase().includes(q);
       return matchCategory && matchSearch;
@@ -137,7 +175,7 @@ export default function App() {
   const totalCartPrice = cart.reduce((sum, item) => sum + item.harga_jual * item.qty, 0);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F5F6F8' }}>
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -147,161 +185,190 @@ export default function App() {
             bottom: '24px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: '#0F172A',
+            background: '#03AC0E',
             color: '#FFFFFF',
             padding: '10px 20px',
-            borderRadius: '9999px',
-            fontSize: '12.5px',
+            borderRadius: '8px',
+            fontSize: '13px',
             fontWeight: '600',
-            boxShadow: '0 10px 20px -3px rgba(0,0,0,0.25)',
+            boxShadow: '0 8px 24px rgba(3, 172, 14, 0.3)',
             zIndex: 110,
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
           }}
         >
-          <span>✓</span> {toastMessage}
+          <span>✓</span>
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Navigation */}
+      {/* 1. Shopee & Tokopedia Marketplace Header */}
       <Navbar
         storeName={storeInfo?.nama_toko || 'POS ERTIGA STORE'}
+        storeAddress={storeInfo?.alamat_toko || 'Sumberjo Kulon, Ngunut'}
+        storePhone={storeInfo?.telepon || '6281234567890'}
         cartCount={totalCartCount}
         onOpenCart={() => setIsCartOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        activeTab={activeMainTab}
+        onTabChange={(tab) => {
+          setActiveMainTab(tab);
+          if (tab === 'products') scrollToProducts();
+        }}
+        onSelectCategory={(catId) => {
+          setSelectedCategory(catId);
+          scrollToProducts();
+        }}
+        onOpenDigitalModal={handleOpenDigitalModal}
       />
 
-      {/* Hero Banner */}
-      <HeroBanner storeInfo={storeInfo} />
+      {/* 2. Main Hero Banner & Side Promo (Always prominent on marketplace home) */}
+      <MarketplaceHero
+        onExploreProducts={scrollToProducts}
+        onOpenDigitalModal={handleOpenDigitalModal}
+      />
 
-      {/* Main Content */}
-      <main className="container" style={{ flex: 1, paddingBottom: '40px' }}>
+      {/* 3. Tokopedia-Style Quick Icons (Pakaian, Hijab, Aksesoris, Pulsa, Listrik, Emas, SMM, Web) */}
+      <MarketplaceQuickIcons
+        categories={categories}
+        onSelectCategory={(catId) => {
+          setSelectedCategory(catId);
+          scrollToProducts();
+        }}
+        onOpenDigitalModal={handleOpenDigitalModal}
+        onSwitchTab={(tab) => {
+          setActiveMainTab(tab);
+          scrollToProducts();
+        }}
+      />
+
+      {/* 4. Flash Sale / Kejar Diskon Section */}
+      <FlashSaleSection
+        products={products}
+        onSelectProduct={setSelectedProduct}
+        onAddToCart={handleAddToCart}
+        onOpenDigitalModal={handleOpenDigitalModal}
+      />
+
+      {/* 5. Main Content Area */}
+      <main className="marketplace-container" ref={productsSectionRef} style={{ flex: 1, paddingBottom: '30px' }}>
         
-        {/* Tab Switcher: Produk Fisik vs Layanan Digital & Jasa */}
-        <ServiceTabNavigation
-          activeTab={activeMainTab}
-          onTabChange={setActiveMainTab}
-        />
-
+        {/* If user selected Digital Services tab specifically */}
         {activeMainTab === 'digital' ? (
-          /* Tampilan Layanan Digital & Jasa */
-          <DigitalServicesSection storeInfo={storeInfo} />
-        ) : (
-          /* Tampilan Katalog Produk Toko Fisik */
           <>
-            {/* Promo banner quick jump to Digital Services */}
-            <div
-              onClick={() => setActiveMainTab('digital')}
-              style={{
-                background: 'linear-gradient(90deg, #1E293B 0%, #0F172A 100%)',
-                borderRadius: '12px',
-                padding: '12px 18px',
-                color: '#FFFFFF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '20px',
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                border: '1px solid #334155',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '20px' }}>⚡</span>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#F1F5F9' }}>
-                    Tersedia Layanan Digital: Emas, Pulsa/PPOB, Booster Sosmed, & Jasa IT
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#94A3B8' }}>
-                    Klik di sini untuk melihat paket & memesan langsung via WhatsApp
-                  </div>
-                </div>
-              </div>
-              <span style={{ fontSize: '12px', fontWeight: '800', color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                Buka Layanan →
-              </span>
-            </div>
-
-            {/* Categories & Filter Bar */}
-            <CategoryFilter
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              totalProductsCount={products.length}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
+            <LogamMuliaSection storeInfo={storeInfo} />
+            <SmmSection storeInfo={storeInfo} />
+            <DigitalServicesSection
+              storeInfo={storeInfo}
+              activeServiceModal={activeDigitalModal}
+              onOpenServiceModal={handleOpenDigitalModal}
+              onCloseServiceModal={() => setActiveDigitalModal(null)}
             />
-
-            {/* Section Title */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
-              <div>
-                <h2 style={{ fontSize: '17px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
-                  {selectedCategory
-                    ? categories.find((c) => c.id === selectedCategory)?.nama_kategori || 'Katalog'
-                    : 'Semua Koleksi Produk'}
+          </>
+        ) : (
+          <>
+            {/* Products Card Section (Tokopedia "Rekomendasi Untuk Anda") */}
+            <div id="katalog-produk" className="mp-section-card">
+              <div className="mp-section-header">
+                <h2 className="mp-section-title">
+                  <span>🛍️</span>
+                  <span>
+                    {searchQuery ? `Hasil Pencarian "${searchQuery}"` : 'Rekomendasi Produk Pilihan'}
+                  </span>
                 </h2>
-                <span style={{ fontSize: '12px', color: '#64748B' }}>
-                  Menampilkan {filteredProducts.length} produk pilihan
-                </span>
+
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    style={{
+                      fontSize: '12px',
+                      color: '#03AC0E',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Reset Pencarian ✕
+                  </button>
+                )}
               </div>
+
+              {/* Category Filter Pills & Sort Selector */}
+              <CategoryFilter
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+                totalProductsCount={filteredProducts.length}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+              />
+
+              {/* Products Grid */}
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9CA3AF' }}>
+                  <p style={{ fontSize: '13.5px', fontWeight: '500' }}>Memuat katalog produk...</p>
+                </div>
+              ) : filteredProducts.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '48px 20px',
+                    border: '1px dashed #E5E7EB',
+                    borderRadius: '8px',
+                    color: '#6B7280',
+                  }}
+                >
+                  <p style={{ fontSize: '15px', fontWeight: '600', color: '#1F2937', marginBottom: '6px' }}>
+                    Produk tidak ditemukan
+                  </p>
+                  <p style={{ fontSize: '12.5px', margin: 0 }}>
+                    Coba kata kunci lain atau pilih kategori "Semua Produk".
+                  </p>
+                </div>
+              ) : (
+                <div className="mp-product-grid">
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                      onSelectProduct={setSelectedProduct}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Products Grid (Responsive: 4 cols on desktop, 3 on tablet, 2 on mobile) */}
-            {loading ? (
-              <div style={{ textAlign: 'center', padding: '80px 20px', color: '#94A3B8' }}>
-                <div style={{ fontSize: '28px', marginBottom: '8px' }}>⏳</div>
-                <p style={{ fontWeight: '600', fontSize: '14px' }}>Memuat katalog produk...</p>
-              </div>
-            ) : filteredProducts.length === 0 ? (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '60px 20px',
-                  background: '#FFFFFF',
-                  borderRadius: '16px',
-                  border: '1px solid #E2E8F0',
-                  color: '#94A3B8',
-                }}
-              >
-                <div style={{ fontSize: '36px', marginBottom: '8px' }}>🔍</div>
-                <p style={{ fontSize: '15px', fontWeight: '700', color: '#64748B', marginBottom: '4px' }}>
-                  Tidak ada produk yang cocok
-                </p>
-                <p style={{ fontSize: '12.5px', margin: 0 }}>
-                  Coba gunakan kata kunci pencarian lain atau pilih kategori yang berbeda.
-                </p>
-              </div>
-            ) : (
-              <div className="products-grid">
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onAddToCart={handleAddToCart}
-                    onSelectProduct={setSelectedProduct}
-                  />
-                ))}
-              </div>
-            )}
+            {/* 2. Investasi Logam Mulia Emas 24K (Section Langsung di Halaman Toko) */}
+            <LogamMuliaSection storeInfo={storeInfo} />
+
+            {/* 3. Booster Sosial Media (SMM Panel - Section Langsung di Halaman Toko) */}
+            <SmmSection storeInfo={storeInfo} />
+
+            {/* 4. Top Up & Tagihan PPOB Section */}
+            <DigitalServicesSection
+              storeInfo={storeInfo}
+              activeServiceModal={activeDigitalModal}
+              onOpenServiceModal={handleOpenDigitalModal}
+              onCloseServiceModal={() => setActiveDigitalModal(null)}
+            />
           </>
         )}
 
       </main>
 
-      {/* Floating Cart Button */}
+      {/* Floating Cart Button (visible on mobile / scroll) */}
       {totalCartCount > 0 && (
         <button
           className="floating-cart-btn"
           onClick={() => setIsCartOpen(true)}
         >
-          <span>🛒</span>
-          <span>{totalCartCount} Produk</span>
-          <span>·</span>
-          <span>Rp {formatRupiah(totalCartPrice)}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span>{totalCartCount} Produk (Rp {formatRupiah(totalCartPrice)})</span>
         </button>
       )}
 
@@ -337,6 +404,8 @@ export default function App() {
           showToast('Pesanan berhasil dibuat! Silakan lanjutkan kirim pesan di WhatsApp.');
         }}
       />
+
+
 
       {/* Footer */}
       <Footer storeInfo={storeInfo} />

@@ -7,6 +7,7 @@ const DEFAULT_FORM = {
   nama_toko: '',
   alamat_toko: '',
   pesan_struk: '',
+  telepon: '',
   printer_name: '',
   lebar_struk: 80,
   auto_print: 0,
@@ -35,6 +36,7 @@ const Pengaturan = () => {
           nama_toko: setting.data.nama_toko || '',
           alamat_toko: setting.data.alamat_toko || '',
           pesan_struk: setting.data.pesan_struk || '',
+          telepon: setting.data.telepon || '',
           printer_name: setting.data.printer_name || '',
           lebar_struk: Number(setting.data.lebar_struk) || 80,
           auto_print: Number(setting.data.auto_print) || 0,
@@ -305,14 +307,30 @@ const Pengaturan = () => {
               </div>
 
               <div>
-                <label style={labelStyle}>Alamat & Kontak Toko</label>
+                <label style={labelStyle}>Alamat Toko Fisik</label>
                 <textarea
                   rows={2}
                   value={form.alamat_toko}
                   onChange={(e) => setForm({ ...form, alamat_toko: e.target.value })}
-                  placeholder="Jl. Raya Utama No. 123&#10;Telp: 0812-3456-7890"
+                  placeholder="Jl. Raya Utama No. 123, Desa Sumberjo Kulon, Ngunut"
                   style={textareaStyle}
                 />
+              </div>
+
+              <div>
+                <label style={labelStyle}>
+                  Nomor WhatsApp Toko (Customer Service & Checkout Online)
+                </label>
+                <input
+                  type="text"
+                  value={form.telepon}
+                  onChange={(e) => setForm({ ...form, telepon: e.target.value })}
+                  placeholder="Contoh: 081234567890 atau 6281234567890"
+                  style={inputStyle}
+                />
+                <small style={{ fontSize: '11px', color: '#64748B', marginTop: '4px', display: 'block' }}>
+                  Nomor ini digunakan website toko online untuk menerima chat pelanggan dan pesan checkout WhatsApp otomatis.
+                </small>
               </div>
 
               <div>

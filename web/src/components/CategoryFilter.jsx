@@ -4,81 +4,38 @@ export default function CategoryFilter({
   categories = [],
   selectedCategory,
   onSelectCategory,
-  searchQuery,
-  onSearchChange,
   totalProductsCount = 0,
   sortBy = 'default',
   onSortChange,
 }) {
   return (
-    <div style={{ margin: '20px 0 16px' }}>
-      
-      {/* Mobile-only search bar */}
-      <div className="nav-search-mobile" style={{ marginBottom: '12px' }}>
-        <div style={{ position: 'relative' }}>
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#94A3B8"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Cari nama barang atau kategori..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            style={{
-              width: '100%',
-              height: '38px',
-              paddingLeft: '36px',
-              paddingRight: searchQuery ? '32px' : '12px',
-              borderRadius: '8px',
-              border: '1px solid #CBD5E1',
-              background: '#FFFFFF',
-              fontSize: '12.5px',
-              boxSizing: 'border-box',
-              outline: 'none',
-            }}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange('')}
-              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '13px' }}
-            >
-              ✕
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Filter Toolbar: Categories on Left, Sorting on Right */}
-      <div className="filter-toolbar">
-        
-        {/* Horizontal Category Scroll */}
-        <div className="category-scroll-container">
+    <div style={{ marginBottom: '16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          flexWrap: 'wrap',
+        }}
+      >
+        {/* Category Pills (Tokopedia style) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: '4px' }}>
           <button
             onClick={() => onSelectCategory(null)}
             style={{
-              padding: '6px 14px',
-              borderRadius: '9999px',
-              fontSize: '12px',
+              padding: '7px 16px',
+              borderRadius: '8px',
+              fontSize: '12.5px',
               fontWeight: '600',
               whiteSpace: 'nowrap',
-              background: selectedCategory === null ? '#0F172A' : '#FFFFFF',
-              color: selectedCategory === null ? '#FFFFFF' : '#475569',
-              border: `1px solid ${selectedCategory === null ? '#0F172A' : '#E2E8F0'}`,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              background: selectedCategory === null ? '#E8F8EE' : '#FFFFFF',
+              color: selectedCategory === null ? '#03AC0E' : '#4B5563',
+              border: selectedCategory === null ? '1px solid #03AC0E' : '1px solid #E5E7EB',
+              transition: 'all 0.15s ease',
             }}
           >
-            Semua Produk ({totalProductsCount})
+            Semua Produk
           </button>
 
           {categories.map((cat) => {
@@ -88,15 +45,15 @@ export default function CategoryFilter({
                 key={cat.id}
                 onClick={() => onSelectCategory(cat.id)}
                 style={{
-                  padding: '6px 14px',
-                  borderRadius: '9999px',
-                  fontSize: '12px',
+                  padding: '7px 16px',
+                  borderRadius: '8px',
+                  fontSize: '12.5px',
                   fontWeight: '600',
                   whiteSpace: 'nowrap',
-                  background: isSelected ? '#0F172A' : '#FFFFFF',
-                  color: isSelected ? '#FFFFFF' : '#475569',
-                  border: `1px solid ${isSelected ? '#0F172A' : '#E2E8F0'}`,
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                  background: isSelected ? '#E8F8EE' : '#FFFFFF',
+                  color: isSelected ? '#03AC0E' : '#4B5563',
+                  border: isSelected ? '1px solid #03AC0E' : '1px solid #E5E7EB',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 {cat.nama_kategori}
@@ -105,35 +62,40 @@ export default function CategoryFilter({
           })}
         </div>
 
-        {/* Sort Selector */}
-        {onSortChange && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto' }}>
-            <span style={{ fontSize: '11.5px', color: '#64748B', fontWeight: '500' }}>Urutkan:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => onSortChange(e.target.value)}
-              style={{
-                height: '32px',
-                padding: '0 10px',
-                borderRadius: '6px',
-                border: '1px solid #CBD5E1',
-                background: '#FFFFFF',
-                fontSize: '11.5px',
-                color: '#334155',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="default">Terbaru / Standar</option>
-              <option value="price_asc">Harga: Termurah</option>
-              <option value="price_desc">Harga: Termahal</option>
-              <option value="name_asc">Nama: A - Z</option>
-            </select>
-          </div>
-        )}
+        {/* Sort & Count */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: '500' }}>
+            Menampilkan <strong style={{ color: '#111827' }}>{totalProductsCount}</strong> barang
+          </span>
 
+          {onSortChange && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '12px', color: '#6B7280' }}>Urutkan:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => onSortChange(e.target.value)}
+                style={{
+                  height: '34px',
+                  padding: '0 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #E5E7EB',
+                  background: '#FFFFFF',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="default">Paling Sesuai</option>
+                <option value="name_asc">Nama Produk (A-Z)</option>
+                <option value="price_asc">Harga Terendah</option>
+                <option value="price_desc">Harga Tertinggi</option>
+              </select>
+            </div>
+          )}
+        </div>
       </div>
-
     </div>
   );
 }

@@ -1,184 +1,118 @@
 import React, { useState } from 'react';
-import { DIGITAL_SERVICES_META } from '../data/digitalServices';
-import GoldServiceModal from './services/GoldServiceModal';
+import { PPOB_SERVICES_META } from '../data/digitalServices';
 import PPOBServiceModal from './services/PPOBServiceModal';
-import RasxmediaServiceModal from './services/RasxmediaServiceModal';
 import AppDevServiceModal from './services/AppDevServiceModal';
 
-export default function DigitalServicesSection({ storeInfo }) {
-  const [activeModal, setActiveModal] = useState(null); // 'emas' | 'ppob' | 'rasxmedia' | 'appdev' | null
+export default function DigitalServicesSection({ storeInfo, activeServiceModal, onCloseServiceModal, onOpenServiceModal }) {
+  const [internalModal, setInternalModal] = useState(null);
+  const [selectedPpobCategory, setSelectedPpobCategory] = useState('pulsa');
+
+  const currentModal = activeServiceModal || internalModal;
+  const setModal = (id, categoryId = 'pulsa') => {
+    setSelectedPpobCategory(categoryId);
+    if (onOpenServiceModal) onOpenServiceModal(id);
+    else setInternalModal(id);
+  };
+  const closeModal = () => {
+    if (onCloseServiceModal) onCloseServiceModal();
+    else setInternalModal(null);
+  };
 
   return (
-    <section style={{ marginBottom: '36px' }}>
-      {/* Header Banner for Digital Services */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-          borderRadius: '16px',
-          padding: '24px',
-          color: '#FFFFFF',
-          marginBottom: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.15)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span
-            style={{
-              background: '#3B82F6',
-              color: '#FFFFFF',
-              fontSize: '11px',
-              fontWeight: '800',
-              padding: '3px 8px',
-              borderRadius: '6px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}
-          >
-            Layanan Baru & Eksklusif
-          </span>
-          <span style={{ fontSize: '12px', color: '#94A3B8' }}>• Transaksi Cepat & Aman via WhatsApp</span>
+    <section id="ppob-section" className="mp-section-card" style={{ marginBottom: '24px' }}>
+      {/* Header */}
+      <div className="mp-section-header">
+        <div>
+          <h2 className="mp-section-title">
+            <span>📱</span>
+            <span>Top Up & Tagihan PPOB</span>
+          </h2>
+          <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
+            Pembelian pulsa, paket internet, pembayaran listrik PLN, serta top-up saldo e-wallet proses instan
+          </p>
         </div>
-        <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '800', letterSpacing: '-0.3px' }}>
-          Layanan Digital, Emas, SMM & Solusi IT
-        </h2>
-        <p style={{ margin: 0, fontSize: '13px', color: '#94A3B8', maxWidth: '680px', lineHeight: '1.5' }}>
-          Pilih salah satu layanan di bawah ini. Anda dapat menghitung estimasi harga, memilih paket yang sesuai, dan langsung terhubung dengan Admin kami.
-        </p>
+        <span
+          style={{
+            fontSize: '11.5px',
+            fontWeight: '700',
+            color: '#03AC0E',
+            background: '#E8F8EE',
+            padding: '4px 10px',
+            borderRadius: '4px',
+          }}
+        >
+          Transaksi 24 Jam
+        </span>
       </div>
 
-      {/* Grid 4 Service Cards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '16px',
-        }}
-      >
-        {DIGITAL_SERVICES_META.map((svc) => (
+      {/* Grid of 4 PPOB Services */}
+      <div className="mp-services-grid">
+        {PPOB_SERVICES_META.map((svc) => (
           <div
             key={svc.id}
-            onClick={() => setActiveModal(svc.id)}
+            className="mp-service-box"
+            onClick={() => setModal('ppob', svc.id)}
             style={{
-              background: '#FFFFFF',
-              borderRadius: '14px',
-              border: `1.5px solid ${svc.borderColor}`,
-              padding: '20px',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = '0 12px 24px -6px rgba(0, 0, 0, 0.08)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.03)';
+              background: svc.bgColor || '#FFFFFF',
+              borderColor: svc.borderColor || '#E5E7EB',
             }}
           >
             <div>
-              {/* Card Top */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '12px',
-                    background: svc.bgColor,
-                    color: svc.iconColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '20px',
-                    border: `1px solid ${svc.borderColor}`,
-                  }}
-                >
-                  {svc.id === 'emas' && '🥇'}
-                  {svc.id === 'ppob' && '⚡'}
-                  {svc.id === 'rasxmedia' && '🚀'}
-                  {svc.id === 'appdev' && '💻'}
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '24px' }}>
+                  {svc.icon}
+                </span>
                 <span
                   style={{
-                    fontSize: '11px',
+                    fontSize: '10px',
                     fontWeight: '700',
-                    color: svc.badgeColor,
-                    background: svc.bgColor,
-                    padding: '3px 8px',
-                    borderRadius: '6px',
-                    border: `1px solid ${svc.borderColor}`,
+                    color: svc.badgeColor || '#03AC0E',
+                    background: '#FFFFFF',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                   }}
                 >
                   {svc.badge}
                 </span>
               </div>
 
-              {/* Title & Tagline */}
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+              <h3 style={{ margin: '0 0 4px 0', fontSize: '14.5px', fontWeight: '700', color: '#1F2937' }}>
                 {svc.title}
               </h3>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: svc.badgeColor, marginBottom: '8px' }}>
-                {svc.tagline}
-              </div>
-              <p style={{ margin: 0, fontSize: '12.5px', color: '#64748B', lineHeight: '1.45' }}>
+              <p style={{ margin: 0, fontSize: '11.5px', color: '#4B5563', lineHeight: '1.45' }}>
                 {svc.description}
               </p>
             </div>
 
-            {/* CTA Button */}
-            <div style={{ marginTop: '18px' }}>
-              <button
-                type="button"
+            <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span
                 style={{
-                  width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: svc.bgColor,
-                  color: svc.badgeColor,
-                  fontWeight: '800',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  display: 'flex',
+                  fontSize: '11.5px',
+                  fontWeight: '700',
+                  color: svc.badgeColor || '#03AC0E',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s',
+                  gap: '4px',
                 }}
               >
-                <span>Lihat Pilihan & Pesan</span>
-                <span>→</span>
-              </button>
+                {svc.actionText || 'Pilih Layanan →'}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Modals */}
-      <GoldServiceModal
-        isOpen={activeModal === 'emas'}
-        onClose={() => setActiveModal(null)}
-        storeInfo={storeInfo}
-      />
       <PPOBServiceModal
-        isOpen={activeModal === 'ppob'}
-        onClose={() => setActiveModal(null)}
+        isOpen={currentModal === 'ppob'}
+        onClose={closeModal}
         storeInfo={storeInfo}
-      />
-      <RasxmediaServiceModal
-        isOpen={activeModal === 'rasxmedia'}
-        onClose={() => setActiveModal(null)}
-        storeInfo={storeInfo}
+        initialCategoryId={selectedPpobCategory}
       />
       <AppDevServiceModal
-        isOpen={activeModal === 'appdev'}
-        onClose={() => setActiveModal(null)}
+        isOpen={currentModal === 'appdev'}
+        onClose={closeModal}
         storeInfo={storeInfo}
       />
     </section>

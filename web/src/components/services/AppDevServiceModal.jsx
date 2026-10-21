@@ -59,32 +59,33 @@ export default function AppDevServiceModal({ isOpen, onClose, storeInfo }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
+            background: '#FFFFFF',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '10px',
-                background: '#059669',
-                color: '#FFFFFF',
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                background: '#F8FAFC',
+                color: '#059669',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                boxShadow: '0 4px 10px rgba(5, 150, 105, 0.3)',
+                border: '1px solid #E2E8F0',
               }}
             >
-              💻
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="16 18 22 12 16 6" />
+                <polyline points="8 6 2 12 8 18" />
+              </svg>
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#064E3B' }}>
+              <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0F172A' }}>
                 Jasa Pembuatan Website & Aplikasi Custom
               </h3>
-              <p style={{ margin: 0, fontSize: '11.5px', color: '#047857' }}>
+              <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B' }}>
                 Landing Page, E-Commerce, Sistem Kasir POS & Software Bisnis
               </p>
             </div>
@@ -94,8 +95,8 @@ export default function AppDevServiceModal({ isOpen, onClose, storeInfo }) {
             style={{
               background: 'transparent',
               border: 'none',
-              fontSize: '20px',
-              color: '#047857',
+              fontSize: '18px',
+              color: '#94A3B8',
               cursor: 'pointer',
               padding: '4px',
             }}

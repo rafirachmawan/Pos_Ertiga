@@ -1,118 +1,192 @@
 import React from 'react';
 
-export default function HeroBanner({ storeInfo }) {
+export default function HeroBanner({ storeInfo, onCtaClick }) {
   return (
-    <section className="hero-section">
-      <div className="container">
-        <div className="hero-grid">
-          
-          {/* Left Column: Heading & Value Props */}
-          <div>
-            <div
+    <div className="container">
+      <div className="technova-hero-card">
+        
+        {/* Left Column: Heading, Subtitle, CTA & Slider Dots */}
+        <div>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11.5px',
+              fontWeight: '700',
+              color: '#2563EB',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '10px',
+            }}
+          >
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2563EB' }} />
+            Koleksi Pilihan & Promo Toko
+          </div>
+
+          <h1
+            style={{
+              fontSize: 'clamp(26px, 3.6vw, 38px)',
+              fontWeight: '800',
+              letterSpacing: '-0.025em',
+              lineHeight: '1.2',
+              marginBottom: '12px',
+              color: '#0F172A',
+            }}
+          >
+            Pilihan Produk Berkualitas, Pesan Cepat via WhatsApp
+          </h1>
+
+          <p
+            style={{
+              fontSize: '13.5px',
+              color: '#64748B',
+              lineHeight: '1.6',
+              marginBottom: '24px',
+              maxWidth: '480px',
+            }}
+          >
+            Data stok terhubung otomatis dengan kasir toko fisik. Belanja praktis tanpa perlu registrasi akun.
+          </p>
+
+          {/* Action Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px' }}>
+            <button
+              onClick={onCtaClick}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                padding: '4px 12px',
-                borderRadius: '9999px',
-                fontSize: '11px',
-                fontWeight: '600',
-                color: '#93C5FD',
-                marginBottom: '14px',
-              }}
-            >
-              <span>✨</span> Koleksi Pilihan Toko Online Resmi
-            </div>
-
-            <h1
-              style={{
-                fontSize: 'clamp(22px, 3.5vw, 32px)',
-                fontWeight: '800',
-                letterSpacing: '-0.025em',
-                lineHeight: '1.25',
-                marginBottom: '10px',
+                gap: '8px',
+                background: '#2563EB',
                 color: '#FFFFFF',
+                padding: '10px 22px',
+                borderRadius: '9999px',
+                fontWeight: '700',
+                fontSize: '13px',
+                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
+                transition: 'background-color 0.15s ease, transform 0.15s ease',
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1D4ED8')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2563EB')}
             >
-              Pilihan Produk Berkualitas, Pesan Cepat Langsung via WhatsApp
-            </h1>
-
-            <p
-              style={{
-                fontSize: '13.5px',
-                color: '#94A3B8',
-                lineHeight: '1.6',
-                marginBottom: '20px',
-                maxWidth: '560px',
-              }}
-            >
-              Koleksi produk fashion & retail pilihan terbaik kami. Data stok terhubung langsung dan akurat dengan kasir toko fisik.
-            </p>
-
-            {/* USP Badges */}
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#E2E8F0', fontWeight: '500' }}>
-                <span style={{ color: '#10B981', fontWeight: '800' }}>✓</span> 100% Produk Original
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#E2E8F0', fontWeight: '500' }}>
-                <span style={{ color: '#10B981', fontWeight: '800' }}>✓</span> Stok Terkini Real-Time
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#E2E8F0', fontWeight: '500' }}>
-                <span style={{ color: '#10B981', fontWeight: '800' }}>✓</span> Layanan WhatsApp Ramah
-              </div>
-            </div>
+              <span>Belanja Sekarang</span>
+              <span>→</span>
+            </button>
+            <span style={{ fontSize: '12px', color: '#64748B', fontWeight: '500' }}>
+              ● 100% Original & Ready Stock
+            </span>
           </div>
 
-          {/* Right Column: Mini Feature Card (Desktop only) */}
-          <div className="hero-card-side">
+          {/* Carousel indicator dots (matching Technova reference) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ width: '20px', height: '6px', borderRadius: '3px', background: '#2563EB' }} />
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#CBD5E1' }} />
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#CBD5E1' }} />
+          </div>
+        </div>
+
+        {/* Right Column: Featured Visual Showcase (like the monitor / device in reference) */}
+        <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '420px',
+              background: 'linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%)',
+              border: '1px solid #E2E8F0',
+              borderRadius: '16px',
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              position: 'relative',
+              boxShadow: '0 10px 25px -5px rgba(37, 99, 235, 0.08)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span
+                style={{
+                  background: '#FFFFFF',
+                  color: '#0F172A',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
+                  border: '1px solid #E2E8F0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                }}
+              >
+                Official Storefront
+              </span>
+              <span style={{ fontSize: '11.5px', color: '#059669', fontWeight: '600' }}>
+                ● Buka Setiap Hari
+              </span>
+            </div>
+
+            {/* Visual Center Preview */}
             <div
               style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '14px',
-                padding: '20px',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.25)',
+                height: '140px',
+                background: '#FFFFFF',
+                borderRadius: '12px',
+                border: '1px solid #E2E8F0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: '8px',
+                padding: '16px',
+                textAlign: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-                <div
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '8px',
-                    background: '#2563EB',
-                    color: '#FFFFFF',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '18px',
-                  }}
-                >
-                  ⚡
-                </div>
-                <div>
-                  <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#FFFFFF' }}>
-                    Belanja Praktis Tanpa Ribet
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#94A3B8' }}>
-                    Tanpa perlu daftar akun, langsung pesan
-                  </div>
-                </div>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: '#0F172A',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '800',
+                  fontSize: '16px',
+                }}
+              >
+                PE
               </div>
-
-              <div style={{ fontSize: '12px', color: '#CBD5E1', lineHeight: '1.6', background: 'rgba(15, 23, 42, 0.4)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
-                1. Pilih produk & tentukan jumlah<br />
-                2. Masukkan ke keranjang belanja<br />
-                3. Kirim rincian pesanan langsung ke WhatsApp toko kami
+              <div style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>
+                {storeInfo?.nama_toko || 'POS ERTIGA STORE'}
+              </div>
+              <div style={{ fontSize: '11px', color: '#64748B' }}>
+                Katalog retail terlengkap & terintegrasi sistem kasir
               </div>
             </div>
-          </div>
 
+            {/* Quick 3-Step Guide underneath */}
+            <div
+              style={{
+                marginTop: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: '11px',
+                color: '#475569',
+                paddingTop: '12px',
+                borderTop: '1px solid #E2E8F0',
+              }}
+            >
+              <span>1. Pilih Produk</span>
+              <span>·</span>
+              <span>2. Masuk Keranjang</span>
+              <span>·</span>
+              <span>3. Kirim ke WhatsApp</span>
+            </div>
+          </div>
         </div>
+
       </div>
-    </section>
+    </div>
   );
 }
+
+
