@@ -12,6 +12,7 @@ import BannerManager from './components/BannerManager'
 import GoldManager from './components/GoldManager'
 import SmmManager from './components/SmmManager'
 import FlashSaleManager from './components/FlashSaleManager'
+import PpobManager from './components/PpobManager'
 import { api } from './lib/api'
 import './index.css'
 
@@ -104,6 +105,9 @@ function App() {
           <div className={`nav-item ${activeTab === 'smm' ? 'active' : ''}`} onClick={() => setActiveTab('smm')}>
             Kelola Booster Sosmed
           </div>
+          <div className={`nav-item ${activeTab === 'ppob' ? 'active' : ''}`} onClick={() => setActiveTab('ppob')}>
+            Kelola PPOB & Pulsa
+          </div>
         </div>
 
         {/* Footer: User info + Logout (pinned bottom) */}
@@ -133,6 +137,7 @@ function App() {
         {activeTab === 'flashsale' && <FlashSaleManager />}
         {activeTab === 'emas' && <GoldManager />}
         {activeTab === 'smm' && <SmmManager />}
+        {activeTab === 'ppob' && <PpobManager />}
       </div>
     </div>
   )

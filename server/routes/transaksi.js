@@ -68,36 +68,68 @@ router.post(
         const items = [];
 
         for (const rawItem of cart) {
-          const barangId = toInt(rawItem.id, 0);
           const qty = toInt(rawItem.qty, 0);
-
-          if (barangId <= 0) throw httpError(400, 'ID barang tidak valid');
           if (qty <= 0) throw httpError(400, 'Qty harus lebih dari 0');
 
-          const barang = await get(
-            `SELECT id, nama_barang, harga_jual, harga_modal, stok
-             FROM barang WHERE id = ? AND aktif = 1`,
-            [barangId]
+          const isCustom = Boolean(
+            rawItem.is_custom ||
+            rawItem.tipe === 'custom' ||
+            rawItem.tipe === 'digital' ||
+            !rawItem.id ||
+            Number(rawItem.id) <= 0 ||
+            typeof rawItem.id === 'string'
           );
 
-          if (!barang) {
-            throw httpError(400, `Barang id ${barangId} tidak ditemukan`);
-          }
-          if (barang.stok < qty) {
-            throw httpError(
-              400,
-              `Stok ${barang.nama_barang} tidak cukup (tersisa ${barang.stok})`
-            );
-          }
+          if (isCustom) {
+            const namaBarang = String(rawItem.nama_barang || '').trim();
+            if (!namaBarang) {
+              throw httpError(400, 'Nama item/layanan custom wajib diisi');
+            }
+            const hargaJual = toInt(rawItem.harga_jual, 0);
+            if (hargaJual < 0) {
+              throw httpError(400, 'Harga jual tidak boleh bernilai negatif');
+            }
+            const hargaModal = toInt(rawItem.harga_modal, 0);
 
-          items.push({
-            id: barang.id,
-            nama_barang: barang.nama_barang,
-            harga_jual: barang.harga_jual,
-            harga_modal: barang.harga_modal,
-            qty,
-            subtotal: barang.harga_jual * qty,
-          });
+            items.push({
+              id: null,
+              is_custom: true,
+              nama_barang: namaBarang,
+              harga_jual: hargaJual,
+              harga_modal: hargaModal,
+              qty,
+              subtotal: hargaJual * qty,
+            });
+          } else {
+            const barangId = toInt(rawItem.id, 0);
+            if (barangId <= 0) throw httpError(400, 'ID barang tidak valid');
+
+            const barang = await get(
+              `SELECT id, nama_barang, harga_jual, harga_modal, stok
+               FROM barang WHERE id = ? AND aktif = 1`,
+              [barangId]
+            );
+
+            if (!barang) {
+              throw httpError(400, `Barang id ${barangId} tidak ditemukan`);
+            }
+            if (barang.stok < qty) {
+              throw httpError(
+                400,
+                `Stok ${barang.nama_barang} tidak cukup (tersisa ${barang.stok})`
+              );
+            }
+
+            items.push({
+              id: barang.id,
+              is_custom: false,
+              nama_barang: barang.nama_barang,
+              harga_jual: barang.harga_jual,
+              harga_modal: barang.harga_modal,
+              qty,
+              subtotal: barang.harga_jual * qty,
+            });
+          }
         }
 
         const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
@@ -149,12 +181,13 @@ router.post(
         for (const item of items) {
           await run(
             `INSERT INTO detail_transaksi
-             (transaksi_id, barang_id, harga_jual_saat_ini,
+             (transaksi_id, barang_id, nama_barang, harga_jual_saat_ini,
               harga_modal_saat_ini, qty, subtotal)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
               transaksiId,
               item.id,
+              item.nama_barang,
               item.harga_jual,
               item.harga_modal,
               item.qty,
@@ -162,14 +195,17 @@ router.post(
             ]
           );
 
-          const stockUpdate = await run(
-            `UPDATE barang SET stok = stok - ?
-             WHERE id = ? AND stok >= ?`,
-            [item.qty, item.id, item.qty]
-          );
+          // Hanya kurangi stok jika barang fisik (ada ID barang)
+          if (!item.is_custom && item.id) {
+            const stockUpdate = await run(
+              `UPDATE barang SET stok = stok - ?
+               WHERE id = ? AND stok >= ?`,
+              [item.qty, item.id, item.qty]
+            );
 
-          if (stockUpdate.changes !== 1) {
-            throw httpError(400, 'Stok berubah saat transaksi, silakan ulangi');
+            if (stockUpdate.changes !== 1) {
+              throw httpError(400, 'Stok berubah saat transaksi, silakan ulangi');
+            }
           }
         }
 
@@ -229,15 +265,17 @@ router.put(
         await run(`UPDATE transaksi SET status = 'void' WHERE id = ?`, [id]);
 
         const items = await all(
-          'SELECT barang_id, qty FROM detail_transaksi WHERE transaksi_id = ?',
+          'SELECT barang_id, qty FROM detail_transaksi WHERE transaksi_id = ? AND barang_id IS NOT NULL',
           [id]
         );
 
         for (const item of items) {
-          await run(
-            'UPDATE barang SET stok = stok + ? WHERE id = ?',
-            [item.qty, item.barang_id]
-          );
+          if (item.barang_id) {
+            await run(
+              'UPDATE barang SET stok = stok + ? WHERE id = ?',
+              [item.qty, item.barang_id]
+            );
+          }
         }
 
         await run('COMMIT');
@@ -264,7 +302,7 @@ router.get(
 
     const rows = await all(
       `SELECT dt.*,
-              COALESCE(b.nama_barang, 'Barang dihapus') AS nama_barang,
+              COALESCE(NULLIF(dt.nama_barang, ''), b.nama_barang, 'Barang') AS nama_barang,
               COALESCE(b.barcode, '-') AS barcode
        FROM detail_transaksi dt
        LEFT JOIN barang b ON dt.barang_id = b.id

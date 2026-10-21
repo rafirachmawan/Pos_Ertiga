@@ -174,4 +174,25 @@ router.get(
   })
 );
 
+// GET /api/public/ppob - Data produk & harga PPOB aktif untuk etalase website
+router.get(
+  '/ppob',
+  asyncHandler(async (req, res) => {
+    const categories = await all(
+      `SELECT * FROM ppob_kategori WHERE aktif = 1 ORDER BY urutan ASC, id ASC`
+    );
+
+    const items = await all(
+      `SELECT * FROM ppob_item WHERE aktif = 1 ORDER BY urutan ASC, harga_jual ASC, id ASC`
+    );
+
+    const data = categories.map((cat) => ({
+      ...cat,
+      items: items.filter((it) => it.kategori_kode === cat.kode),
+    }));
+
+    res.json({ data });
+  })
+);
+
 module.exports = router;

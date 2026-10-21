@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 12;
+const LATEST_VERSION = 13;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -969,6 +969,123 @@ const migrations = [
          SET kondisi = 'Baru' 
          WHERE kondisi IS NULL OR kondisi = ''`
       );
+    },
+  },
+  {
+    version: 13,
+    name: 'transaksi custom kasir & sistem ppob digital',
+    async up(db) {
+      // 1. Tambah kolom nama_barang di detail_transaksi agar transaksi custom kasir (pulsa, jasa, token, dll) tercatat rapi
+      await addColumnIfMissing(
+        db,
+        'detail_transaksi',
+        'nama_barang',
+        "TEXT DEFAULT ''"
+      );
+
+      // Backfill nama_barang untuk transaksi lama dari tabel barang
+      await run(
+        db,
+        `UPDATE detail_transaksi 
+         SET nama_barang = (
+           SELECT b.nama_barang FROM barang b WHERE b.id = detail_transaksi.barang_id
+         )
+         WHERE (nama_barang IS NULL OR nama_barang = '') AND barang_id IS NOT NULL`
+      );
+
+      // 2. Buat tabel kategori PPOB
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS ppob_kategori (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          kode VARCHAR(50) UNIQUE NOT NULL,
+          nama VARCHAR(100) NOT NULL,
+          deskripsi TEXT DEFAULT '',
+          icon VARCHAR(50) DEFAULT 'mobile',
+          urutan INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+
+      // 3. Buat tabel item / produk PPOB
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS ppob_item (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          kategori_kode VARCHAR(50) NOT NULL,
+          operator VARCHAR(100) NOT NULL,
+          nama_produk VARCHAR(200) NOT NULL,
+          nominal VARCHAR(100) NOT NULL,
+          harga_modal INTEGER DEFAULT 0,
+          harga_jual INTEGER NOT NULL,
+          urutan INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+
+      await run(db, `CREATE INDEX IF NOT EXISTS idx_ppob_item_kat ON ppob_item(kategori_kode)`);
+      await run(db, `CREATE INDEX IF NOT EXISTS idx_ppob_item_op ON ppob_item(operator)`);
+
+      // 4. Seed kategori PPOB
+      const countKat = await get(db, `SELECT COUNT(*) as total FROM ppob_kategori`);
+      if (!countKat || countKat.total === 0) {
+        await run(
+          db,
+          `INSERT INTO ppob_kategori (kode, nama, deskripsi, icon, urutan, aktif) VALUES
+           ('pulsa', 'Pulsa Seluler', 'Isi ulang pulsa reguler all operator', 'phone', 0, 1),
+           ('paket_data', 'Paket Data Internet', 'Kuota data internet harian & bulanan', 'wifi', 1, 1),
+           ('listrik', 'Listrik PLN', 'Token listrik prabayar & tagihan PLN', 'zap', 2, 1),
+           ('ewallet', 'Top-Up E-Wallet', 'Isi saldo DANA, GoPay, OVO, ShopeePay', 'wallet', 3, 1)`
+        );
+
+        // Seed item PPOB
+        const seedItems = [
+          // Pulsa Telkomsel
+          ['pulsa', 'Telkomsel', 'Pulsa Telkomsel 5.000', '5.000', 5800, 7000, 0],
+          ['pulsa', 'Telkomsel', 'Pulsa Telkomsel 10.000', '10.000', 10600, 12000, 1],
+          ['pulsa', 'Telkomsel', 'Pulsa Telkomsel 20.000', '20.000', 20300, 22000, 2],
+          ['pulsa', 'Telkomsel', 'Pulsa Telkomsel 25.000', '25.000', 25100, 27000, 3],
+          ['pulsa', 'Telkomsel', 'Pulsa Telkomsel 50.000', '50.000', 49800, 52000, 4],
+          ['pulsa', 'Telkomsel', 'Pulsa Telkomsel 100.000', '100.000', 98500, 101000, 5],
+          // Pulsa Indosat
+          ['pulsa', 'Indosat', 'Pulsa Indosat 5.000', '5.000', 5800, 7000, 10],
+          ['pulsa', 'Indosat', 'Pulsa Indosat 10.000', '10.000', 10600, 12000, 11],
+          ['pulsa', 'Indosat', 'Pulsa Indosat 25.000', '25.000', 25100, 27000, 12],
+          ['pulsa', 'Indosat', 'Pulsa Indosat 50.000', '50.000', 49800, 52000, 13],
+          ['pulsa', 'Indosat', 'Pulsa Indosat 100.000', '100.000', 98500, 101000, 14],
+          // Pulsa XL
+          ['pulsa', 'XL / Axis', 'Pulsa XL 5.000', '5.000', 5800, 7000, 20],
+          ['pulsa', 'XL / Axis', 'Pulsa XL 10.000', '10.000', 10600, 12000, 21],
+          ['pulsa', 'XL / Axis', 'Pulsa XL 25.000', '25.000', 25100, 27000, 22],
+          ['pulsa', 'XL / Axis', 'Pulsa XL 50.000', '50.000', 49800, 52000, 23],
+          ['pulsa', 'XL / Axis', 'Pulsa XL 100.000', '100.000', 98500, 101000, 24],
+          // Listrik PLN
+          ['listrik', 'PLN Prabayar', 'Token PLN 20.000', '20.000', 20500, 22500, 30],
+          ['listrik', 'PLN Prabayar', 'Token PLN 50.000', '50.000', 50500, 52500, 31],
+          ['listrik', 'PLN Prabayar', 'Token PLN 100.000', '100.000', 100500, 102500, 32],
+          ['listrik', 'PLN Prabayar', 'Token PLN 200.000', '200.000', 200500, 202500, 33],
+          ['listrik', 'PLN Prabayar', 'Token PLN 500.000', '500.000', 500500, 502500, 34],
+          // E-Wallet DANA
+          ['ewallet', 'DANA', 'Saldo DANA 20.000', '20.000', 20500, 22000, 40],
+          ['ewallet', 'DANA', 'Saldo DANA 50.000', '50.000', 50500, 52000, 41],
+          ['ewallet', 'DANA', 'Saldo DANA 100.000', '100.000', 100500, 102000, 42],
+          // E-Wallet GoPay
+          ['ewallet', 'GoPay', 'Saldo GoPay 20.000', '20.000', 20500, 22000, 50],
+          ['ewallet', 'GoPay', 'Saldo GoPay 50.000', '50.000', 50500, 52000, 51],
+          ['ewallet', 'GoPay', 'Saldo GoPay 100.000', '100.000', 100500, 102000, 52],
+        ];
+
+        for (const [kat, op, nama, nom, modal, jual, urut] of seedItems) {
+          await run(
+            db,
+            `INSERT INTO ppob_item (kategori_kode, operator, nama_produk, nominal, harga_modal, harga_jual, urutan, aktif)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+            [kat, op, nama, nom, modal, jual, urut]
+          );
+        }
+      }
     },
   },
 ];

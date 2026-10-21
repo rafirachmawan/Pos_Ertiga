@@ -25,6 +25,18 @@ const POS = () => {
   const barcodeRef = useRef(null);
   const clientRefRef = useRef(null);
 
+  // Modal Penjualan Non-Pakaian / Pulsa / Layanan Digital
+  const [showDigitalModal, setShowDigitalModal] = useState(false);
+  const [digitalTab, setDigitalTab] = useState('quick'); // 'quick' | 'manual'
+  const [ppobItems, setPpobItems] = useState([]);
+  const [ppobFilter, setPpobFilter] = useState('all');
+  const [manualForm, setManualForm] = useState({
+    nama_barang: '',
+    harga_jual: '',
+    harga_modal: '',
+    qty: 1,
+  });
+
   useEffect(() => {
     fetchItems();
     Promise.all([api('/api/kategori'), api('/api/pengaturan')])
@@ -55,6 +67,32 @@ const POS = () => {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const fetchPpobQuickItems = async () => {
+    try {
+      const res = await api('/api/ppob/items');
+      if (res.data) setPpobItems(res.data);
+    } catch (err) {
+      console.warn('Gagal memuat item PPOB:', err);
+    }
+  };
+
+  const addCustomToCart = (itemData) => {
+    const customId = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const newItem = {
+      id: customId,
+      nama_barang: itemData.nama_barang,
+      harga_jual: Number(itemData.harga_jual) || 0,
+      harga_modal: Number(itemData.harga_modal) || 0,
+      qty: Number(itemData.qty) || 1,
+      subtotal: (Number(itemData.harga_jual) || 0) * (Number(itemData.qty) || 1),
+      is_custom: true,
+      stok: 999999,
+    };
+    setCart((prev) => [...prev, newItem]);
+    setShowDigitalModal(false);
+    setManualForm({ nama_barang: '', harga_jual: '', harga_modal: '', qty: 1 });
   };
 
   // Filter produk berdasarkan search query dan kategori
@@ -89,18 +127,22 @@ const POS = () => {
   // Update qty dari input keranjang (+ dan -)
   const updateQty = (id, delta) => {
     const cartItem = cart.find(item => item.id === id);
-    const product = items.find(item => item.id === id);
-    if (!cartItem || !product) return;
+    if (!cartItem) return;
 
     const newQty = cartItem.qty + delta;
     if (newQty <= 0) {
       removeFromCart(id);
       return;
     }
-    if (newQty > product.stok) {
-      alert('Stok tidak mencukupi!');
-      return;
+
+    if (!cartItem.is_custom) {
+      const product = items.find(item => item.id === id);
+      if (product && newQty > product.stok) {
+        alert('Stok tidak mencukupi!');
+        return;
+      }
     }
+
     setCart(cart.map(item =>
       item.id === id
       ? { ...item, qty: newQty, subtotal: newQty * item.harga_jual }
@@ -190,7 +232,17 @@ const POS = () => {
       nama_pelanggan: namaPelanggan.trim() || 'Umum',
       metode_pembayaran: metodePembayaran,
       client_ref: clientRefRef.current,
-      cart: cart.map((item) => ({ id: item.id, qty: item.qty })),
+      cart: cart.map((item) =>
+        item.is_custom
+          ? {
+              is_custom: true,
+              nama_barang: item.nama_barang,
+              harga_jual: item.harga_jual,
+              harga_modal: item.harga_modal || 0,
+              qty: item.qty,
+            }
+          : { id: item.id, qty: item.qty }
+      ),
     };
 
     try {
@@ -295,6 +347,33 @@ const POS = () => {
                 Scan
               </button>
             </form>
+
+            {/* Tombol Input Pulsa & Non-Pakaian */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowDigitalModal(true);
+                fetchPpobQuickItems();
+              }}
+              style={{
+                height: '36px',
+                padding: '0 14px',
+                background: '#03AC0E',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '12.5px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 4px rgba(3, 172, 14, 0.2)',
+              }}
+            >
+              + Pulsa & Non-Pakaian
+            </button>
           </div>
         </div>
 
@@ -576,8 +655,13 @@ const POS = () => {
                   <div style={{ fontSize: '12.5px', fontWeight: '600', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {item.nama_barang}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
-                    Rp {item.harga_jual.toLocaleString('id-ID')}
+                  <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>Rp {item.harga_jual.toLocaleString('id-ID')}</span>
+                    {item.is_custom && (
+                      <span style={{ fontSize: '9.5px', fontWeight: '700', color: '#059669', background: '#ECFDF5', padding: '1px 5px', borderRadius: '3px' }}>
+                        Non-Pakaian
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -727,6 +811,269 @@ const POS = () => {
         </div>
       </div>
       {/* ===== MODAL STRUK ===== */}
+      {/* Modal Penjualan Non-Pakaian / Pulsa & Custom Item */}
+      {showDigitalModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            backdropFilter: 'blur(3px)',
+            padding: '16px',
+          }}
+          onClick={() => setShowDigitalModal(false)}
+        >
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: '14px',
+              maxWidth: '640px',
+              width: '100%',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0F172A' }}>
+                  Penjualan Non-Pakaian / Pulsa & Layanan Digital
+                </h3>
+                <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#64748B' }}>
+                  Pilih produk pulsa/token atau input item manual untuk dicetak ke struk kasir
+                </p>
+              </div>
+              <button onClick={() => setShowDigitalModal(false)} style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', color: '#64748B' }}>✕</button>
+            </div>
+
+            {/* Modal Navigation Tabs */}
+            <div style={{ display: 'flex', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
+              <button
+                type="button"
+                onClick={() => setDigitalTab('quick')}
+                style={{
+                  flex: 1,
+                  padding: '11px',
+                  background: digitalTab === 'quick' ? '#FFFFFF' : 'transparent',
+                  border: 'none',
+                  borderBottom: digitalTab === 'quick' ? '2px solid #03AC0E' : 'none',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  color: digitalTab === 'quick' ? '#03AC0E' : '#64748B',
+                  cursor: 'pointer',
+                }}
+              >
+                Pilih Cepat PPOB / Pulsa / Listrik
+              </button>
+              <button
+                type="button"
+                onClick={() => setDigitalTab('manual')}
+                style={{
+                  flex: 1,
+                  padding: '11px',
+                  background: digitalTab === 'manual' ? '#FFFFFF' : 'transparent',
+                  border: 'none',
+                  borderBottom: digitalTab === 'manual' ? '2px solid #03AC0E' : 'none',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  color: digitalTab === 'manual' ? '#03AC0E' : '#64748B',
+                  cursor: 'pointer',
+                }}
+              >
+                Input Manual / Bebas
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+              {digitalTab === 'quick' ? (
+                <div>
+                  {/* Category Filter Chips */}
+                  <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '4px' }}>
+                    {[
+                      { key: 'all', label: 'Semua' },
+                      { key: 'pulsa', label: 'Pulsa' },
+                      { key: 'listrik', label: 'Listrik PLN' },
+                      { key: 'ewallet', label: 'E-Wallet' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setPpobFilter(tab.key)}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          fontSize: '12px',
+                          fontWeight: ppobFilter === tab.key ? '700' : '500',
+                          background: ppobFilter === tab.key ? '#0F172A' : '#F1F5F9',
+                          color: ppobFilter === tab.key ? '#FFFFFF' : '#475569',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Grid of PPOB items */}
+                  {ppobItems.length === 0 ? (
+                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748B' }}>
+                      Memuat daftar produk PPOB...
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
+                      {ppobItems
+                        .filter((p) => ppobFilter === 'all' || p.kategori_kode === ppobFilter)
+                        .map((p) => (
+                          <div
+                            key={p.id}
+                            style={{
+                              background: '#FFFFFF',
+                              border: '1px solid #E2E8F0',
+                              borderRadius: '8px',
+                              padding: '12px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <div>
+                              <div style={{ fontSize: '10px', fontWeight: '700', color: '#03AC0E', textTransform: 'uppercase', marginBottom: '2px' }}>
+                                {p.operator}
+                              </div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+                                {p.nama_produk}
+                              </div>
+                              <div style={{ fontSize: '13px', fontWeight: '800', color: '#2563EB' }}>
+                                Rp {p.harga_jual.toLocaleString('id-ID')}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                addCustomToCart({
+                                  nama_barang: p.nama_produk,
+                                  harga_jual: p.harga_jual,
+                                  harga_modal: p.harga_modal,
+                                  qty: 1,
+                                })
+                              }
+                              style={{
+                                marginTop: '10px',
+                                padding: '6px 10px',
+                                background: '#F1F5F9',
+                                color: '#0F172A',
+                                border: '1px solid #CBD5E1',
+                                borderRadius: '6px',
+                                fontSize: '11.5px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              + Masuk Kasir
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!manualForm.nama_barang.trim()) return alert('Nama item wajib diisi');
+                    if (Number(manualForm.harga_jual) <= 0) return alert('Harga jual harus lebih dari 0');
+                    addCustomToCart(manualForm);
+                  }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                >
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Nama Item / Layanan (misal: Pulsa Telkomsel 50rb, Token PLN 100rb, Jasa Print, dll.) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="mis. Pulsa Telkomsel 50.000"
+                      value={manualForm.nama_barang}
+                      onChange={(e) => setManualForm({ ...manualForm, nama_barang: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                        Harga Jual (Rp) *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        placeholder="mis. 52000"
+                        value={manualForm.harga_jual}
+                        onChange={(e) => setManualForm({ ...manualForm, harga_jual: e.target.value })}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: '700', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                        Harga Modal (Rp, opsional untuk laba)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="mis. 49800"
+                        value={manualForm.harga_modal}
+                        onChange={(e) => setManualForm({ ...manualForm, harga_modal: e.target.value })}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ width: '120px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Jumlah (Qty)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={manualForm.qty}
+                      onChange={(e) => setManualForm({ ...manualForm, qty: Math.max(1, Number(e.target.value)) })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowDigitalModal(false)}
+                      style={{ padding: '8px 16px', background: '#F1F5F9', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: '#475569' }}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      style={{ padding: '8px 20px', background: '#03AC0E', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', color: '#FFFFFF' }}
+                    >
+                      + Masukkan ke Keranjang Kasir
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {struk && (
         <div
           style={{

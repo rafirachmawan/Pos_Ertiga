@@ -1,37 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PPOB_DATA } from '../../data/digitalServices';
 import { formatRupiah } from '../../lib/format';
 import { generateWhatsAppPpobUrl } from '../../lib/whatsapp';
+import { fetchPublicPpob } from '../../lib/api';
 
 export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCategoryId = null }) {
-  if (!isOpen) return null;
-
-  const defaultCategory = (initialCategoryId && PPOB_DATA.categories.find((c) => c.id === initialCategoryId)) || PPOB_DATA.categories[0];
-  const [activeCategory, setActiveCategory] = useState(defaultCategory);
-  const [selectedProvider, setSelectedProvider] = useState(defaultCategory.providers[0]);
+  const [liveCategories, setLiveCategories] = useState(null);
+  const [activeCategoryId, setActiveCategoryId] = useState(initialCategoryId || 'pulsa');
+  const [selectedProvider, setSelectedProvider] = useState(null);
   const [targetNumber, setTargetNumber] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
-  const [customer, setCustomer] = useState({
-    nama: '',
-    telepon: '',
-  });
+  const [customer, setCustomer] = useState({ nama: '', telepon: '' });
 
-  // Sync category if initialCategoryId changes
-  React.useEffect(() => {
+  // Fetch live data from POS backend
+  useEffect(() => {
+    if (!isOpen) return;
+    let mounted = true;
+    fetchPublicPpob().then((data) => {
+      if (mounted && data && data.length > 0) {
+        const mapped = data.map((cat) => {
+          const providersMap = {};
+          (cat.items || []).forEach((it) => {
+            const op = it.operator || 'Umum';
+            if (!providersMap[op]) providersMap[op] = [];
+            providersMap[op].push({
+              nominal: it.nominal || it.nama_produk,
+              price: it.harga_jual,
+              id: it.id,
+            });
+          });
+          const providerKeys = Object.keys(providersMap);
+          return {
+            id: cat.kode,
+            name: cat.nama,
+            providers: providerKeys.length > 0 ? providerKeys : ['Semua'],
+            items: providersMap,
+          };
+        });
+        setLiveCategories(mapped);
+      }
+    });
+    return () => { mounted = false; };
+  }, [isOpen]);
+
+  // Merged categories: live data takes priority, fallback to hardcoded
+  const categories = useMemo(() => liveCategories || PPOB_DATA.categories, [liveCategories]);
+
+  // Derive the active category object from categories
+  const activeCategory = useMemo(() => {
+    return categories.find((c) => c.id === activeCategoryId) || categories[0];
+  }, [categories, activeCategoryId]);
+
+  // Sync selectedProvider when activeCategory changes or live data loads
+  useEffect(() => {
+    if (!activeCategory) return;
+    if (!selectedProvider || !activeCategory.providers.includes(selectedProvider)) {
+      setSelectedProvider(activeCategory.providers[0]);
+    }
+  }, [activeCategory]);
+
+  // Sync activeCategoryId when initialCategoryId prop changes
+  useEffect(() => {
     if (initialCategoryId) {
-      const found = PPOB_DATA.categories.find((c) => c.id === initialCategoryId);
-      if (found) {
-        setActiveCategory(found);
-        setSelectedProvider(found.providers[0]);
-        setSelectedItem(null);
+      setActiveCategoryId(initialCategoryId);
+    }
+  }, [initialCategoryId]);
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setTargetNumber('');
+      setSelectedItem(null);
+      setCustomer({ nama: '', telepon: '' });
+      if (initialCategoryId) {
+        setActiveCategoryId(initialCategoryId);
       }
     }
-  }, [initialCategoryId, isOpen]);
+  }, [isOpen]);
+
+  const availableItems = (activeCategory && activeCategory.items[selectedProvider]) || [];
 
   // Switch category
-  const handleCategoryChange = (cat) => {
-    setActiveCategory(cat);
-    setSelectedProvider(cat.providers[0]);
+  const handleCategoryChange = (catId) => {
+    setActiveCategoryId(catId);
     setSelectedItem(null);
   };
 
@@ -40,8 +91,6 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
     setSelectedProvider(prov);
     setSelectedItem(null);
   };
-
-  const availableItems = activeCategory.items[selectedProvider] || [];
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -76,12 +125,14 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
     onClose();
   };
 
-  const tabDefinitions = [
-    { id: 'pulsa', name: 'Pulsa' },
-    { id: 'paket_data', name: 'Paket Data' },
-    { id: 'listrik', name: 'Listrik PLN' },
-    { id: 'ewallet', name: 'E-Wallet' },
-  ];
+  // Early return AFTER all hooks
+  if (!isOpen) return null;
+
+  // Build tab list dynamically from categories
+  const tabDefinitions = categories.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+  }));
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -159,11 +210,11 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
           </button>
         </div>
 
-        {/* 2. Category Tabs (Fixed 4-Grid - No Horizontal Scrollbar) */}
+        {/* 2. Category Tabs (Dynamic from DB / Fallback) */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: `repeat(${Math.min(tabDefinitions.length, 4)}, 1fr)`,
             gap: '6px',
             padding: '8px 16px',
             background: '#F8FAFC',
@@ -171,14 +222,12 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
           }}
         >
           {tabDefinitions.map((tab) => {
-            const catObj = PPOB_DATA.categories.find((c) => c.id === tab.id);
-            if (!catObj) return null;
-            const isActive = activeCategory.id === tab.id;
+            const isActive = activeCategoryId === tab.id;
             return (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => handleCategoryChange(catObj)}
+                onClick={() => handleCategoryChange(tab.id)}
                 style={{
                   padding: '9px 4px',
                   borderRadius: '8px',
@@ -196,7 +245,6 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
                   transition: 'all 0.15s ease',
                 }}
               >
-                <span>{tab.icon}</span>
                 <span>{tab.name}</span>
               </button>
             );
@@ -223,45 +271,47 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
             }}
           >
             {/* Provider Selection */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: '#374151', marginBottom: '8px', letterSpacing: '0.3px' }}>
-                PILIH OPERATOR / PROVIDER
-              </label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {activeCategory.providers.map((p) => {
-                  const isSelected = selectedProvider === p;
-                  return (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => handleProviderChange(p)}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '20px',
-                        border: isSelected ? '1.5px solid #03AC0E' : '1px solid #D1D5DB',
-                        background: isSelected ? '#E8F8EE' : '#FFFFFF',
-                        color: isSelected ? '#03AC0E' : '#4B5563',
-                        fontWeight: isSelected ? '700' : '600',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {isSelected && '✓ '}
-                      {p}
-                    </button>
-                  );
-                })}
+            {activeCategory && activeCategory.providers.length > 0 && (
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: '#374151', marginBottom: '8px', letterSpacing: '0.3px' }}>
+                  PILIH OPERATOR / PROVIDER
+                </label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {activeCategory.providers.map((p) => {
+                    const isSelected = selectedProvider === p;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => handleProviderChange(p)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '20px',
+                          border: isSelected ? '1.5px solid #03AC0E' : '1px solid #D1D5DB',
+                          background: isSelected ? '#E8F8EE' : '#FFFFFF',
+                          color: isSelected ? '#03AC0E' : '#4B5563',
+                          fontWeight: isSelected ? '700' : '600',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {isSelected && '✓ '}
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Target Number */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: '#374151', marginBottom: '6px', letterSpacing: '0.3px' }}>
-                {activeCategory.id === 'listrik'
+                {activeCategoryId === 'listrik'
                   ? 'NOMOR METERAN / ID PELANGGAN PLN *'
-                  : activeCategory.id === 'ewallet'
-                  ? `NOMOR HP AKUN ${selectedProvider.toUpperCase()} *`
+                  : activeCategoryId === 'ewallet'
+                  ? `NOMOR HP AKUN ${(selectedProvider || '').toUpperCase()} *`
                   : 'NOMOR TELEPON / HP TUJUAN *'}
               </label>
               <input
@@ -270,7 +320,7 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
                 value={targetNumber}
                 onChange={(e) => setTargetNumber(e.target.value)}
                 placeholder={
-                  activeCategory.id === 'listrik'
+                  activeCategoryId === 'listrik'
                     ? 'Contoh: 14234567890 (No. Meter/ID Pelanggan)'
                     : 'Contoh: 081234567890'
                 }
@@ -296,54 +346,60 @@ export default function PPOBServiceModal({ isOpen, onClose, storeInfo, initialCa
             {/* Denominations Grid */}
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '800', color: '#374151', marginBottom: '8px', letterSpacing: '0.3px' }}>
-                {activeCategory.id === 'paket_data' ? 'PILIH PAKET INTERNET' : 'PILIH NOMINAL PENGISIAN'}
+                {activeCategoryId === 'paket_data' ? 'PILIH PAKET INTERNET' : 'PILIH NOMINAL PENGISIAN'}
               </label>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                  gap: '10px',
-                }}
-              >
-                {availableItems.map((item, idx) => {
-                  const isSelected = selectedItem?.nominal === item.nominal;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setSelectedItem(item)}
-                      style={{
-                        padding: '12px 14px',
-                        borderRadius: '10px',
-                        border: isSelected ? '2px solid #03AC0E' : '1.5px solid #E5E7EB',
-                        background: isSelected ? '#F0FDF4' : '#FFFFFF',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        gap: '6px',
-                        boxShadow: isSelected ? '0 2px 8px rgba(3,172,14,0.12)' : 'none',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '12.5px', fontWeight: '700', color: '#1F2937' }}>
-                          {item.nominal}
-                        </span>
-                        {isSelected && (
-                          <span style={{ color: '#03AC0E', fontWeight: '800', fontSize: '13px' }}>
-                            ✓
+              {availableItems.length === 0 ? (
+                <div style={{ padding: '24px 16px', textAlign: 'center', color: '#9CA3AF', fontSize: '13px', background: '#F9FAFB', borderRadius: '8px', border: '1px dashed #E5E7EB' }}>
+                  Belum ada produk tersedia untuk {selectedProvider || 'provider ini'}.
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+                    gap: '10px',
+                  }}
+                >
+                  {availableItems.map((item, idx) => {
+                    const isSelected = selectedItem?.nominal === item.nominal && selectedItem?.price === item.price;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedItem(item)}
+                        style={{
+                          padding: '12px 14px',
+                          borderRadius: '10px',
+                          border: isSelected ? '2px solid #03AC0E' : '1.5px solid #E5E7EB',
+                          background: isSelected ? '#F0FDF4' : '#FFFFFF',
+                          textAlign: 'left',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          gap: '6px',
+                          boxShadow: isSelected ? '0 2px 8px rgba(3,172,14,0.12)' : 'none',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: '12.5px', fontWeight: '700', color: '#1F2937' }}>
+                            {item.nominal}
                           </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: '13px', fontWeight: '800', color: isSelected ? '#03AC0E' : '#E11D48' }}>
-                        Rp {formatRupiah(item.price)}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                          {isSelected && (
+                            <span style={{ color: '#03AC0E', fontWeight: '800', fontSize: '13px' }}>
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '13px', fontWeight: '800', color: isSelected ? '#03AC0E' : '#E11D48' }}>
+                          Rp {formatRupiah(item.price)}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Customer Name */}

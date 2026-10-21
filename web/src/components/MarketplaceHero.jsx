@@ -38,7 +38,7 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
 
   // Fetch banners from API
   useEffect(() => {
-    fetch(`${API_BASE}/api/public/banners`)
+    fetch('/api/public/banners')
       .then((r) => r.json())
       .then((res) => {
         if (res.data && res.data.length > 0) {

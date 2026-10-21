@@ -192,15 +192,15 @@ router.get(
 
     const rows = await all(
       `SELECT
-         COALESCE(b.nama_barang, 'Barang dihapus') AS nama_barang,
-         COALESCE(b.satuan, 'pcs') AS satuan,
+         COALESCE(NULLIF(dt.nama_barang, ''), b.nama_barang, 'Barang') AS nama_barang,
+         COALESCE(b.satuan, 'transaksi') AS satuan,
          SUM(dt.qty) AS total_terjual,
          SUM(dt.subtotal) AS total_omzet
        FROM detail_transaksi dt
        LEFT JOIN barang b ON dt.barang_id = b.id
        JOIN transaksi t ON dt.transaksi_id = t.id
        ${where}
-       GROUP BY dt.barang_id, b.nama_barang, b.satuan
+       GROUP BY COALESCE(NULLIF(dt.nama_barang, ''), b.nama_barang), b.satuan
        ORDER BY total_terjual DESC
        LIMIT 5`,
       params

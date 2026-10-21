@@ -24,7 +24,7 @@ export default function FlashSaleManager() {
   const [settings, setSettings] = useState({
     judul: 'FLASH SALE',
     subjudul: 'Promo Terbatas Hari Ini',
-    badge_text: '⚡ FLASH SALE',
+    badge_text: 'FLASH SALE',
     aktif: 1,
     jam_selesai: '22:00',
     durasi_jam: 3,
@@ -269,8 +269,8 @@ export default function FlashSaleManager() {
       {/* 1. Header Section */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0F172A', margin: 0, letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>⚡ Kelola Flash Sale Website</span>
+          <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#0F172A', margin: 0, letterSpacing: '-0.02em' }}>
+            Kelola Flash Sale Website
           </h2>
           <p style={{ fontSize: '13px', color: '#64748B', margin: '4px 0 0 0' }}>
             Atur produk promo terbatas, hitung mundur (countdown), diskon spesial, dan status tayang di etalase toko online.
@@ -388,24 +388,18 @@ export default function FlashSaleManager() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#FFFBEB', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>
-              ⏱️
-            </div>
-            <div>
-              <h3 style={{ fontSize: '14.5px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
-                Pengaturan Header & Timer Flash Sale
-              </h3>
-              <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0 0' }}>
-                Atur label badge, subjudul teks promo, dan durasi hitung mundur timer di homepage
-              </p>
-            </div>
+          <div>
+            <h3 style={{ fontSize: '14.5px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
+              Pengaturan Header & Timer Flash Sale
+            </h3>
+            <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0 0' }}>
+              Atur label badge, subjudul teks promo, dan durasi hitung mundur timer di homepage
+            </p>
           </div>
 
-          {/* Live Preview Chip */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FEF2F2', padding: '4px 10px', borderRadius: '6px', border: '1px solid #FECACA', fontSize: '11.5px', color: '#991B1B' }}>
-            <span style={{ fontWeight: '700' }}>{settings.badge_text || '⚡ FLASH SALE'}</span>
-            <span>•</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F8FAFC', padding: '4px 10px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '11.5px', color: '#475569' }}>
+            <span style={{ fontWeight: '700' }}>{settings.badge_text || 'FLASH SALE'}</span>
+            <span>·</span>
             <span>{settings.durasi_jam || 3} Jam Countdown</span>
           </div>
         </div>
@@ -420,7 +414,7 @@ export default function FlashSaleManager() {
                 type="text"
                 value={settings.badge_text || ''}
                 onChange={(e) => setSettings({ ...settings, badge_text: e.target.value })}
-                placeholder="mis. ⚡ FLASH SALE"
+                placeholder="mis. FLASH SALE"
                 style={{
                   width: '100%',
                   height: '38px',
@@ -443,7 +437,7 @@ export default function FlashSaleManager() {
                 type="text"
                 value={settings.subjudul || ''}
                 onChange={(e) => setSettings({ ...settings, subjudul: e.target.value })}
-                placeholder="mis. 🔥 Promo Terbatas Hari Ini"
+                placeholder="mis. Promo Terbatas Hari Ini"
                 style={{
                   width: '100%',
                   height: '38px',
@@ -506,7 +500,6 @@ export default function FlashSaleManager() {
                 onMouseEnter={(e) => !savingSettings && (e.currentTarget.style.background = '#1E293B')}
                 onMouseLeave={(e) => !savingSettings && (e.currentTarget.style.background = '#0F172A')}
               >
-                <span>💾</span>
                 <span>{savingSettings ? 'Menyimpan...' : 'Simpan'}</span>
               </button>
             </div>
@@ -558,9 +551,7 @@ export default function FlashSaleManager() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {/* Search Input */}
             <div style={{ position: 'relative', width: '220px' }}>
-              <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '12px' }}>
-                🔍
-              </span>
+              <svg style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input
                 type="text"
                 placeholder="Cari item promo..."
@@ -634,7 +625,7 @@ export default function FlashSaleManager() {
           </div>
         ) : filteredItems.length === 0 ? (
           <div style={{ padding: '56px 20px', textAlign: 'center' }}>
-            <div style={{ fontSize: '36px', marginBottom: '8px' }}>⚡</div>
+            <div style={{ fontSize: '14px', color: '#94A3B8', marginBottom: '8px' }}>—</div>
             <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: '0 0 4px 0' }}>
               {items.length === 0 ? 'Belum Ada Item Flash Sale' : 'Item Tidak Ditemukan'}
             </h4>
@@ -665,17 +656,17 @@ export default function FlashSaleManager() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#64748B', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  <th style={{ padding: '12px 14px', width: '50px', textAlign: 'center' }}>No</th>
-                  <th style={{ padding: '12px 14px', width: '60px', textAlign: 'center' }}>Foto</th>
-                  <th style={{ padding: '12px 14px', minWidth: '220px' }}>Nama Item Promo</th>
-                  <th style={{ padding: '12px 14px', width: '130px' }}>Tipe</th>
-                  <th style={{ padding: '12px 14px', width: '120px', textAlign: 'right' }}>Harga Asli</th>
-                  <th style={{ padding: '12px 14px', width: '130px', textAlign: 'right' }}>Harga Flash Sale</th>
-                  <th style={{ padding: '12px 14px', width: '80px', textAlign: 'center' }}>Diskon</th>
-                  <th style={{ padding: '12px 14px', width: '130px' }}>Progres Terjual</th>
-                  <th style={{ padding: '12px 14px', width: '110px', textAlign: 'center' }}>Status</th>
-                  <th style={{ padding: '12px 14px', width: '90px', textAlign: 'center' }}>Aksi</th>
+                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '50px', textAlign: 'center', whiteSpace: 'nowrap' }}>No</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '60px', textAlign: 'center', whiteSpace: 'nowrap' }}>Foto</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: '220px', whiteSpace: 'nowrap' }}>Nama Item Promo</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', whiteSpace: 'nowrap' }}>Tipe</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '120px', textAlign: 'right', whiteSpace: 'nowrap' }}>Harga Asli</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '140px', textAlign: 'right', whiteSpace: 'nowrap' }}>Harga Flash Sale</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '80px', textAlign: 'center', whiteSpace: 'nowrap' }}>Diskon</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', whiteSpace: 'nowrap' }}>Progres Terjual</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '110px', textAlign: 'center', whiteSpace: 'nowrap' }}>Status</th>
+                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '90px', textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -725,7 +716,7 @@ export default function FlashSaleManager() {
                             }}
                           />
                         ) : (
-                          <span style={{ fontSize: '18px' }}>📦</span>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         )}
                       </div>
                     </td>
@@ -738,7 +729,7 @@ export default function FlashSaleManager() {
                       {item.barang_id ? (
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ fontSize: '11px', color: '#059669', background: '#ECFDF5', padding: '1px 6px', borderRadius: '4px', border: '1px solid #A7F3D0', fontWeight: '600' }}>
-                            📦 ID Barang #{item.barang_id}
+                            ID Barang #{item.barang_id}
                           </span>
                           <span style={{ fontSize: '11px', color: '#475569', background: '#F1F5F9', padding: '1px 6px', borderRadius: '4px', fontWeight: '500' }}>
                             Stok: {item.barang_stok ?? '-'}
@@ -746,7 +737,7 @@ export default function FlashSaleManager() {
                         </div>
                       ) : (
                         <span style={{ fontSize: '11px', color: '#64748B', background: '#F1F5F9', padding: '1px 6px', borderRadius: '4px', fontWeight: '500' }}>
-                          ⚡ Layanan / Custom Deal
+                          Layanan / Custom Deal
                         </span>
                       )}
                     </td>
@@ -809,7 +800,7 @@ export default function FlashSaleManager() {
                             style={{
                               width: `${Math.min(100, Math.max(0, item.terjual_pct || 75))}%`,
                               height: '100%',
-                              background: 'linear-gradient(90deg, #F87171, #EF4444)',
+                              background: '#EF4444',
                               borderRadius: '999px',
                             }}
                           />
@@ -883,7 +874,7 @@ export default function FlashSaleManager() {
                           onMouseEnter={(e) => (e.currentTarget.style.background = '#FCA5A5')}
                           onMouseLeave={(e) => (e.currentTarget.style.background = '#FEE2E2')}
                         >
-                          🗑
+                          ✕
                         </button>
                       </div>
                     </td>
@@ -938,7 +929,7 @@ export default function FlashSaleManager() {
               {/* Quick Select from Inventory */}
               <div style={{ marginBottom: '16px', background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
-                  ⚡ Pilih Cepat dari Inventori Toko (Opsional)
+                  Pilih Cepat dari Inventori Toko (Opsional)
                 </label>
                 <select
                   value={form.barang_id || ''}

@@ -285,3 +285,16 @@ export async function fetchPublicFlashSale() {
   }
 }
 
+export async function fetchPublicPpob() {
+  try {
+    const res = await fetch('/api/public/ppob');
+    if (!res.ok) throw new Error('Failed to fetch');
+    const json = await res.json();
+    return json.data && json.data.length > 0 ? json.data : null;
+  } catch (err) {
+    console.warn('[API] Menggunakan data fallback PPOB:', err.message);
+    return null;
+  }
+}
+
+
