@@ -23,19 +23,19 @@ export default function DigitalServicesSection({ storeInfo, activeServiceModal, 
       <div className="mp-section-header">
         <div>
           <h2 className="mp-section-title">
-            <span>📱</span>
             <span>Top Up & Tagihan PPOB</span>
           </h2>
           <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
-            Pembelian pulsa, paket internet, pembayaran listrik PLN, serta top-up saldo e-wallet proses instan
+            Pembelian pulsa, paket internet, pembayaran listrik PLN, serta top-up saldo e-wallet proses instan.
           </p>
         </div>
         <span
           style={{
             fontSize: '11.5px',
-            fontWeight: '700',
-            color: '#03AC0E',
-            background: '#E8F8EE',
+            fontWeight: '600',
+            color: '#475569',
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
             padding: '4px 10px',
             borderRadius: '4px',
           }}
@@ -52,34 +52,45 @@ export default function DigitalServicesSection({ storeInfo, activeServiceModal, 
             className="mp-service-box"
             onClick={() => setModal('ppob', svc.id)}
             style={{
-              background: svc.bgColor || '#FFFFFF',
-              borderColor: svc.borderColor || '#E5E7EB',
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '10px',
+              padding: '16px',
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontSize: '24px' }}>
-                  {svc.icon}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: '#03AC0E',
+                    background: '#E8F8EE',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  {svc.tagline || 'Layanan Digital'}
                 </span>
                 <span
                   style={{
-                    fontSize: '10px',
-                    fontWeight: '700',
-                    color: svc.badgeColor || '#03AC0E',
-                    background: '#FFFFFF',
+                    fontSize: '10.5px',
+                    fontWeight: '600',
+                    color: '#64748B',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                   }}
                 >
                   {svc.badge}
                 </span>
               </div>
 
-              <h3 style={{ margin: '0 0 4px 0', fontSize: '14.5px', fontWeight: '700', color: '#1F2937' }}>
+              <h3 style={{ margin: '0 0 6px 0', fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>
                 {svc.title}
               </h3>
-              <p style={{ margin: 0, fontSize: '11.5px', color: '#4B5563', lineHeight: '1.45' }}>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: '1.5' }}>
                 {svc.description}
               </p>
             </div>
@@ -87,15 +98,15 @@ export default function DigitalServicesSection({ storeInfo, activeServiceModal, 
             <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span
                 style={{
-                  fontSize: '11.5px',
-                  fontWeight: '700',
-                  color: svc.badgeColor || '#03AC0E',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#03AC0E',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px',
                 }}
               >
-                {svc.actionText || 'Pilih Layanan →'}
+                Pilih Layanan
               </span>
             </div>
           </div>

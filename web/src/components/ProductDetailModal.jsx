@@ -137,16 +137,34 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
             </div>
 
             {/* Right Column: Clean Specs & Details */}
-            <div>
-              {/* Category & Status */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#03AC0E' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* 1. Header Meta Bar */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  flexWrap: 'wrap',
+                  paddingBottom: '8px',
+                  borderBottom: '1px solid #F1F5F9',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    color: '#03AC0E',
+                    background: '#E8F8EE',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                  }}
+                >
                   Official Store
                 </span>
                 {product.nama_kategori && (
                   <>
                     <span style={{ color: '#CBD5E1' }}>•</span>
-                    <span style={{ fontSize: '12px', color: '#64748B' }}>
+                    <span style={{ fontSize: '12px', color: '#64748B', fontWeight: '500' }}>
                       {product.nama_kategori}
                     </span>
                   </>
@@ -161,78 +179,115 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
                 )}
               </div>
 
-              {/* Product Title */}
-              <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A', lineHeight: '1.35', margin: '0 0 10px 0' }}>
-                {product.nama_barang}
-              </h2>
-
-              {/* Price & Discount */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '16px' }}>
-                <span style={{ fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
-                  Rp {formatRupiah(product.harga_jual)}
-                </span>
-                <span style={{ fontSize: '13px', color: '#94A3B8', textDecoration: 'line-through' }}>
-                  Rp {formatRupiah(originalPrice)}
-                </span>
-                <span
-                  style={{
-                    background: '#FEE2E2',
-                    color: '#DC2626',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                  }}
-                >
-                  -15%
-                </span>
-              </div>
-
-              {/* Specs List without wrapping issues */}
-              <div
-                style={{
-                  borderTop: '1px solid #F1F5F9',
-                  borderBottom: '1px solid #F1F5F9',
-                  padding: '12px 0',
-                  marginBottom: '16px',
-                  fontSize: '12.5px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                }}
-              >
-                <div style={{ display: 'flex' }}>
-                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Kondisi</span>
-                  <span style={{ color: '#0F172A', fontWeight: '500' }}>Baru</span>
-                </div>
-                <div style={{ display: 'flex' }}>
-                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Berat Satuan</span>
-                  <span style={{ color: '#0F172A', fontWeight: '500' }}>{formatWeight(product.berat_gram || 200)}</span>
-                </div>
-                <div style={{ display: 'flex' }}>
-                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Stok</span>
-                  <span style={{ color: isOutOfStock ? '#DC2626' : '#0F172A', fontWeight: isOutOfStock ? '600' : '500' }}>
-                    {isOutOfStock ? 'Habis' : `${product.stok} ${product.satuan || 'pcs'}`}
+              {/* 2. Kotak Judul & Harga */}
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', lineHeight: '1.3', margin: '0 0 8px 0' }}>
+                  {product.nama_barang}
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                  <span style={{ fontSize: '22px', fontWeight: '900', color: '#03AC0E' }}>
+                    Rp {formatRupiah(product.harga_jual)}
+                  </span>
+                  <span style={{ fontSize: '13px', color: '#94A3B8', textDecoration: 'line-through' }}>
+                    Rp {formatRupiah(originalPrice)}
+                  </span>
+                  <span
+                    style={{
+                      background: '#FEE2E2',
+                      color: '#DC2626',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    -15%
                   </span>
                 </div>
-                <div style={{ display: 'flex' }}>
-                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Pengiriman</span>
-                  <span style={{ color: '#0F172A', fontWeight: '500' }}>Ngunut, Tulungagung</span>
+              </div>
+
+              {/* 3. Kotak Spesifikasi & Kondisi */}
+              <div
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    color: '#475569',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Spesifikasi Produk
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12.5px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ width: '105px', color: '#64748B', flexShrink: 0 }}>Kondisi</span>
+                    <span
+                      style={{
+                        color: product.kondisi === 'Bekas' ? '#D97706' : '#0F172A',
+                        fontWeight: '600',
+                      }}
+                    >
+                      {product.kondisi || 'Baru'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ width: '105px', color: '#64748B', flexShrink: 0 }}>Berat Satuan</span>
+                    <span style={{ color: '#0F172A', fontWeight: '500' }}>
+                      {formatWeight(product.berat_gram || 200)}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ width: '105px', color: '#64748B', flexShrink: 0 }}>Stok</span>
+                    <span style={{ color: isOutOfStock ? '#DC2626' : '#0F172A', fontWeight: '600' }}>
+                      {isOutOfStock ? 'Habis' : `${product.stok} ${product.satuan || 'pcs'}`}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ width: '105px', color: '#64748B', flexShrink: 0 }}>Pengiriman</span>
+                    <span style={{ color: '#0F172A', fontWeight: '500' }}>
+                      Ngunut, Tulungagung
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Deskripsi Produk */}
-              <div style={{ marginBottom: '8px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+              {/* 4. Kotak Deskripsi Produk */}
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '10px 14px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    color: '#475569',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    marginBottom: '6px',
+                  }}
+                >
                   Deskripsi Produk
                 </div>
                 <div
                   style={{
                     fontSize: '12.5px',
                     lineHeight: '1.6',
-                    color: '#475569',
+                    color: '#334155',
                     whiteSpace: 'pre-line',
-                    maxHeight: '130px',
+                    maxHeight: '110px',
                     overflowY: 'auto',
                     paddingRight: '6px',
                   }}

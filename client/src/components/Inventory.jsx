@@ -25,6 +25,7 @@ const DEFAULT_FORM_DATA = {
   berat_gram: 200,
   tampil_online: 1,
   deskripsi: '',
+  kondisi: 'Baru',
 };
 
 const Inventory = () => {
@@ -164,6 +165,7 @@ const Inventory = () => {
       berat_gram: item.berat_gram ?? 200,
       tampil_online: item.tampil_online !== undefined ? item.tampil_online : 1,
       deskripsi: item.deskripsi || '',
+      kondisi: item.kondisi || 'Baru',
     });
     setDisplayHargaModal(formatRupiah(item.harga_modal));
     setDisplayHargaJual(formatRupiah(item.harga_jual));
@@ -974,7 +976,7 @@ const Inventory = () => {
                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', marginBottom: '8px' }}>
                   Pengaturan Katalog Website Online
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px', alignItems: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', alignItems: 'center' }}>
                   <div>
                     <label style={{ fontSize: '11.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
                       Berat Produk (gram)
@@ -995,20 +997,46 @@ const Inventory = () => {
                     </div>
                   </div>
 
-                  <div style={{ paddingTop: '4px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#0F172A', cursor: 'pointer', fontWeight: '700' }}>
-                      <input
-                        type="checkbox"
-                        checked={Number(formData.tampil_online) === 1}
-                        onChange={(e) => setFormData({ ...formData, tampil_online: e.target.checked ? 1 : 0 })}
-                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                      />
-                      Tampil di Website Toko Online
+                  <div>
+                    <label style={{ fontSize: '11.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
+                      Kondisi Produk
                     </label>
-                    <small style={{ fontSize: '11px', color: '#64748B', marginTop: '3px', display: 'block' }}>
-                      {Number(formData.tampil_online) === 1 ? '✓ Ditampilkan di halaman web marketplace' : '✗ Hanya dijual kasir fisik'}
-                    </small>
+                    <select
+                      name="kondisi"
+                      value={formData.kondisi || 'Baru'}
+                      onChange={handleChange}
+                      style={{
+                        width: '100%',
+                        height: '36px',
+                        fontSize: '13px',
+                        borderRadius: '6px',
+                        border: '1px solid #CBD5E1',
+                        padding: '0 10px',
+                        background: '#FFFFFF',
+                        color: '#0F172A',
+                        outline: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <option value="Baru">Baru</option>
+                      <option value="Bekas">Bekas / Preloved</option>
+                    </select>
                   </div>
+                </div>
+
+                <div style={{ marginTop: '12px', paddingTop: '4px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#0F172A', cursor: 'pointer', fontWeight: '700' }}>
+                    <input
+                      type="checkbox"
+                      checked={Number(formData.tampil_online) === 1}
+                      onChange={(e) => setFormData({ ...formData, tampil_online: e.target.checked ? 1 : 0 })}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                    />
+                    Tampil di Website Toko Online
+                  </label>
+                  <small style={{ fontSize: '11px', color: '#64748B', marginTop: '3px', display: 'block' }}>
+                    {Number(formData.tampil_online) === 1 ? '✓ Ditampilkan di halaman web marketplace' : '✗ Hanya dijual kasir fisik'}
+                  </small>
                 </div>
 
                 {/* Deskripsi Produk / Baju untuk Toko Online */}

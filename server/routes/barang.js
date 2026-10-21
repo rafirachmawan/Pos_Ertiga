@@ -45,6 +45,7 @@ function normalizeBarang(body) {
   const tampilOnline =
     body.tampil_online === undefined ? 1 : Number(body.tampil_online) ? 1 : 0;
   const deskripsi = String(body.deskripsi ?? '').trim();
+  const kondisi = String(body.kondisi || 'Baru').trim().slice(0, 50);
 
   return {
     barcode,
@@ -58,6 +59,7 @@ function normalizeBarang(body) {
     berat_gram: beratGram,
     tampil_online: tampilOnline,
     deskripsi,
+    kondisi,
   };
 }
 
@@ -114,8 +116,8 @@ router.post(
     try {
       const result = await run(
         `INSERT INTO barang
-         (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id, berat_gram, tampil_online, deskripsi)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id, berat_gram, tampil_online, deskripsi, kondisi)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.barcode,
           data.nama_barang,
@@ -128,6 +130,7 @@ router.post(
           data.berat_gram,
           data.tampil_online,
           data.deskripsi,
+          data.kondisi,
         ]
       );
 
@@ -166,7 +169,7 @@ router.put(
       const result = await run(
         `UPDATE barang
          SET barcode = ?, nama_barang = ?, harga_modal = ?, harga_jual = ?,
-             stok = ?, gambar = ?, satuan = ?, kategori_id = ?, berat_gram = ?, tampil_online = ?, deskripsi = ?
+             stok = ?, gambar = ?, satuan = ?, kategori_id = ?, berat_gram = ?, tampil_online = ?, deskripsi = ?, kondisi = ?
          WHERE id = ?`,
         [
           data.barcode,
@@ -180,6 +183,7 @@ router.put(
           data.berat_gram,
           data.tampil_online,
           data.deskripsi,
+          data.kondisi,
           id,
         ]
       );

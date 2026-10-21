@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 11;
+const LATEST_VERSION = 12;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -950,6 +950,24 @@ const migrations = [
          SET gambar = ?
          WHERE gambar IS NULL OR gambar = ''`,
         [imgAntam]
+      );
+    },
+  },
+  {
+    version: 12,
+    name: 'tambah kolom kondisi pada barang',
+    async up(db) {
+      await addColumnIfMissing(
+        db,
+        'barang',
+        'kondisi',
+        "VARCHAR(50) DEFAULT 'Baru'"
+      );
+      await run(
+        db,
+        `UPDATE barang 
+         SET kondisi = 'Baru' 
+         WHERE kondisi IS NULL OR kondisi = ''`
       );
     },
   },

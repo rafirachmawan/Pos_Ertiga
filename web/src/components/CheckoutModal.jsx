@@ -200,7 +200,7 @@ export default function CheckoutModal({
               boxShadow: '0 4px 6px -1px rgba(5,150,105,0.2)',
             }}
           >
-            <span>💬</span> Kirim Pesanan via WhatsApp
+            Kirim Pesanan via WhatsApp
           </button>
 
           <p style={{ fontSize: '11px', color: '#94A3B8', textAlign: 'center', marginTop: '10px', margin: '10px 0 0 0' }}>

@@ -139,7 +139,7 @@ export default function GoldServiceModal({ isOpen, onClose, storeInfo }) {
                 border: '1px solid #FDE68A',
               }}
             >
-              🪙
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9A2 2 0 0 0 13 8h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1-1.8-1"/><path d="M12 6v2m0 8v2"/></svg>
             </div>
             <div>
               <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>
@@ -202,7 +202,6 @@ export default function GoldServiceModal({ isOpen, onClose, storeInfo }) {
                 gap: '6px',
               }}
             >
-              <span>🏷️</span>
               <span>Beli Emas Baru</span>
             </button>
             <button
@@ -225,7 +224,6 @@ export default function GoldServiceModal({ isOpen, onClose, storeInfo }) {
                 gap: '6px',
               }}
             >
-              <span>🔄</span>
               <span>Jual Emas (Buyback)</span>
             </button>
           </div>
@@ -490,7 +488,7 @@ export default function GoldServiceModal({ isOpen, onClose, storeInfo }) {
                           cursor: 'pointer',
                         }}
                       >
-                        {opt === 'Ambil di Toko' ? '🏬 Ambil di Toko' : '📦 Kirim Asuransi'}
+                        {opt === 'Ambil di Toko' ? 'Ambil di Toko' : 'Kirim Asuransi'}
                       </button>
                     ))}
                   </div>

@@ -97,7 +97,6 @@ export default function LogamMuliaSection({ storeInfo }) {
       <div className="mp-section-header">
         <div>
           <h2 className="mp-section-title">
-            <span>🪙</span>
             <span>Investasi Logam Mulia Emas 24K</span>
           </h2>
           <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
@@ -108,10 +107,10 @@ export default function LogamMuliaSection({ storeInfo }) {
         <span
           style={{
             fontSize: '11.5px',
-            fontWeight: '700',
-            color: '#B45309',
-            background: '#FEF3C7',
-            border: '1px solid #FDE68A',
+            fontWeight: '600',
+            color: '#475569',
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
             padding: '4px 10px',
             borderRadius: '4px',
           }}
@@ -133,7 +132,7 @@ export default function LogamMuliaSection({ storeInfo }) {
           borderBottom: '1px solid #F1F5F9',
         }}
       >
-        {/* Merk Tabs */}
+        {/* Merk Tabs (Clean pills) */}
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }}>
           {merks.map((m) => {
             const isSelected = selectedMerkId === m.id;
@@ -143,12 +142,12 @@ export default function LogamMuliaSection({ storeInfo }) {
                 type="button"
                 onClick={() => setSelectedMerkId(m.id)}
                 style={{
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  border: `1.5px solid ${isSelected ? '#D97706' : '#E2E8F0'}`,
-                  background: isSelected ? '#FFFBEB' : '#FFFFFF',
-                  color: isSelected ? '#B45309' : '#475569',
-                  fontWeight: isSelected ? '700' : '600',
+                  padding: '7px 16px',
+                  borderRadius: '8px',
+                  border: isSelected ? '1px solid #03AC0E' : '1px solid #E2E8F0',
+                  background: isSelected ? '#E8F8EE' : '#FFFFFF',
+                  color: isSelected ? '#03AC0E' : '#475569',
+                  fontWeight: isSelected ? '700' : '500',
                   fontSize: '12.5px',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
@@ -156,10 +155,8 @@ export default function LogamMuliaSection({ storeInfo }) {
                   alignItems: 'center',
                   gap: '6px',
                   transition: 'all 0.15s ease',
-                  boxShadow: isSelected ? '0 1px 3px rgba(217, 119, 6, 0.15)' : 'none',
                 }}
               >
-                <span>{isSelected ? '🪙' : '•'}</span>
                 <span>{m.nama_merk}</span>
                 <span style={{ fontSize: '11px', opacity: 0.75 }}>
                   ({m.items?.length || 0})
@@ -191,7 +188,7 @@ export default function LogamMuliaSection({ storeInfo }) {
               cursor: 'pointer',
               transition: 'all 0.15s ease',
               background: mode === 'buy' ? '#FFFFFF' : 'transparent',
-              color: mode === 'buy' ? '#D97706' : '#64748B',
+              color: mode === 'buy' ? '#03AC0E' : '#64748B',
               boxShadow: mode === 'buy' ? '0 1px 3px rgba(15,23,42,0.08)' : 'none',
             }}
           >
@@ -218,28 +215,21 @@ export default function LogamMuliaSection({ storeInfo }) {
         </div>
       </div>
 
-      {/* Brand Description banner */}
+      {/* Brand Description note (subtle) */}
       {activeMerk.keterangan && (
         <div
           style={{
-            background: '#FFFBEB',
-            border: '1px solid #FEF3C7',
-            borderRadius: '8px',
-            padding: '8px 14px',
-            marginBottom: '16px',
             fontSize: '12px',
-            color: '#92400E',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
+            color: '#64748B',
+            marginBottom: '16px',
+            lineHeight: '1.5',
           }}
         >
-          <span>ℹ️</span>
-          <span>{activeMerk.keterangan}</span>
+          {activeMerk.keterangan}
         </div>
       )}
 
-      {/* 3. Items Grid (Muncul seperti Katalog Baju & Layanan PPOB) */}
+      {/* 3. Items Grid */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px 0', color: '#94A3B8', fontSize: '13px' }}>
           Memuat daftar emas ready dari toko...
@@ -256,7 +246,7 @@ export default function LogamMuliaSection({ storeInfo }) {
 
             return (
               <div key={item.id} className="mp-gold-card">
-                {/* 1. Gold Image Container with floating badges */}
+                {/* 1. Gold Image Container */}
                 <div className="mp-gold-thumb-wrap">
                   <img
                     src={imageSrc}
@@ -267,38 +257,22 @@ export default function LogamMuliaSection({ storeInfo }) {
                     }}
                   />
 
-                  {/* Gramatur Floating Badge */}
+                  {/* Clean Gramatur Badge */}
                   <span className="mp-gold-gram-badge">
-                    ⚖️ {item.gramatur}
+                    {item.gramatur}
                   </span>
 
-                  {/* Right Badges (Favorit & Stok) */}
+                  {/* Clean Stock Badge */}
                   <div className="mp-gold-badges-right">
-                    {Number(item.is_favorit) === 1 && (
-                      <span
-                        style={{
-                          background: '#EF4444',
-                          color: '#FFFFFF',
-                          padding: '2px 7px',
-                          borderRadius: '4px',
-                          fontSize: '10px',
-                          fontWeight: '800',
-                          letterSpacing: '0.02em',
-                          boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
-                        }}
-                      >
-                        FAVORIT
-                      </span>
-                    )}
                     <span
                       style={{
-                        background: item.stok > 0 ? 'rgba(3, 172, 14, 0.92)' : 'rgba(100, 116, 139, 0.92)',
-                        color: '#FFFFFF',
+                        background: item.stok > 0 ? '#E8F8EE' : '#FEE2E2',
+                        color: item.stok > 0 ? '#059669' : '#DC2626',
+                        border: `1px solid ${item.stok > 0 ? '#A7F3D0' : '#FECACA'}`,
                         padding: '2px 7px',
                         borderRadius: '4px',
-                        fontSize: '10px',
-                        fontWeight: '700',
-                        backdropFilter: 'blur(4px)',
+                        fontSize: '10.5px',
+                        fontWeight: '600',
                       }}
                     >
                       {item.stok > 0 ? `Ready ${item.stok}` : 'Habis'}
@@ -309,7 +283,7 @@ export default function LogamMuliaSection({ storeInfo }) {
                 {/* 2. Card Content */}
                 <div className="mp-gold-body">
                   <div>
-                    <h3 style={{ margin: '0 0 4px 0', fontSize: '14.5px', fontWeight: '800', color: '#0F172A', lineHeight: '1.3' }}>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#0F172A', lineHeight: '1.3' }}>
                       {activeMerk.nama_merk} {item.gramatur}
                     </h3>
                     <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B', lineHeight: '1.4', height: '32px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
@@ -318,12 +292,12 @@ export default function LogamMuliaSection({ storeInfo }) {
                   </div>
 
                   {/* Price & Action Button */}
-                  <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
+                  <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '500' }}>
                         {mode === 'buy' ? 'Harga Beli:' : 'Harga Buyback:'}
                       </span>
-                      <span style={{ fontSize: '16px', fontWeight: '800', color: '#B45309' }}>
+                      <span style={{ fontSize: '15.5px', fontWeight: '800', color: '#0F172A' }}>
                         Rp {formatRupiah(itemPrice)}
                       </span>
                     </div>
@@ -333,20 +307,18 @@ export default function LogamMuliaSection({ storeInfo }) {
                       onClick={() => handleOpenOrder(item)}
                       style={{
                         width: '100%',
-                        padding: '8px 12px',
+                        height: '36px',
                         background: mode === 'buy' ? '#03AC0E' : '#0F172A',
                         color: '#FFFFFF',
                         border: 'none',
-                        borderRadius: '7px',
-                        fontWeight: '700',
+                        borderRadius: '6px',
+                        fontWeight: '600',
                         fontSize: '12px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '6px',
-                        transition: 'all 0.15s ease',
-                        boxShadow: mode === 'buy' ? '0 2px 6px rgba(3, 172, 14, 0.2)' : 'none',
+                        transition: 'background 0.15s ease',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = mode === 'buy' ? '#028A0B' : '#1E293B';
@@ -355,8 +327,7 @@ export default function LogamMuliaSection({ storeInfo }) {
                         e.currentTarget.style.background = mode === 'buy' ? '#03AC0E' : '#0F172A';
                       }}
                     >
-                      <span>{mode === 'buy' ? 'Beli via WhatsApp' : 'Jual via WhatsApp'}</span>
-                      <span>→</span>
+                      {mode === 'buy' ? 'Beli via WhatsApp' : 'Jual via WhatsApp'}
                     </button>
                   </div>
                 </div>
@@ -366,24 +337,24 @@ export default function LogamMuliaSection({ storeInfo }) {
         </div>
       )}
 
-      {/* 4. Quick WhatsApp Order Dialog (Saat tombol Beli / Jual diklik) */}
+      {/* 4. Quick WhatsApp Order Dialog */}
       {orderingItem && (
         <div className="modal-backdrop" onClick={() => setOrderingItem(null)}>
           <div
             style={{
               background: '#FFFFFF',
-              borderRadius: '14px',
-              maxWidth: '460px',
+              borderRadius: '12px',
+              maxWidth: '440px',
               width: '92%',
               padding: '22px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 20px 45px rgba(0, 0, 0, 0.15)',
               border: '1px solid #E2E8F0',
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0F172A' }}>
                   {mode === 'buy' ? 'Pesan Emas Fisik' : 'Ajukan Penjualan Emas (Buyback)'}
                 </h3>
                 <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#64748B' }}>
@@ -393,7 +364,7 @@ export default function LogamMuliaSection({ storeInfo }) {
               <button
                 type="button"
                 onClick={() => setOrderingItem(null)}
-                style={{ background: 'transparent', border: 'none', fontSize: '18px', color: '#94A3B8', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', fontSize: '16px', color: '#94A3B8', cursor: 'pointer' }}
               >
                 ✕
               </button>
@@ -401,23 +372,23 @@ export default function LogamMuliaSection({ storeInfo }) {
 
             <form onSubmit={handleSendWhatsAppOrder}>
               {/* Stepper Jumlah Keping */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', marginBottom: '12px' }}>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>Jumlah Keping:</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', padding: '10px 14px', borderRadius: '6px', border: '1px solid #E2E8F0', marginBottom: '12px' }}>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#475569' }}>Jumlah Keping:</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <button
                     type="button"
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFF', fontWeight: '700', cursor: 'pointer' }}
+                    style={{ width: '28px', height: '28px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFF', fontWeight: '600', cursor: 'pointer' }}
                   >
                     -
                   </button>
-                  <span style={{ fontSize: '14px', fontWeight: '800', minWidth: '24px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '700', minWidth: '24px', textAlign: 'center', color: '#0F172A' }}>
                     {qty}
                   </span>
                   <button
                     type="button"
                     onClick={() => setQty((q) => q + 1)}
-                    style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid #CBD5E1', background: '#FFF', fontWeight: '700', cursor: 'pointer' }}
+                    style={{ width: '28px', height: '28px', borderRadius: '4px', border: '1px solid #CBD5E1', background: '#FFF', fontWeight: '600', cursor: 'pointer' }}
                   >
                     +
                   </button>
@@ -427,7 +398,7 @@ export default function LogamMuliaSection({ storeInfo }) {
               {/* Total Calculation */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '0 4px' }}>
                 <span style={{ fontSize: '12px', color: '#64748B' }}>Total Estimasi:</span>
-                <span style={{ fontSize: '16px', fontWeight: '800', color: '#D97706' }}>
+                <span style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
                   Rp {formatRupiah((mode === 'buy' ? orderingItem.harga_jual : (orderingItem.harga_beli || orderingItem.harga_jual * 0.9)) * qty)}
                 </span>
               </div>
@@ -435,7 +406,7 @@ export default function LogamMuliaSection({ storeInfo }) {
               {/* Delivery Option */}
               {mode === 'buy' && (
                 <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#475569', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
                     Metode Pengambilan
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -447,15 +418,15 @@ export default function LogamMuliaSection({ storeInfo }) {
                         style={{
                           padding: '7px',
                           borderRadius: '6px',
-                          border: `1.5px solid ${deliveryOption === opt ? '#D97706' : '#CBD5E1'}`,
-                          background: deliveryOption === opt ? '#FFFBEB' : '#FFFFFF',
-                          color: deliveryOption === opt ? '#B45309' : '#475569',
-                          fontWeight: '700',
+                          border: `1px solid ${deliveryOption === opt ? '#03AC0E' : '#CBD5E1'}`,
+                          background: deliveryOption === opt ? '#E8F8EE' : '#FFFFFF',
+                          color: deliveryOption === opt ? '#03AC0E' : '#475569',
+                          fontWeight: '600',
                           fontSize: '11.5px',
                           cursor: 'pointer',
                         }}
                       >
-                        {opt === 'Ambil di Toko' ? '🏬 Ambil di Toko' : '📦 Kirim Asuransi'}
+                        {opt}
                       </button>
                     ))}
                   </div>
@@ -465,7 +436,7 @@ export default function LogamMuliaSection({ storeInfo }) {
               {/* Name & Phone */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#334155', marginBottom: '3px' }}>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#334155', marginBottom: '3px' }}>
                     Nama Lengkap *
                   </label>
                   <input
@@ -478,7 +449,7 @@ export default function LogamMuliaSection({ storeInfo }) {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#334155', marginBottom: '3px' }}>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#334155', marginBottom: '3px' }}>
                     Nomor WhatsApp *
                   </label>
                   <input
@@ -497,23 +468,24 @@ export default function LogamMuliaSection({ storeInfo }) {
                 type="submit"
                 style={{
                   width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '7px',
+                  height: '38px',
+                  borderRadius: '6px',
                   border: 'none',
                   background: '#03AC0E',
                   color: '#FFFFFF',
-                  fontWeight: '700',
+                  fontWeight: '600',
                   fontSize: '13px',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
                   marginTop: '10px',
+                  transition: 'background 0.15s ease',
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#028A0B')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = '#03AC0E')}
               >
-                <span>Lanjutkan Pesan ke WhatsApp</span>
-                <span>→</span>
+                Lanjutkan Pesan ke WhatsApp
               </button>
             </form>
           </div>

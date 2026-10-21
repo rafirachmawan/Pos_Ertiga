@@ -41,7 +41,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const rows = await all(
       `SELECT b.id, b.barcode, b.nama_barang, b.harga_jual, b.stok, b.satuan,
-              b.gambar, b.berat_gram, b.deskripsi, b.kategori_id, k.nama_kategori
+              b.gambar, b.berat_gram, b.deskripsi, b.kondisi, b.kategori_id, k.nama_kategori
        FROM barang b
        LEFT JOIN kategori k ON b.kategori_id = k.id
        WHERE b.aktif = 1 AND b.tampil_online = 1 AND (b.deleted_at IS NULL)

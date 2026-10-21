@@ -153,8 +153,7 @@ export default function RasxmediaServiceModal({ isOpen, onClose, storeInfo }) {
                   gap: '6px',
                 }}
               >
-                <span>{p.id === 'tiktok' ? '🎵' : p.id === 'instagram' ? '📸' : '▶️'}</span>
-                {p.name}
+                <span>{p.name}</span>
               </button>
             );
           })}
@@ -330,7 +329,7 @@ export default function RasxmediaServiceModal({ isOpen, onClose, storeInfo }) {
               marginBottom: '18px',
             }}
           >
-            🔒 <strong>100% Aman & Tanpa Password:</strong> Cukup berikan link / username akun yang tidak di-private. Proses penambahan otomatis masuk bertahap.
+            <strong>100% Aman & Tanpa Password:</strong> Cukup berikan link / username akun yang tidak di-private. Proses penambahan otomatis masuk bertahap.
           </div>
 
           {/* Submit Button */}
@@ -353,7 +352,7 @@ export default function RasxmediaServiceModal({ isOpen, onClose, storeInfo }) {
               boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
             }}
           >
-            <span>💬</span> Pesan Booster via WhatsApp (Rp {formatRupiah(selectedTier.price)})
+            Pesan Booster via WhatsApp (Rp {formatRupiah(selectedTier.price)})
           </button>
         </form>
       </div>

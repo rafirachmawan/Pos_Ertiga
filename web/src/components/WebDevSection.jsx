@@ -49,7 +49,6 @@ export default function WebDevSection({ storeInfo }) {
       <div className="mp-section-header">
         <div>
           <h2 className="mp-section-title">
-            <span>💻</span>
             <span>Jasa Pembuatan Website & Aplikasi Custom</span>
           </h2>
           <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
@@ -60,15 +59,15 @@ export default function WebDevSection({ storeInfo }) {
         <span
           style={{
             fontSize: '11.5px',
-            fontWeight: '700',
-            color: '#059669',
-            background: '#ECFDF5',
-            border: '1px solid #A7F3D0',
+            fontWeight: '600',
+            color: '#475569',
+            background: '#F8FAFC',
+            border: '1px solid #E2E8F0',
             padding: '4px 10px',
             borderRadius: '4px',
           }}
         >
-          Garansi & Full Support 🛡️
+          Garansi & Full Support
         </span>
       </div>
 
@@ -77,51 +76,39 @@ export default function WebDevSection({ storeInfo }) {
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '10px',
+          gap: '12px',
           padding: '12px 16px',
           background: '#F8FAFC',
           border: '1px solid #E2E8F0',
-          borderRadius: '10px',
+          borderRadius: '8px',
           marginBottom: '20px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '18px' }}>⚡</span>
-          <div>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Pengerjaan Cepat</div>
-            <div style={{ fontSize: '11px', color: '#64748B' }}>3 - 14 Hari Kerja Siap Pakai</div>
-          </div>
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Pengerjaan Cepat</div>
+          <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>3 - 14 Hari Kerja Siap Pakai</div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '18px' }}>📱</span>
-          <div>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Mobile & SEO Friendly</div>
-            <div style={{ fontSize: '11px', color: '#64748B' }}>Responsif di HP, Tablet & Laptop</div>
-          </div>
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Mobile & SEO Friendly</div>
+          <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Responsif di HP, Tablet & Laptop</div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '18px' }}>🌐</span>
-          <div>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Include Domain & Server</div>
-            <div style={{ fontSize: '11px', color: '#64748B' }}>Setup Cloud Hosting & Domain .com</div>
-          </div>
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Include Domain & Server</div>
+          <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Cloud Hosting & Domain .com</div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '18px' }}>💬</span>
-          <div>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Konsultasi 100% Gratis</div>
-            <div style={{ fontSize: '11px', color: '#64748B' }}>Diskusi Teknis & Demo Sistem</div>
-          </div>
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>Konsultasi Gratis</div>
+          <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Diskusi Teknis & Demo Sistem</div>
         </div>
       </div>
 
       {/* 3. Package Cards Grid (4 Pilihan Paket) */}
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <div style={{ fontSize: '13.5px', fontWeight: '800', color: '#1E293B' }}>
+          <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#0F172A' }}>
             Pilih Paket Layanan Website & Software:
           </div>
           <span style={{ fontSize: '11.5px', color: '#64748B' }}>
@@ -133,7 +120,7 @@ export default function WebDevSection({ storeInfo }) {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '14px',
+            gap: '12px',
           }}
         >
           {APP_DEV_DATA.packages.map((pkg) => {
@@ -143,25 +130,22 @@ export default function WebDevSection({ storeInfo }) {
                 key={pkg.id}
                 onClick={() => handleSelectPackageAndFocus(pkg)}
                 style={{
-                  border: isSelected ? '2px solid #059669' : '1px solid #E2E8F0',
-                  borderRadius: '12px',
-                  padding: '18px 16px',
+                  border: isSelected ? '1.5px solid #03AC0E' : '1px solid #E2E8F0',
+                  borderRadius: '10px',
+                  padding: '16px',
                   background: isSelected ? '#F0FDF4' : '#FFFFFF',
                   cursor: 'pointer',
                   position: 'relative',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  boxShadow: isSelected ? '0 4px 14px rgba(5, 150, 105, 0.15)' : '0 1px 3px rgba(0,0,0,0.03)',
-                  transition: 'all 0.18s ease',
+                  transition: 'all 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)';
+                  e.currentTarget.style.borderColor = '#03AC0E';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = isSelected ? '0 4px 14px rgba(5, 150, 105, 0.15)' : '0 1px 3px rgba(0,0,0,0.03)';
+                  e.currentTarget.style.borderColor = isSelected ? '#03AC0E' : '#E2E8F0';
                 }}
               >
                 {/* Popular Recommendation Badge */}
@@ -169,37 +153,35 @@ export default function WebDevSection({ storeInfo }) {
                   <span
                     style={{
                       position: 'absolute',
-                      top: '-10px',
+                      top: '-1px',
                       right: '12px',
-                      background: '#059669',
+                      background: '#03AC0E',
                       color: '#FFFFFF',
                       fontSize: '9.5px',
-                      fontWeight: '800',
-                      padding: '3px 8px',
-                      borderRadius: '4px',
-                      letterSpacing: '0.04em',
-                      boxShadow: '0 2px 4px rgba(5, 150, 105, 0.25)',
+                      fontWeight: '700',
+                      padding: '2px 8px',
+                      borderRadius: '0 0 4px 4px',
+                      letterSpacing: '0.02em',
                     }}
                   >
-                    ⭐ REKOMENDASI
+                    REKOMENDASI
                   </span>
                 )}
 
                 <div>
-                  <div style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A', marginBottom: '4px', lineHeight: '1.3' }}>
+                  <div style={{ fontSize: '14.5px', fontWeight: '700', color: '#0F172A', marginBottom: '4px', lineHeight: '1.3' }}>
                     {pkg.title}
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#64748B', marginBottom: '12px' }}>
                     {pkg.tagline}
                   </div>
 
-                  <div style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '16px', fontWeight: '800', color: '#059669' }}>
+                  <div style={{ marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid #F1F5F9' }}>
+                    <div style={{ fontSize: '16px', fontWeight: '800', color: '#03AC0E' }}>
                       {pkg.priceEstimate}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span>⏱️</span>
-                      <span>Pengerjaan: {pkg.estimatedDays}</span>
+                    <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                      Estimasi: {pkg.estimatedDays}
                     </div>
                   </div>
 
@@ -207,7 +189,7 @@ export default function WebDevSection({ storeInfo }) {
                   <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {pkg.features.map((feat, idx) => (
                       <li key={idx} style={{ fontSize: '11.5px', color: '#334155', display: 'flex', alignItems: 'flex-start', gap: '6px', lineHeight: '1.4' }}>
-                        <span style={{ color: '#059669', fontWeight: '800', flexShrink: 0 }}>✓</span>
+                        <span style={{ color: '#03AC0E', fontWeight: '700', flexShrink: 0 }}>✓</span>
                         <span>{feat}</span>
                       </li>
                     ))}
@@ -220,18 +202,18 @@ export default function WebDevSection({ storeInfo }) {
                   style={{
                     width: '100%',
                     marginTop: '16px',
-                    padding: '8px 0',
-                    background: isSelected ? '#059669' : '#FFFFFF',
-                    color: isSelected ? '#FFFFFF' : '#059669',
-                    border: `1.5px solid #059669`,
-                    borderRadius: '8px',
+                    height: '34px',
+                    background: isSelected ? '#03AC0E' : '#FFFFFF',
+                    color: isSelected ? '#FFFFFF' : '#03AC0E',
+                    border: '1px solid #03AC0E',
+                    borderRadius: '6px',
                     fontSize: '12px',
-                    fontWeight: '700',
+                    fontWeight: '600',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  {isSelected ? '✓ Paket Dipilih' : 'Pilih Paket Ini →'}
+                  {isSelected ? 'Paket Dipilih' : 'Pilih Paket Ini'}
                 </button>
               </div>
             );
@@ -244,45 +226,42 @@ export default function WebDevSection({ storeInfo }) {
         id="webdev-consult-form"
         style={{
           background: '#F8FAFC',
-          border: '1.5px solid #CBD5E1',
-          borderRadius: '12px',
-          padding: '20px 22px',
+          border: '1px solid #E2E8F0',
+          borderRadius: '10px',
+          padding: '18px 20px',
           marginTop: '10px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '20px' }}>💬</span>
-              <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: '800', color: '#0F172A' }}>
-                Form Konsultasi & Pemesanan Proyek
-              </h3>
-            </div>
+            <h3 style={{ margin: 0, fontSize: '14.5px', fontWeight: '700', color: '#0F172A' }}>
+              Form Konsultasi & Pemesanan Proyek
+            </h3>
             <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#64748B' }}>
-              Paket terpilih: <strong style={{ color: '#059669' }}>{selectedPackage.title}</strong> ({selectedPackage.priceEstimate}). Kirim rincian kebutuhan Anda langsung ke WhatsApp tim developer.
+              Paket terpilih: <strong style={{ color: '#03AC0E' }}>{selectedPackage.title}</strong> ({selectedPackage.priceEstimate}). Kirim rincian kebutuhan Anda ke WhatsApp tim developer.
             </p>
           </div>
 
           <span
             style={{
               fontSize: '11px',
-              fontWeight: '700',
-              color: '#0369A1',
-              background: '#E0F2FE',
-              padding: '4px 10px',
-              borderRadius: '6px',
-              border: '1px solid #BAE6FD',
+              fontWeight: '600',
+              color: '#475569',
+              background: '#FFFFFF',
+              padding: '3px 8px',
+              borderRadius: '4px',
+              border: '1px solid #E2E8F0',
             }}
           >
-            Direct WhatsApp Response ⚡
+            Direct WhatsApp Response
           </span>
         </div>
 
         <form onSubmit={handleSendWhatsApp}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '12px' }}>
             {/* Nama Klien */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '5px' }}>
+              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#334155', marginBottom: '4px' }}>
                 Nama / Usaha Klien *
               </label>
               <input
@@ -293,10 +272,10 @@ export default function WebDevSection({ storeInfo }) {
                 onChange={(e) => setCustomer({ ...customer, nama: e.target.value })}
                 style={{
                   width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
                   border: '1px solid #CBD5E1',
-                  fontSize: '13px',
+                  fontSize: '12.5px',
                   boxSizing: 'border-box',
                   background: '#FFFFFF',
                 }}
@@ -305,7 +284,7 @@ export default function WebDevSection({ storeInfo }) {
 
             {/* No WhatsApp */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '5px' }}>
+              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#334155', marginBottom: '4px' }}>
                 Nomor WhatsApp Anda *
               </label>
               <input
@@ -316,10 +295,10 @@ export default function WebDevSection({ storeInfo }) {
                 onChange={(e) => setCustomer({ ...customer, telepon: e.target.value })}
                 style={{
                   width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
                   border: '1px solid #CBD5E1',
-                  fontSize: '13px',
+                  fontSize: '12.5px',
                   boxSizing: 'border-box',
                   background: '#FFFFFF',
                 }}
@@ -328,7 +307,7 @@ export default function WebDevSection({ storeInfo }) {
 
             {/* Rentang Budget */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '5px' }}>
+              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#334155', marginBottom: '4px' }}>
                 Rentang Budget yang Disediakan
               </label>
               <select
@@ -336,10 +315,10 @@ export default function WebDevSection({ storeInfo }) {
                 onChange={(e) => setBudgetRange(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '9px 12px',
-                  borderRadius: '8px',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
                   border: '1px solid #CBD5E1',
-                  fontSize: '13px',
+                  fontSize: '12.5px',
                   boxSizing: 'border-box',
                   background: '#FFFFFF',
                   cursor: 'pointer',
@@ -354,8 +333,8 @@ export default function WebDevSection({ storeInfo }) {
           </div>
 
           {/* Project Brief */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '5px' }}>
+          <div style={{ marginBottom: '14px' }}>
+            <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '600', color: '#334155', marginBottom: '4px' }}>
               Ceritakan Kebutuhan Website / Aplikasi Anda
             </label>
             <textarea
@@ -365,10 +344,10 @@ export default function WebDevSection({ storeInfo }) {
               onChange={(e) => setProjectBrief(e.target.value)}
               style={{
                 width: '100%',
-                padding: '9px 12px',
-                borderRadius: '8px',
+                padding: '8px 10px',
+                borderRadius: '6px',
                 border: '1px solid #CBD5E1',
-                fontSize: '13px',
+                fontSize: '12.5px',
                 boxSizing: 'border-box',
                 fontFamily: 'inherit',
                 background: '#FFFFFF',
@@ -382,26 +361,23 @@ export default function WebDevSection({ storeInfo }) {
             type="submit"
             style={{
               width: '100%',
-              padding: '12px',
-              borderRadius: '8px',
+              height: '38px',
+              borderRadius: '6px',
               border: 'none',
-              background: '#059669',
+              background: '#03AC0E',
               color: '#FFFFFF',
-              fontWeight: '800',
-              fontSize: '14px',
+              fontWeight: '600',
+              fontSize: '13px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)',
               transition: 'background 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#047857')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#059669')}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#028A0B')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = '#03AC0E')}
           >
-            <span>💬</span>
-            <span>Kirim Konsultasi {selectedPackage.title} via WhatsApp</span>
+            Kirim Konsultasi {selectedPackage.title} via WhatsApp
           </button>
         </form>
       </div>

@@ -190,7 +190,7 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
                     borderRadius: '4px',
                   }}
                 >
-                  ⚡ FLASH SALE
+                  FLASH SALE
                 </span>
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#1F2937', marginTop: '6px', marginBottom: '4px' }}>
                   Kejar Diskon Terbatas
@@ -235,7 +235,7 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
                     borderRadius: '4px',
                   }}
                 >
-                  🚀 BOOSTER MEDSOS
+                  BOOSTER MEDSOS
                 </span>
                 <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#1F2937', marginTop: '6px', marginBottom: '4px' }}>
                   Rasxmedia SMM

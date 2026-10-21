@@ -181,7 +181,7 @@ export default function AppDevServiceModal({ isOpen, onClose, storeInfo }) {
               ))}
             </ul>
             <div style={{ marginTop: '8px', fontSize: '11px', color: '#059669', fontWeight: '700' }}>
-              ⏱️ Estimasi Waktu Pengerjaan: {selectedPackage.estimatedDays}
+              Estimasi Waktu Pengerjaan: {selectedPackage.estimatedDays}
             </div>
           </div>
 
@@ -297,7 +297,7 @@ export default function AppDevServiceModal({ isOpen, onClose, storeInfo }) {
               boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
             }}
           >
-            <span>💬</span> Konsultasi Proyek via WhatsApp
+            Konsultasi Proyek via WhatsApp
           </button>
         </form>
       </div>
