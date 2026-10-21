@@ -41,13 +41,13 @@ export default function Navbar({
           <div className="mp-topbar-inner">
             <div className="mp-topbar-left">
               <span className="mp-topbar-item">
-                <span style={{ color: '#03AC0E', fontWeight: '700' }}>✓</span> Toko Resmi & Terpercaya
+                <span style={{ color: '#03AC0E', fontWeight: '700' }}>✓</span> Toko Resmi POS Ertiga
               </span>
               <span className="mp-topbar-item">
-                📍 {storeAddress}
+                {storeAddress}
               </span>
               <span className="mp-topbar-item">
-                🕒 Jam Operasional: 08:00 - 21:00 WIB
+                08:00 - 21:00 WIB
               </span>
             </div>
 
@@ -57,12 +57,12 @@ export default function Navbar({
                 target="_blank"
                 rel="noreferrer"
                 className="mp-topbar-item"
-                style={{ fontWeight: '600' }}
+                style={{ fontWeight: '500' }}
               >
-                💬 Customer Service (WA)
+                Customer Service (WhatsApp)
               </a>
               <span className="mp-topbar-item">
-                🛡️ Transaksi Aman & Cepat
+                Transaksi Aman & Terpercaya
               </span>
             </div>
           </div>
@@ -135,7 +135,6 @@ export default function Navbar({
                 className="mp-wa-btn"
                 title="Hubungi Penjual via WhatsApp"
               >
-                <span>💬</span>
                 <span>Chat Penjual</span>
               </a>
 
@@ -173,37 +172,37 @@ export default function Navbar({
                 setTimeout(() => scrollToSection('katalog-produk'), 50);
               }}
             >
-              🏷️ Katalog Belanja
+              Katalog Belanja
             </span>
             <span
               className="mp-subnav-pill"
               onClick={() => scrollToSection('flash-sale-section')}
             >
-              ⚡ Flash Sale Hari Ini
+              Flash Sale
             </span>
             <span
               className="mp-subnav-pill"
               onClick={() => scrollToSection('ppob-section')}
             >
-              📱 Top Up & Tagihan PPOB
+              Top Up & Tagihan PPOB
             </span>
             <span
               className="mp-subnav-pill"
               onClick={() => scrollToSection('logam-mulia-section')}
             >
-              🪙 Logam Mulia Emas 24K
+              Logam Mulia Emas
             </span>
             <span
               className="mp-subnav-pill"
               onClick={() => scrollToSection('booster-sosmed-section')}
             >
-              🚀 Booster Sosmed
+              Booster Sosmed
             </span>
             <span
               className="mp-subnav-pill"
               onClick={() => scrollToSection('jasa-web-section')}
             >
-              💻 Jasa Pembuatan Web & POS
+              Jasa Web & POS
             </span>
           </div>
         </div>

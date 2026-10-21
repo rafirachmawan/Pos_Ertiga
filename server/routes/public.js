@@ -135,4 +135,43 @@ router.get(
   })
 );
 
+// GET /api/public/flash-sale - Data flash sale aktif untuk etalase toko online
+router.get(
+  '/flash-sale',
+  asyncHandler(async (req, res) => {
+    let settings = await get(
+      `SELECT judul, subjudul, badge_text, aktif, jam_selesai, durasi_jam
+       FROM flash_sale_settings
+       WHERE id = 1`
+    );
+    if (!settings) {
+      settings = {
+        judul: 'FLASH SALE',
+        subjudul: 'Promo Terbatas Hari Ini',
+        badge_text: '⚡ FLASH SALE',
+        aktif: 1,
+        jam_selesai: '22:00',
+        durasi_jam: 3,
+      };
+    }
+
+    const items = await all(
+      `SELECT fsi.id, fsi.barang_id, fsi.nama_item, fsi.gambar, fsi.harga_asli, fsi.harga_diskon,
+              fsi.diskon_persen, fsi.terjual_pct, fsi.tipe, fsi.target_link, fsi.urutan,
+              b.barcode, b.nama_barang, b.satuan, b.stok, b.berat_gram, b.deskripsi, b.kategori_id
+       FROM flash_sale_items fsi
+       LEFT JOIN barang b ON fsi.barang_id = b.id
+       WHERE fsi.aktif = 1
+       ORDER BY fsi.urutan ASC, fsi.id ASC`
+    );
+
+    res.json({
+      data: {
+        settings,
+        items,
+      },
+    });
+  })
+);
+
 module.exports = router;

@@ -11,6 +11,7 @@ import Master from './components/Master'
 import BannerManager from './components/BannerManager'
 import GoldManager from './components/GoldManager'
 import SmmManager from './components/SmmManager'
+import FlashSaleManager from './components/FlashSaleManager'
 import { api } from './lib/api'
 import './index.css'
 
@@ -94,6 +95,9 @@ function App() {
           <div className={`nav-item ${activeTab === 'banners' ? 'active' : ''}`} onClick={() => setActiveTab('banners')}>
             Kelola Banner
           </div>
+          <div className={`nav-item ${activeTab === 'flashsale' ? 'active' : ''}`} onClick={() => setActiveTab('flashsale')}>
+            Kelola Flash Sale
+          </div>
           <div className={`nav-item ${activeTab === 'emas' ? 'active' : ''}`} onClick={() => setActiveTab('emas')}>
             Kelola Logam Mulia
           </div>
@@ -126,6 +130,7 @@ function App() {
         {activeTab === 'master' && <Master />}
         {activeTab === 'pengaturan' && <Pengaturan />}
         {activeTab === 'banners' && <BannerManager />}
+        {activeTab === 'flashsale' && <FlashSaleManager />}
         {activeTab === 'emas' && <GoldManager />}
         {activeTab === 'smm' && <SmmManager />}
       </div>

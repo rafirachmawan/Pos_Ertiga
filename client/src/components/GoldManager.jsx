@@ -447,6 +447,9 @@ export default function GoldManager() {
           <table style={{ width: '100%', minWidth: '1040px', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '60px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
+                  Foto
+                </th>
                 <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '150px', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
                   Merk / Produsen
                 </th>
@@ -476,7 +479,7 @@ export default function GoldManager() {
             <tbody>
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: '40px 16px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
+                  <td colSpan={9} style={{ padding: '40px 16px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
                     Belum ada varian emas pada merk yang dipilih. Klik tombol "+ Tambah Varian Gramatur" untuk menambahkan.
                   </td>
                 </tr>
@@ -492,6 +495,36 @@ export default function GoldManager() {
                     onMouseEnter={(e) => (e.currentTarget.style.background = '#F8FAFC')}
                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   >
+                    {/* Foto */}
+                    <td style={{ padding: '10px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'center' }}>
+                      <div
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          background: '#FEF3C7',
+                          border: '1px solid #FDE68A',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {it.gambar ? (
+                          <img
+                            src={it.gambar}
+                            alt={it.gramatur}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: '18px' }}>🪙</span>
+                        )}
+                      </div>
+                    </td>
+
                     {/* 1. Merk */}
                     <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', whiteSpace: 'nowrap' }}>
                       <span
@@ -827,6 +860,51 @@ export default function GoldManager() {
                     onChange={(e) => setItemForm({ ...itemForm, harga_beli: e.target.value })}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '7px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
                   />
+                </div>
+              </div>
+
+              {/* Foto / Gambar Emas */}
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px', color: '#334155' }}>
+                  URL Foto / Gambar Emas
+                </label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    placeholder="https://... atau tempel URL gambar kepingan emas"
+                    value={itemForm.gambar}
+                    onChange={(e) => setItemForm({ ...itemForm, gambar: e.target.value })}
+                    style={{ flex: 1, padding: '9px 12px', borderRadius: '7px', border: '1px solid #CBD5E1', boxSizing: 'border-box', fontSize: '12.5px' }}
+                  />
+                  {itemForm.gambar && (
+                    <div style={{ width: '38px', height: '38px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #E2E8F0', flexShrink: 0, background: '#F1F5F9' }}>
+                      <img src={itemForm.gambar} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => (e.target.style.display = 'none')} />
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: '#64748B' }}>Preset cepat:</span>
+                  <button
+                    type="button"
+                    onClick={() => setItemForm({ ...itemForm, gambar: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80' })}
+                    style={{ background: '#FEF3C7', border: '1px solid #FDE68A', color: '#92400E', fontSize: '10.5px', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600' }}
+                  >
+                    Antam CertiCard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setItemForm({ ...itemForm, gambar: 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80' })}
+                    style={{ background: '#FEF3C7', border: '1px solid #FDE68A', color: '#92400E', fontSize: '10.5px', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600' }}
+                  >
+                    Mini Gold
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setItemForm({ ...itemForm, gambar: 'https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=500&q=80' })}
+                    style={{ background: '#FEF3C7', border: '1px solid #FDE68A', color: '#92400E', fontSize: '10.5px', padding: '2px 8px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600' }}
+                  >
+                    UBS Gold
+                  </button>
                 </div>
               </div>
 

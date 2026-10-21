@@ -3,6 +3,17 @@ import { formatRupiah } from '../lib/format';
 import { generateWhatsAppGoldUrl } from '../lib/whatsapp';
 import { fetchPublicLogamMulia, FALLBACK_LOGAM_MULIA } from '../lib/api';
 
+const getDefaultGoldImage = (brandName) => {
+  const b = (brandName || '').toLowerCase();
+  if (b.includes('mini')) {
+    return 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80';
+  }
+  if (b.includes('ubs')) {
+    return 'https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=500&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80';
+};
+
 export default function LogamMuliaSection({ storeInfo }) {
   const [merks, setMerks] = useState(FALLBACK_LOGAM_MULIA);
   const [selectedMerkId, setSelectedMerkId] = useState(FALLBACK_LOGAM_MULIA[0]?.id || 1);
@@ -238,131 +249,116 @@ export default function LogamMuliaSection({ storeInfo }) {
           Belum ada varian emas ready untuk {activeMerk.nama_merk}. Tambahkan melalui aplikasi POS Ertiga.
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: '14px',
-          }}
-        >
+        <div className="mp-gold-grid">
           {availableItems.map((item) => {
             const itemPrice = mode === 'buy' ? item.harga_jual : (item.harga_beli || item.harga_jual * 0.9);
-            return (
-              <div
-                key={item.id}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#D97706';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 12px rgba(217,119,6,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#E5E7EB';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
-                }}
-              >
-                <div>
-                  {/* Gramatur & Badges */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <div
-                      style={{
-                        background: '#FEF3C7',
-                        color: '#92400E',
-                        border: '1px solid #FDE68A',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        fontSize: '12.5px',
-                        fontWeight: '800',
-                      }}
-                    >
-                      {item.gramatur}
-                    </div>
+            const imageSrc = item.gambar || getDefaultGoldImage(activeMerk.nama_merk);
 
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      {Number(item.is_favorit) === 1 && (
-                        <span
-                          style={{
-                            background: '#FEE2E2',
-                            color: '#DC2626',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontSize: '10px',
-                            fontWeight: '800',
-                          }}
-                        >
-                          FAVORIT
-                        </span>
-                      )}
+            return (
+              <div key={item.id} className="mp-gold-card">
+                {/* 1. Gold Image Container with floating badges */}
+                <div className="mp-gold-thumb-wrap">
+                  <img
+                    src={imageSrc}
+                    alt={`${activeMerk.nama_merk} ${item.gramatur}`}
+                    className="mp-gold-img"
+                    onError={(e) => {
+                      e.target.src = getDefaultGoldImage(activeMerk.nama_merk);
+                    }}
+                  />
+
+                  {/* Gramatur Floating Badge */}
+                  <span className="mp-gold-gram-badge">
+                    ⚖️ {item.gramatur}
+                  </span>
+
+                  {/* Right Badges (Favorit & Stok) */}
+                  <div className="mp-gold-badges-right">
+                    {Number(item.is_favorit) === 1 && (
                       <span
                         style={{
-                          background: item.stok > 0 ? '#E8F8EE' : '#F1F5F9',
-                          color: item.stok > 0 ? '#03AC0E' : '#64748B',
+                          background: '#EF4444',
+                          color: '#FFFFFF',
                           padding: '2px 7px',
                           borderRadius: '4px',
-                          fontSize: '10.5px',
-                          fontWeight: '700',
+                          fontSize: '10px',
+                          fontWeight: '800',
+                          letterSpacing: '0.02em',
+                          boxShadow: '0 2px 4px rgba(239, 68, 68, 0.3)',
                         }}
                       >
-                        {item.stok > 0 ? `Ready ${item.stok}` : 'Habis'}
+                        FAVORIT
                       </span>
-                    </div>
+                    )}
+                    <span
+                      style={{
+                        background: item.stok > 0 ? 'rgba(3, 172, 14, 0.92)' : 'rgba(100, 116, 139, 0.92)',
+                        color: '#FFFFFF',
+                        padding: '2px 7px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        backdropFilter: 'blur(4px)',
+                      }}
+                    >
+                      {item.stok > 0 ? `Ready ${item.stok}` : 'Habis'}
+                    </span>
                   </div>
-
-                  {/* Title & Description */}
-                  <h3 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: '800', color: '#1F2937' }}>
-                    {activeMerk.nama_merk} {item.gramatur}
-                  </h3>
-
-                  <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', lineHeight: '1.4', minHeight: '34px' }}>
-                    {item.deskripsi || 'Emas batangan murni 24 Karat bersertifikat resmi.'}
-                  </p>
                 </div>
 
-                {/* Price & Action Button */}
-                <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #F3F4F6' }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '11px', color: '#6B7280' }}>
-                      {mode === 'buy' ? 'Harga Beli:' : 'Harga Buyback:'}
-                    </span>
-                    <span style={{ fontSize: '16px', fontWeight: '800', color: '#B45309' }}>
-                      Rp {formatRupiah(itemPrice)}
-                    </span>
+                {/* 2. Card Content */}
+                <div className="mp-gold-body">
+                  <div>
+                    <h3 style={{ margin: '0 0 4px 0', fontSize: '14.5px', fontWeight: '800', color: '#0F172A', lineHeight: '1.3' }}>
+                      {activeMerk.nama_merk} {item.gramatur}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B', lineHeight: '1.4', height: '32px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      {item.deskripsi || 'Emas batangan murni 24 Karat bersertifikat resmi.'}
+                    </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleOpenOrder(item)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      background: mode === 'buy' ? '#03AC0E' : '#0F172A',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      borderRadius: '7px',
-                      fontWeight: '700',
-                      fontSize: '12.5px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      transition: 'background 0.15s ease',
-                    }}
-                  >
-                    <span>{mode === 'buy' ? 'Beli via WhatsApp' : 'Jual via WhatsApp'}</span>
-                    <span>→</span>
-                  </button>
+                  {/* Price & Action Button */}
+                  <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '500' }}>
+                        {mode === 'buy' ? 'Harga Beli:' : 'Harga Buyback:'}
+                      </span>
+                      <span style={{ fontSize: '16px', fontWeight: '800', color: '#B45309' }}>
+                        Rp {formatRupiah(itemPrice)}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenOrder(item)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        background: mode === 'buy' ? '#03AC0E' : '#0F172A',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '7px',
+                        fontWeight: '700',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease',
+                        boxShadow: mode === 'buy' ? '0 2px 6px rgba(3, 172, 14, 0.2)' : 'none',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = mode === 'buy' ? '#028A0B' : '#1E293B';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = mode === 'buy' ? '#03AC0E' : '#0F172A';
+                      }}
+                    >
+                      <span>{mode === 'buy' ? 'Beli via WhatsApp' : 'Jual via WhatsApp'}</span>
+                      <span>→</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

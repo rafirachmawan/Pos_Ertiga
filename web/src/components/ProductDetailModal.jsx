@@ -22,17 +22,27 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
   const displayDescription = (product.deskripsi && product.deskripsi.trim()) || defaultDescription;
 
   return (
-    <div className="modal-backdrop" onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+    <div
+      className="modal-backdrop"
+      onClick={onClose}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+      }}
+    >
       <div
         style={{
           background: '#FFFFFF',
-          borderRadius: '16px',
-          maxWidth: '680px',
+          borderRadius: '12px',
+          maxWidth: '640px',
           width: '100%',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 20px 45px rgba(0, 0, 0, 0.15)',
           border: '1px solid #E2E8F0',
           position: 'relative',
           overflow: 'hidden',
@@ -40,27 +50,34 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Floating Close Button */}
+        {/* Simple Close Button */}
         <button
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '12px',
-            right: '12px',
+            top: '14px',
+            right: '14px',
             zIndex: 20,
-            width: '34px',
-            height: '34px',
+            width: '32px',
+            height: '32px',
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.95)',
+            background: '#F8FAFC',
             border: '1px solid #E2E8F0',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#475569',
-            fontSize: '15px',
+            color: '#64748B',
+            fontSize: '13px',
             cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            transition: 'all 0.15s ease',
+            transition: 'background 0.15s ease, color 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#F1F5F9';
+            e.currentTarget.style.color = '#0F172A';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#F8FAFC';
+            e.currentTarget.style.color = '#64748B';
           }}
           title="Tutup"
         >
@@ -72,28 +89,27 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(240px, 280px) 1fr',
+              gridTemplateColumns: '240px 1fr',
               gap: '24px',
               alignItems: 'start',
             }}
             className="mp-detail-grid"
           >
-            {/* Left Column: Image Presentation */}
+            {/* Left Column: Clean Image */}
             <div>
               <div
                 style={{
                   width: '100%',
-                  height: '280px',
+                  aspectRatio: '1 / 1',
                   background: '#F8FAFC',
-                  borderRadius: '12px',
+                  borderRadius: '10px',
                   border: '1px solid #E2E8F0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   overflow: 'hidden',
-                  padding: '12px',
+                  padding: '8px',
                   boxSizing: 'border-box',
-                  position: 'relative',
                 }}
               >
                 {product.gambar ? (
@@ -104,202 +120,152 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
                       width: '100%',
                       height: '100%',
                       objectFit: 'contain',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
                     }}
                   />
                 ) : (
                   <div style={{ color: '#94A3B8', textAlign: 'center' }}>
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <rect x="3" y="3" width="18" height="18" rx="2" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
                       <polyline points="21 15 16 10 5 21" />
                     </svg>
-                    <div style={{ fontSize: '12px', marginTop: '6px', fontWeight: '600' }}>Foto Produk</div>
+                    <div style={{ fontSize: '11px', marginTop: '4px', fontWeight: '500' }}>Foto Produk</div>
                   </div>
                 )}
-
-                {/* Badge Discount */}
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '10px',
-                    background: '#FEF2F2',
-                    color: '#DC2626',
-                    border: '1px solid #FECACA',
-                    padding: '2px 7px',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    fontWeight: '800',
-                  }}
-                >
-                  DISKON 15%
-                </span>
-              </div>
-
-              {/* Guarantees below image */}
-              <div
-                style={{
-                  marginTop: '12px',
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '6px',
-                  fontSize: '11px',
-                  color: '#64748B',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#F8FAFC', padding: '6px 8px', borderRadius: '6px', border: '1px solid #F1F5F9' }}>
-                  <span>🛡️</span> 100% Original
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#F8FAFC', padding: '6px 8px', borderRadius: '6px', border: '1px solid #F1F5F9' }}>
-                  <span>⚡</span> Stok Siap Kirim
-                </div>
               </div>
             </div>
 
-            {/* Right Column: Information & Description */}
+            {/* Right Column: Clean Specs & Details */}
             <div>
-              {/* Category & SKU Badges */}
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '8px' }}>
-                <span
-                  style={{
-                    background: '#E8F8EE',
-                    color: '#03AC0E',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                  }}
-                >
-                  ✓ Official Store
+              {/* Category & Status */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#03AC0E' }}>
+                  Official Store
                 </span>
                 {product.nama_kategori && (
-                  <span
-                    style={{
-                      background: '#F1F5F9',
-                      color: '#475569',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                    }}
-                  >
-                    {product.nama_kategori}
-                  </span>
+                  <>
+                    <span style={{ color: '#CBD5E1' }}>•</span>
+                    <span style={{ fontSize: '12px', color: '#64748B' }}>
+                      {product.nama_kategori}
+                    </span>
+                  </>
                 )}
                 {product.barcode && (
-                  <span style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'monospace' }}>
-                    SKU: {product.barcode}
-                  </span>
+                  <>
+                    <span style={{ color: '#CBD5E1' }}>•</span>
+                    <span style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'monospace' }}>
+                      SKU: {product.barcode}
+                    </span>
+                  </>
                 )}
               </div>
 
               {/* Product Title */}
-              <h2 style={{ fontSize: '19px', fontWeight: '800', color: '#1F2937', lineHeight: '1.35', margin: '0 0 10px 0' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A', lineHeight: '1.35', margin: '0 0 10px 0' }}>
                 {product.nama_barang}
               </h2>
 
               {/* Price & Discount */}
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '14px' }}>
-                <span style={{ fontSize: '24px', fontWeight: '900', color: '#03AC0E' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '16px' }}>
+                <span style={{ fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
                   Rp {formatRupiah(product.harga_jual)}
                 </span>
                 <span style={{ fontSize: '13px', color: '#94A3B8', textDecoration: 'line-through' }}>
                   Rp {formatRupiah(originalPrice)}
                 </span>
+                <span
+                  style={{
+                    background: '#FEE2E2',
+                    color: '#DC2626',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                  }}
+                >
+                  -15%
+                </span>
               </div>
 
-              {/* Specs Box */}
+              {/* Specs List without wrapping issues */}
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '8px',
-                  background: '#F8FAFC',
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  border: '1px solid #E2E8F0',
+                  borderTop: '1px solid #F1F5F9',
+                  borderBottom: '1px solid #F1F5F9',
+                  padding: '12px 0',
                   marginBottom: '16px',
-                  fontSize: '12px',
+                  fontSize: '12.5px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
                 }}
               >
-                <div>
-                  <span style={{ color: '#64748B' }}>Status Stok: </span>
-                  <strong style={{ color: isOutOfStock ? '#DC2626' : '#03AC0E' }}>
-                    {isOutOfStock ? 'Habis' : `Tersedia (${product.stok} ${product.satuan || 'pcs'})`}
-                  </strong>
+                <div style={{ display: 'flex' }}>
+                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Kondisi</span>
+                  <span style={{ color: '#0F172A', fontWeight: '500' }}>Baru</span>
                 </div>
-                <div>
-                  <span style={{ color: '#64748B' }}>Berat: </span>
-                  <strong style={{ color: '#1F2937' }}>{formatWeight(product.berat_gram || 200)}</strong>
+                <div style={{ display: 'flex' }}>
+                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Berat Satuan</span>
+                  <span style={{ color: '#0F172A', fontWeight: '500' }}>{formatWeight(product.berat_gram || 200)}</span>
                 </div>
-                <div>
-                  <span style={{ color: '#64748B' }}>Kondisi: </span>
-                  <strong style={{ color: '#1F2937' }}>Baru (Original)</strong>
+                <div style={{ display: 'flex' }}>
+                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Stok</span>
+                  <span style={{ color: isOutOfStock ? '#DC2626' : '#0F172A', fontWeight: isOutOfStock ? '600' : '500' }}>
+                    {isOutOfStock ? 'Habis' : `${product.stok} ${product.satuan || 'pcs'}`}
+                  </span>
                 </div>
-                <div>
-                  <span style={{ color: '#64748B' }}>Pengiriman: </span>
-                  <strong style={{ color: '#1F2937' }}>Ngunut, Tulungagung</strong>
+                <div style={{ display: 'flex' }}>
+                  <span style={{ width: '100px', color: '#64748B', flexShrink: 0 }}>Pengiriman</span>
+                  <span style={{ color: '#0F172A', fontWeight: '500' }}>Ngunut, Tulungagung</span>
                 </div>
               </div>
 
-              {/* Deskripsi Produk Section */}
-              <div
-                style={{
-                  background: '#FFFFFF',
-                  borderRadius: '10px',
-                  border: '1px solid #E2E8F0',
-                  padding: '12px 14px',
-                  marginBottom: '8px',
-                }}
-              >
-                <div style={{ fontSize: '12.5px', fontWeight: '800', color: '#1F2937', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>📋</span>
-                  <span>Deskripsi Produk</span>
+              {/* Deskripsi Produk */}
+              <div style={{ marginBottom: '8px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+                  Deskripsi Produk
                 </div>
                 <div
                   style={{
                     fontSize: '12.5px',
                     lineHeight: '1.6',
-                    color: '#4B5563',
+                    color: '#475569',
                     whiteSpace: 'pre-line',
-                    maxHeight: '120px',
+                    maxHeight: '130px',
                     overflowY: 'auto',
-                    paddingRight: '4px',
+                    paddingRight: '6px',
                   }}
                 >
                   {displayDescription}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
 
-        {/* Sticky Action Footer */}
+        {/* Action Footer */}
         <div
           style={{
             padding: '14px 24px',
             borderTop: '1px solid #E2E8F0',
             background: '#FFFFFF',
-            boxShadow: '0 -4px 12px rgba(0,0,0,0.03)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '16px',
-            flexWrap: 'wrap',
           }}
         >
-          {/* Subtotal & Qty Selector */}
           {!isOutOfStock ? (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {/* Stepper with clean border */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    border: '1.5px solid #CBD5E1',
-                    borderRadius: '8px',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '6px',
                     background: '#FFFFFF',
                     overflow: 'hidden',
                   }}
@@ -309,19 +275,26 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
                     disabled={qty <= 1}
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
                     style={{
-                      width: '36px',
-                      height: '38px',
-                      fontSize: '16px',
-                      fontWeight: '800',
+                      width: '32px',
+                      height: '34px',
+                      fontSize: '15px',
+                      fontWeight: '600',
                       color: qty <= 1 ? '#CBD5E1' : '#334155',
                       border: 'none',
                       background: 'transparent',
                       cursor: qty <= 1 ? 'not-allowed' : 'pointer',
+                      transition: 'background 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (qty > 1) e.currentTarget.style.background = '#F1F5F9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
                     }}
                   >
                     -
                   </button>
-                  <span style={{ width: '38px', textAlign: 'center', fontWeight: '800', fontSize: '13.5px', color: '#1F2937' }}>
+                  <span style={{ width: '36px', textAlign: 'center', fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>
                     {qty}
                   </span>
                   <button
@@ -329,14 +302,21 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
                     disabled={qty >= maxQty}
                     onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
                     style={{
-                      width: '36px',
-                      height: '38px',
-                      fontSize: '16px',
-                      fontWeight: '800',
+                      width: '32px',
+                      height: '34px',
+                      fontSize: '15px',
+                      fontWeight: '600',
                       color: qty >= maxQty ? '#CBD5E1' : '#334155',
                       border: 'none',
                       background: 'transparent',
                       cursor: qty >= maxQty ? 'not-allowed' : 'pointer',
+                      transition: 'background 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (qty < maxQty) e.currentTarget.style.background = '#F1F5F9';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
                     }}
                   >
                     +
@@ -344,41 +324,33 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>Total Harga:</div>
-                  <div style={{ fontSize: '16px', fontWeight: '900', color: '#03AC0E' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Total:</div>
+                  <div style={{ fontSize: '16px', fontWeight: '700', color: '#0F172A' }}>
                     Rp {formatRupiah(totalPrice)}
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px', flex: 1, minWidth: '200px' }}>
+              <div style={{ display: 'flex', gap: '8px', flex: 1, maxWidth: '220px' }}>
                 <button
                   type="button"
                   onClick={handleAdd}
                   style={{
-                    flex: 1,
-                    height: '42px',
+                    width: '100%',
+                    height: '38px',
                     background: '#03AC0E',
                     color: '#FFFFFF',
-                    borderRadius: '8px',
-                    fontWeight: '800',
-                    fontSize: '13.5px',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    fontSize: '13px',
                     border: 'none',
                     cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 12px rgba(3, 172, 14, 0.25)',
-                    transition: 'all 0.15s ease',
+                    transition: 'background 0.15s ease',
                   }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#028A0B')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '#03AC0E')}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <path d="M16 10a4 4 0 0 1-8 0" />
-                  </svg>
-                  <span>+ Tambah ke Keranjang</span>
+                  + Keranjang
                 </button>
               </div>
             </>
@@ -387,15 +359,15 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
               style={{
                 width: '100%',
                 textAlign: 'center',
-                padding: '12px',
+                padding: '10px',
                 background: '#FEF2F2',
                 color: '#DC2626',
-                borderRadius: '8px',
-                fontWeight: '700',
+                borderRadius: '6px',
+                fontWeight: '600',
                 fontSize: '13px',
               }}
             >
-              Mohon maaf, stok produk ini saat ini sedang habis.
+              Stok produk ini sedang habis
             </div>
           )}
         </div>

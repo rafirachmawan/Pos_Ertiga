@@ -20,6 +20,7 @@ const publicRoutes = require('./routes/public');
 const bannerRoutes = require('./routes/banners');
 const logamMuliaRoutes = require('./routes/logamMulia');
 const smmRoutes = require('./routes/smm');
+const flashSaleRoutes = require('./routes/flashSale');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -129,6 +130,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/logam-mulia', logamMuliaRoutes);
 app.use('/api/smm', smmRoutes);
+app.use('/api/flash-sale', flashSaleRoutes);
 
 // Endpoint API yang tidak dikenal harus tetap JSON.
 app.use('/api', (req, res) => {

@@ -330,11 +330,18 @@ export default function GoldServiceModal({ isOpen, onClose, storeInfo }) {
                             fontSize: '13px',
                             lineHeight: '1.1',
                             flexShrink: 0,
+                            overflow: 'hidden',
                             border: `1px solid ${isSelected ? '#FDE68A' : '#E2E8F0'}`,
                           }}
                         >
-                          <span>{item.gramatur.replace('gr', '').trim()}</span>
-                          <span style={{ fontSize: '9px', fontWeight: '600' }}>GRAM</span>
+                          {item.gambar ? (
+                            <img src={item.gambar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => (e.target.style.display = 'none')} />
+                          ) : (
+                            <>
+                              <span>{item.gramatur.replace('gr', '').trim()}</span>
+                              <span style={{ fontSize: '9px', fontWeight: '600' }}>GRAM</span>
+                            </>
+                          )}
                         </div>
 
                         <div>

@@ -96,11 +96,11 @@ export const FALLBACK_LOGAM_MULIA = [
     nama_merk: 'Antam Logam Mulia',
     keterangan: 'Emas batangan murni 24 Karat kemurnian 999.9% bersertifikat resmi LBMA & CertiCard',
     items: [
-      { id: 101, gramatur: '0.5 gr', harga_jual: 790000, harga_beli: 710000, stok: 8, deskripsi: 'CertiCard Redesigned Press resmi Antam 2024 kemurnian 99.99%', is_favorit: 1 },
-      { id: 102, gramatur: '1.0 gr', harga_jual: 1485000, harga_beli: 1350000, stok: 10, deskripsi: 'CertiCard kemurnian 99.99% terakreditasi LBMA resmi Antam', is_favorit: 1 },
-      { id: 103, gramatur: '2.0 gr', harga_jual: 2920000, harga_beli: 2680000, stok: 5, deskripsi: 'Emas batangan 2 gram press segel resmi Antam kemurnian 999.9', is_favorit: 0 },
-      { id: 104, gramatur: '5.0 gr', harga_jual: 7220000, harga_beli: 6650000, stok: 3, deskripsi: 'Emas batangan 5 gram segel CertiCard resmi kemurnian 99.99%', is_favorit: 0 },
-      { id: 105, gramatur: '10.0 gr', harga_jual: 14350000, harga_beli: 13200000, stok: 2, deskripsi: 'Emas batangan 10 gram press segel resmi Antam investasi premium', is_favorit: 0 },
+      { id: 101, gramatur: '0.5 gr', harga_jual: 790000, harga_beli: 710000, stok: 8, deskripsi: 'CertiCard Redesigned Press resmi Antam 2024 kemurnian 99.99%', gambar: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80', is_favorit: 1 },
+      { id: 102, gramatur: '1.0 gr', harga_jual: 1485000, harga_beli: 1350000, stok: 10, deskripsi: 'CertiCard kemurnian 99.99% terakreditasi LBMA resmi Antam', gambar: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80', is_favorit: 1 },
+      { id: 103, gramatur: '2.0 gr', harga_jual: 2920000, harga_beli: 2680000, stok: 5, deskripsi: 'Emas batangan 2 gram press segel resmi Antam kemurnian 999.9', gambar: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
+      { id: 104, gramatur: '5.0 gr', harga_jual: 7220000, harga_beli: 6650000, stok: 3, deskripsi: 'Emas batangan 5 gram segel CertiCard resmi kemurnian 99.99%', gambar: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
+      { id: 105, gramatur: '10.0 gr', harga_jual: 14350000, harga_beli: 13200000, stok: 2, deskripsi: 'Emas batangan 10 gram press segel resmi Antam investasi premium', gambar: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
     ],
   },
   {
@@ -108,11 +108,11 @@ export const FALLBACK_LOGAM_MULIA = [
     nama_merk: 'Mini Gold',
     keterangan: 'Sarana menabung emas mulai dari gramatur mikro bersertifikat resmi 24K',
     items: [
-      { id: 201, gramatur: '0.025 gr', harga_jual: 48000, harga_beli: 40000, stok: 25, deskripsi: 'Mini Gold Black Series kemurnian 24K 99.9% bersertifikat', is_favorit: 0 },
-      { id: 202, gramatur: '0.05 gr', harga_jual: 92000, harga_beli: 78000, stok: 20, deskripsi: 'Mini Gold Souvenir Series kemurnian 24K 99.9% bersertifikat', is_favorit: 0 },
-      { id: 203, gramatur: '0.1 gr', harga_jual: 175000, harga_beli: 150000, stok: 15, deskripsi: 'Mini Gold Classic 0.1 gram kemurnian 24 Karat bersertifikat', is_favorit: 1 },
-      { id: 204, gramatur: '0.25 gr', harga_jual: 415000, harga_beli: 360000, stok: 10, deskripsi: 'Mini Gold White Series 0.25 gram kemurnian 24K bersertifikat', is_favorit: 0 },
-      { id: 205, gramatur: '0.5 gr', harga_jual: 780000, harga_beli: 700000, stok: 6, deskripsi: 'Mini Gold Reguler 0.5 gram kemurnian 24 Karat bersertifikat', is_favorit: 1 },
+      { id: 201, gramatur: '0.025 gr', harga_jual: 48000, harga_beli: 40000, stok: 25, deskripsi: 'Mini Gold Black Series kemurnian 24K 99.9% bersertifikat', gambar: 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
+      { id: 202, gramatur: '0.05 gr', harga_jual: 92000, harga_beli: 78000, stok: 20, deskripsi: 'Mini Gold Souvenir Series kemurnian 24K 99.9% bersertifikat', gambar: 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
+      { id: 203, gramatur: '0.1 gr', harga_jual: 175000, harga_beli: 150000, stok: 15, deskripsi: 'Mini Gold Classic 0.1 gram kemurnian 24 Karat bersertifikat', gambar: 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80', is_favorit: 1 },
+      { id: 204, gramatur: '0.25 gr', harga_jual: 415000, harga_beli: 360000, stok: 10, deskripsi: 'Mini Gold White Series 0.25 gram kemurnian 24K bersertifikat', gambar: 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
+      { id: 205, gramatur: '0.5 gr', harga_jual: 780000, harga_beli: 700000, stok: 6, deskripsi: 'Mini Gold Reguler 0.5 gram kemurnian 24 Karat bersertifikat', gambar: 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80', is_favorit: 1 },
     ],
   },
   {
@@ -120,10 +120,10 @@ export const FALLBACK_LOGAM_MULIA = [
     nama_merk: 'UBS Gold',
     keterangan: 'Emas batangan PT Untung Bersama Sejahtera kemurnian 99.99% segel hologram',
     items: [
-      { id: 301, gramatur: '0.5 gr', harga_jual: 785000, harga_beli: 705000, stok: 5, deskripsi: 'UBS Gold kemurnian 99.99% segel press hologram resmi', is_favorit: 0 },
-      { id: 302, gramatur: '1.0 gr', harga_jual: 1475000, harga_beli: 1340000, stok: 8, deskripsi: 'UBS Gold 1 gram kemurnian 99.99% hologram resmi bergaransi', is_favorit: 1 },
-      { id: 303, gramatur: '2.0 gr', harga_jual: 2900000, harga_beli: 2660000, stok: 4, deskripsi: 'UBS Gold 2 gram kemurnian 99.99% segel resmi PT UBS', is_favorit: 0 },
-      { id: 304, gramatur: '5.0 gr', harga_jual: 7180000, harga_beli: 6610000, stok: 2, deskripsi: 'UBS Gold 5 gram kemurnian 99.99% segel resmi PT UBS', is_favorit: 0 },
+      { id: 301, gramatur: '0.5 gr', harga_jual: 785000, harga_beli: 705000, stok: 5, deskripsi: 'UBS Gold kemurnian 99.99% segel press hologram resmi', gambar: 'https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
+      { id: 302, gramatur: '1.0 gr', harga_jual: 1475000, harga_beli: 1340000, stok: 8, deskripsi: 'UBS Gold 1 gram kemurnian 99.99% hologram resmi bergaransi', gambar: 'https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=500&q=80', is_favorit: 1 },
+      { id: 303, gramatur: '2.0 gr', harga_jual: 2900000, harga_beli: 2660000, stok: 4, deskripsi: 'UBS Gold 2 gram kemurnian 99.99% segel resmi PT UBS', gambar: 'https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
+      { id: 304, gramatur: '5.0 gr', harga_jual: 7180000, harga_beli: 6610000, stok: 2, deskripsi: 'UBS Gold 5 gram kemurnian 99.99% segel resmi PT UBS', gambar: 'https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=500&q=80', is_favorit: 0 },
     ],
   },
 ];
@@ -209,6 +209,79 @@ export async function fetchPublicSmm() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback booster sosmed:', err.message);
     return FALLBACK_SMM;
+  }
+}
+
+export const FALLBACK_FLASH_SALE = {
+  settings: {
+    judul: 'FLASH SALE',
+    subjudul: 'Promo Terbatas Hari Ini',
+    badge_text: '⚡ FLASH SALE',
+    aktif: 1,
+    jam_selesai: '22:00',
+    durasi_jam: 3,
+  },
+  items: [
+    {
+      id: 1,
+      barang_id: null,
+      nama_item: 'Kaos Hitam Polos',
+      gambar: '',
+      harga_asli: 49000,
+      harga_diskon: 40000,
+      diskon_persen: '-15%',
+      terjual_pct: 75,
+      tipe: 'product',
+      target_link: '',
+    },
+    {
+      id: 2,
+      barang_id: null,
+      nama_item: 'Kaos hitam Salvador',
+      gambar: '',
+      harga_asli: 120000,
+      harga_diskon: 100000,
+      diskon_persen: '-20%',
+      terjual_pct: 80,
+      tipe: 'product',
+      target_link: '',
+    },
+    {
+      id: 3,
+      barang_id: null,
+      nama_item: 'Logam Mulia Mini Gold 0.1 gr',
+      gambar: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=400&q=80',
+      harga_asli: 195000,
+      harga_diskon: 175000,
+      diskon_persen: '-10%',
+      terjual_pct: 85,
+      tipe: 'digital',
+      target_link: 'deal-emas',
+    },
+    {
+      id: 4,
+      barang_id: null,
+      nama_item: 'Token Listrik PLN 50.000',
+      gambar: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=400&q=80',
+      harga_asli: 54000,
+      harga_diskon: 51000,
+      diskon_persen: '-5%',
+      terjual_pct: 92,
+      tipe: 'digital',
+      target_link: 'ppob',
+    },
+  ],
+};
+
+export async function fetchPublicFlashSale() {
+  try {
+    const res = await fetch('/api/public/flash-sale');
+    if (!res.ok) throw new Error('Failed to fetch');
+    const json = await res.json();
+    return json.data || FALLBACK_FLASH_SALE;
+  } catch (err) {
+    console.warn('[API] Menggunakan data fallback flash sale:', err.message);
+    return FALLBACK_FLASH_SALE;
   }
 }
 

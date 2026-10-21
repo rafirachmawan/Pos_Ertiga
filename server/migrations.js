@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 9;
+const LATEST_VERSION = 11;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -810,6 +810,147 @@ const migrations = [
           );
         }
       }
+    },
+  },
+  {
+    version: 10,
+    name: 'flash_sale_system',
+    up: async (db) => {
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS flash_sale_settings (
+          id INTEGER PRIMARY KEY,
+          judul VARCHAR(100) DEFAULT 'FLASH SALE',
+          subjudul VARCHAR(150) DEFAULT 'Promo Terbatas Hari Ini',
+          badge_text VARCHAR(50) DEFAULT '⚡ FLASH SALE',
+          aktif INTEGER DEFAULT 1,
+          jam_selesai VARCHAR(10) DEFAULT '22:00',
+          durasi_jam INTEGER DEFAULT 3
+        )`
+      );
+
+      await run(
+        db,
+        `CREATE TABLE IF NOT EXISTS flash_sale_items (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          barang_id INTEGER,
+          nama_item VARCHAR(200) NOT NULL,
+          gambar TEXT,
+          harga_asli INTEGER NOT NULL,
+          harga_diskon INTEGER NOT NULL,
+          diskon_persen VARCHAR(20) DEFAULT '-15%',
+          terjual_pct INTEGER DEFAULT 75,
+          tipe VARCHAR(20) DEFAULT 'product',
+          target_link TEXT DEFAULT '',
+          urutan INTEGER DEFAULT 0,
+          aktif INTEGER DEFAULT 1,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`
+      );
+
+      const existingSettings = await get(db, `SELECT id FROM flash_sale_settings WHERE id = 1`);
+      if (!existingSettings) {
+        await run(
+          db,
+          `INSERT INTO flash_sale_settings (id, judul, subjudul, badge_text, aktif, jam_selesai, durasi_jam)
+           VALUES (1, 'FLASH SALE', 'Promo Terbatas Hari Ini', '⚡ FLASH SALE', 1, '22:00', 3)`
+        );
+      }
+
+      const existingItems = await all(db, `SELECT id FROM flash_sale_items LIMIT 1`);
+      if (existingItems.length === 0) {
+        const sampleBarang = await all(db, `SELECT id, nama_barang, harga_jual, gambar FROM barang WHERE aktif = 1 AND (deleted_at IS NULL) LIMIT 2`);
+        
+        if (sampleBarang.length > 0) {
+          const b1 = sampleBarang[0];
+          const diskon1 = Math.round(b1.harga_jual * 0.85);
+          await run(
+            db,
+            `INSERT INTO flash_sale_items (barang_id, nama_item, gambar, harga_asli, harga_diskon, diskon_persen, terjual_pct, tipe, urutan, aktif)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 'product', 0, 1)`,
+            [b1.id, b1.nama_barang, b1.gambar || '', b1.harga_jual, diskon1, '-15%', 75]
+          );
+        } else {
+          await run(
+            db,
+            `INSERT INTO flash_sale_items (barang_id, nama_item, gambar, harga_asli, harga_diskon, diskon_persen, terjual_pct, tipe, urutan, aktif)
+             VALUES (NULL, 'Kaos Hitam Polos', '', 49000, 40000, '-15%', 75, 'product', 0, 1)`
+          );
+        }
+
+        if (sampleBarang.length > 1) {
+          const b2 = sampleBarang[1];
+          const diskon2 = Math.round(b2.harga_jual * 0.8);
+          await run(
+            db,
+            `INSERT INTO flash_sale_items (barang_id, nama_item, gambar, harga_asli, harga_diskon, diskon_persen, terjual_pct, tipe, urutan, aktif)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 'product', 1, 1)`,
+            [b2.id, b2.nama_barang, b2.gambar || '', b2.harga_jual, diskon2, '-20%', 80]
+          );
+        } else {
+          await run(
+            db,
+            `INSERT INTO flash_sale_items (barang_id, nama_item, gambar, harga_asli, harga_diskon, diskon_persen, terjual_pct, tipe, urutan, aktif)
+             VALUES (NULL, 'Kaos hitam Salvador', '', 120000, 100000, '-20%', 80, 'product', 1, 1)`
+          );
+        }
+
+        await run(
+          db,
+          `INSERT INTO flash_sale_items (barang_id, nama_item, gambar, harga_asli, harga_diskon, diskon_persen, terjual_pct, tipe, target_link, urutan, aktif)
+           VALUES (NULL, 'Logam Mulia Mini Gold 0.1 gr', 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=400&q=80', 195000, 175000, '-10%', 85, 'digital', 'deal-emas', 2, 1)`
+        );
+
+        await run(
+          db,
+          `INSERT INTO flash_sale_items (barang_id, nama_item, gambar, harga_asli, harga_diskon, diskon_persen, terjual_pct, tipe, target_link, urutan, aktif)
+           VALUES (NULL, 'Token Listrik PLN 50.000', 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=400&q=80', 54000, 51000, '-5%', 92, 'digital', 'ppob', 3, 1)`
+        );
+      }
+    },
+  },
+  {
+    version: 11,
+    name: 'populate default images for logam mulia items',
+    async up(db) {
+      const imgAntam = 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=500&q=80';
+      const imgMini = 'https://images.unsplash.com/photo-1624365169365-27a3d3c8c73d?auto=format&fit=crop&w=500&q=80';
+      const imgUbs = 'https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=500&q=80';
+
+      await run(
+        db,
+        `UPDATE logam_mulia_item 
+         SET gambar = ?
+         WHERE (gambar IS NULL OR gambar = '') 
+           AND kategori_id IN (SELECT id FROM logam_mulia_kategori WHERE nama_merk LIKE '%Antam%')`,
+        [imgAntam]
+      );
+
+      await run(
+        db,
+        `UPDATE logam_mulia_item 
+         SET gambar = ?
+         WHERE (gambar IS NULL OR gambar = '') 
+           AND kategori_id IN (SELECT id FROM logam_mulia_kategori WHERE nama_merk LIKE '%Mini%')`,
+        [imgMini]
+      );
+
+      await run(
+        db,
+        `UPDATE logam_mulia_item 
+         SET gambar = ?
+         WHERE (gambar IS NULL OR gambar = '') 
+           AND kategori_id IN (SELECT id FROM logam_mulia_kategori WHERE nama_merk LIKE '%UBS%')`,
+        [imgUbs]
+      );
+
+      await run(
+        db,
+        `UPDATE logam_mulia_item 
+         SET gambar = ?
+         WHERE gambar IS NULL OR gambar = ''`,
+        [imgAntam]
+      );
     },
   },
 ];

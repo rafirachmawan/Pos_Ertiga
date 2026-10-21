@@ -284,7 +284,6 @@ export default function App() {
             <div id="katalog-produk" className="mp-section-card">
               <div className="mp-section-header">
                 <h2 className="mp-section-title">
-                  <span>🛍️</span>
                   <span>
                     {searchQuery ? `Hasil Pencarian "${searchQuery}"` : 'Rekomendasi Produk Pilihan'}
                   </span>
