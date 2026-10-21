@@ -59,11 +59,11 @@ export default function Footer({ storeInfo }) {
             <div>
               <h4 className="mp-footer-col-title">Layanan & Jasa</h4>
               <ul className="mp-footer-links">
-                <li><a href="#digital">Top-Up Pulsa All Operator</a></li>
-                <li><a href="#digital">Token Listrik PLN 24 Jam</a></li>
-                <li><a href="#digital">Investasi Emas Logam Mulia</a></li>
-                <li><a href="#digital">Rasxmedia SMM Booster</a></li>
-                <li><a href="#digital">Jasa Website & Sistem Kasir</a></li>
+                <li><a href="#ppob-section">Top-Up Pulsa All Operator</a></li>
+                <li><a href="#ppob-section">Token Listrik PLN 24 Jam</a></li>
+                <li><a href="#logam-mulia-section">Investasi Emas Logam Mulia</a></li>
+                <li><a href="#booster-sosmed-section">Booster Sosmed SMM</a></li>
+                <li><a href="#jasa-web-section">Jasa Website & Sistem Kasir</a></li>
               </ul>
             </div>
 

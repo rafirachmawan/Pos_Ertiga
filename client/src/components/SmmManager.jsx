@@ -297,173 +297,184 @@ export default function SmmManager() {
   }, 0);
 
   return (
-    <div className="tab-pane active" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 8px' }}>
+    <div style={{ padding: '0 0 40px 0' }}>
       
-      {/* 1. Header Card */}
+      {/* 1. Header Section */}
       <div
         style={{
-          background: '#FFFFFF',
-          border: '1px solid #E2E8F0',
-          borderRadius: '12px',
-          padding: '20px 24px',
-          marginBottom: '20px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           display: 'flex',
-          alignItems: 'center',
           justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '22px',
           flexWrap: 'wrap',
-          gap: '16px',
+          gap: '14px',
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-            <span style={{ fontSize: '24px' }}>🚀</span>
-            <h1 style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#0F172A', margin: 0, letterSpacing: '-0.02em' }}>
               Kelola Booster Sosmed (SMM)
-            </h1>
+            </h2>
             <span
               style={{
-                background: '#F1F5F9',
-                color: '#475569',
-                fontSize: '11px',
+                background: '#F5F3FF',
+                color: '#6D28D9',
+                fontSize: '11.5px',
                 fontWeight: '700',
-                padding: '2px 8px',
+                padding: '3px 10px',
                 borderRadius: '6px',
-                border: '1px solid #E2E8F0',
+                border: '1px solid #DDD6FE',
               }}
             >
               {totalPlatforms} Platform · {totalServices} Layanan · {totalPackages} Paket
             </span>
           </div>
-          <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
+          <p style={{ fontSize: '13px', color: '#64748B', margin: '4px 0 0 0' }}>
             Atur platform (TikTok, Instagram, YouTube), jenis layanan, harga jual, dan kuantitas order yang tampil di web toko.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
+            type="button"
             onClick={openCreatePlatform}
             style={{
+              padding: '9px 15px',
+              background: '#FFFFFF',
+              color: '#334155',
+              border: '1px solid #CBD5E1',
+              borderRadius: '8px',
+              fontWeight: '700',
+              fontSize: '12.5px',
+              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '9px 15px',
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              borderRadius: '8px',
-              fontSize: '12.5px',
-              fontWeight: '600',
-              color: '#334155',
-              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+              transition: 'all 0.15s ease',
             }}
           >
-            <span>➕</span> Tambah Platform
+            <span style={{ fontSize: '14px', lineHeight: 1 }}>+</span>
+            <span>Tambah Platform</span>
           </button>
 
           <button
+            type="button"
             onClick={() => openCreateLayanan()}
             style={{
+              padding: '9px 15px',
+              background: '#FFFFFF',
+              color: '#334155',
+              border: '1px solid #CBD5E1',
+              borderRadius: '8px',
+              fontWeight: '700',
+              fontSize: '12.5px',
+              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '9px 15px',
-              background: '#FFFFFF',
-              border: '1px solid #CBD5E1',
-              borderRadius: '8px',
-              fontSize: '12.5px',
-              fontWeight: '600',
-              color: '#334155',
-              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+              transition: 'all 0.15s ease',
             }}
           >
-            <span>➕</span> Tambah Layanan
+            <span style={{ fontSize: '14px', lineHeight: 1 }}>+</span>
+            <span>Tambah Layanan</span>
           </button>
 
           <button
+            type="button"
             onClick={() => openCreatePaket()}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '9px 16px',
+              padding: '9px 18px',
               background: '#7C3AED',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
+              fontWeight: '700',
               fontSize: '12.5px',
-              fontWeight: '600',
               cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(124, 58, 237, 0.25)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(124, 58, 237, 0.25)',
+              transition: 'all 0.15s ease',
             }}
           >
-            <span>➕</span> Tambah Paket Harga
+            <span style={{ fontSize: '14px', lineHeight: 1 }}>+</span>
+            <span>Tambah Paket Harga</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Platform Selector Tabs */}
+      {/* 2. Unified Filter & Search Toolbar */}
       <div
         style={{
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: '12px',
+          padding: '12px 18px',
+          marginBottom: '20px',
           display: 'flex',
-          gap: '8px',
-          overflowX: 'auto',
-          paddingBottom: '4px',
-          marginBottom: '18px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
+          flexWrap: 'wrap',
+          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         }}
       >
-        <button
-          onClick={() => setSelectedPlatformId('all')}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: '600',
-            border: selectedPlatformId === 'all' ? '1px solid #7C3AED' : '1px solid #E2E8F0',
-            background: selectedPlatformId === 'all' ? '#7C3AED' : '#FFFFFF',
-            color: selectedPlatformId === 'all' ? '#FFFFFF' : '#475569',
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          Semua Platform ({totalPlatforms})
-        </button>
+        {/* Platform Filter Pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748B', marginRight: '4px' }}>
+            Filter Platform:
+          </span>
 
-        {dataTree.map((p) => {
-          const isSelected = selectedPlatformId === p.id;
-          const pkgCount = p.services?.reduce((a, s) => a + (s.packages?.length || 0), 0) || 0;
-          return (
-            <div
-              key={p.id}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                background: isSelected ? '#F5F3FF' : '#FFFFFF',
-                border: isSelected ? '1.5px solid #7C3AED' : '1px solid #E2E8F0',
-                borderRadius: '8px',
-                padding: '2px 4px 2px 10px',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-              }}
-            >
+          <button
+            type="button"
+            onClick={() => setSelectedPlatformId('all')}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '20px',
+              border: '1.5px solid',
+              borderColor: selectedPlatformId === 'all' ? '#7C3AED' : '#E2E8F0',
+              background: selectedPlatformId === 'all' ? '#7C3AED' : '#F8FAFC',
+              color: selectedPlatformId === 'all' ? '#FFFFFF' : '#475569',
+              fontSize: '12px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            Semua Platform ({totalPlatforms})
+          </button>
+
+          {dataTree.map((p) => {
+            const isSelected = selectedPlatformId === p.id;
+            const pkgCount = p.services?.reduce((a, s) => a + (s.packages?.length || 0), 0) || 0;
+            return (
               <button
+                key={p.id}
+                type="button"
                 onClick={() => setSelectedPlatformId(p.id)}
                 style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: '6px 8px 6px 0',
-                  fontSize: '13px',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  border: '1.5px solid',
+                  borderColor: isSelected ? (p.color || '#7C3AED') : '#E2E8F0',
+                  background: isSelected ? `${p.color || '#7C3AED'}15` : '#F8FAFC',
+                  color: isSelected ? (p.color || '#7C3AED') : '#475569',
+                  fontSize: '12px',
                   fontWeight: isSelected ? '700' : '600',
-                  color: isSelected ? '#7C3AED' : '#334155',
                   cursor: 'pointer',
-                  display: 'flex',
+                  whiteSpace: 'nowrap',
+                  display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <span
                   style={{
-                    display: 'inline-block',
                     width: '8px',
                     height: '8px',
                     borderRadius: '50%',
@@ -474,106 +485,55 @@ export default function SmmManager() {
                 <span
                   style={{
                     fontSize: '11px',
-                    background: isSelected ? '#DDD6FE' : '#F1F5F9',
-                    color: isSelected ? '#6D28D9' : '#64748B',
+                    background: isSelected ? `${p.color || '#7C3AED'}25` : '#E2E8F0',
+                    color: isSelected ? (p.color || '#7C3AED') : '#64748B',
                     padding: '1px 6px',
                     borderRadius: '10px',
+                    fontWeight: '700',
                   }}
                 >
                   {pkgCount}
                 </span>
               </button>
+            );
+          })}
+        </div>
 
-              <button
-                onClick={() => openEditPlatform(p)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: '4px',
-                  cursor: 'pointer',
-                  color: '#94A3B8',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-                title="Edit Platform"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              </button>
-
-              <button
-                onClick={() => handleDeletePlatform(p)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  padding: '4px',
-                  cursor: 'pointer',
-                  color: '#EF4444',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-                title="Hapus Platform"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 3. Search Bar */}
-      <div
-        style={{
-          background: '#FFFFFF',
-          border: '1px solid #E2E8F0',
-          borderRadius: '10px',
-          padding: '12px 16px',
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          flexWrap: 'wrap',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-        }}
-      >
-        <div style={{ position: 'relative', width: '100%', maxWidth: '380px' }}>
-          <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }}>
-            🔍
+        {/* Search Input & Total info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <div style={{ position: 'relative', width: '270px' }}>
+            <span style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '13px' }}>
+              🔍
+            </span>
+            <input
+              type="text"
+              placeholder="Cari layanan, paket order..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                height: '36px',
+                paddingLeft: '32px',
+                paddingRight: '12px',
+                border: '1px solid #CBD5E1',
+                borderRadius: '8px',
+                fontSize: '12.5px',
+                color: '#1E293B',
+                outline: 'none',
+                boxSizing: 'border-box',
+                background: '#FAFAFA',
+              }}
+            />
+          </div>
+          <span style={{ fontSize: '12px', color: '#64748B', fontWeight: '500' }}>
+            <strong style={{ color: '#0F172A' }}>{totalPackages}</strong> pilihan aktif
           </span>
-          <input
-            type="text"
-            placeholder="Cari layanan, paket order, atau kuantitas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              height: '38px',
-              paddingLeft: '36px',
-              paddingRight: '12px',
-              border: '1px solid #CBD5E1',
-              borderRadius: '8px',
-              fontSize: '13px',
-              color: '#1E293B',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
-
-        <div style={{ fontSize: '13px', color: '#64748B' }}>
-          Tersedia <strong>{totalPackages}</strong> pilihan paket booster aktif
         </div>
       </div>
 
-      {/* 4. Content: Platforms & Services Accordion / Cards */}
+      {/* 3. Content: Platforms & Services */}
       {loading ? (
-        <div style={{ padding: '60px 20px', textAlign: 'center', color: '#94A3B8' }}>
+        <div style={{ padding: '60px 20px', textAlign: 'center', color: '#94A3B8', fontSize: '13.5px' }}>
           Memuat data Booster Sosmed...
         </div>
       ) : platformsToDisplay.length === 0 ? (
@@ -587,30 +547,32 @@ export default function SmmManager() {
             color: '#64748B',
           }}
         >
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📱</div>
-          <p style={{ fontSize: '15px', fontWeight: '600', color: '#1E293B', margin: '0 0 6px 0' }}>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🚀</div>
+          <p style={{ fontSize: '15px', fontWeight: '700', color: '#1E293B', margin: '0 0 6px 0' }}>
             Belum ada platform yang terdaftar
           </p>
           <p style={{ fontSize: '13px', margin: 0, marginBottom: '16px' }}>
             Klik tombol di bawah untuk menambahkan platform baru seperti TikTok, Instagram, atau YouTube.
           </p>
           <button
+            type="button"
             onClick={openCreatePlatform}
             style={{
-              padding: '8px 18px',
+              padding: '9px 18px',
               background: '#7C3AED',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
-              fontWeight: '600',
+              fontWeight: '700',
               cursor: 'pointer',
+              fontSize: '13px',
             }}
           >
             + Tambah Platform Baru
           </button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
           {platformsToDisplay.map((p) => {
             const filteredServices = (p.services || []).filter((s) => {
               if (!searchQuery.trim()) return true;
@@ -633,14 +595,14 @@ export default function SmmManager() {
                   background: '#FFFFFF',
                   border: '1px solid #E2E8F0',
                   borderRadius: '12px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                   overflow: 'hidden',
                 }}
               >
                 {/* Platform Header */}
                 <div
                   style={{
-                    padding: '16px 20px',
+                    padding: '14px 20px',
                     background: '#F8FAFC',
                     borderBottom: '1px solid #E2E8F0',
                     display: 'flex',
@@ -650,39 +612,44 @@ export default function SmmManager() {
                     gap: '12px',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '8px',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '10px',
                         background: p.color || '#7C3AED',
                         color: '#FFFFFF',
-                        fontWeight: '700',
-                        fontSize: '14px',
+                        fontWeight: '800',
+                        fontSize: '15px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                       }}
                     >
                       {p.nama_platform?.charAt(0)}
                     </span>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
+                        <h3 style={{ fontSize: '16.5px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
                           {p.nama_platform}
                         </h3>
                         <span
                           style={{
                             fontSize: '11px',
-                            fontWeight: '600',
+                            fontWeight: '700',
                             padding: '2px 8px',
                             borderRadius: '12px',
                             background: p.aktif ? '#ECFDF5' : '#F1F5F9',
                             color: p.aktif ? '#059669' : '#64748B',
                             border: p.aktif ? '1px solid #A7F3D0' : '1px solid #E2E8F0',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                         >
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: p.aktif ? '#10B981' : '#94A3B8' }} />
                           {p.aktif ? 'Aktif di Web' : 'Disembunyikan'}
                         </span>
                       </div>
@@ -694,51 +661,80 @@ export default function SmmManager() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  {/* Platform Action Buttons */}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button
+                      type="button"
                       onClick={() => openCreateLayanan(p.id)}
                       style={{
-                        padding: '6px 12px',
+                        padding: '7px 14px',
                         background: '#FFFFFF',
                         border: '1px solid #CBD5E1',
-                        borderRadius: '6px',
+                        borderRadius: '7px',
                         fontSize: '12px',
                         fontWeight: '600',
-                        color: '#334155',
+                        color: '#0F172A',
                         cursor: 'pointer',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '5px',
+                        transition: 'all 0.15s ease',
                       }}
                     >
-                      <span>➕</span> Tambah Layanan {p.nama_platform}
+                      <span>➕</span> Tambah Layanan
                     </button>
                     <button
+                      type="button"
                       onClick={() => openEditPlatform(p)}
                       style={{
-                        padding: '6px 10px',
+                        padding: '7px 12px',
                         background: '#FFFFFF',
                         border: '1px solid #CBD5E1',
-                        borderRadius: '6px',
+                        borderRadius: '7px',
                         fontSize: '12px',
                         fontWeight: '600',
                         color: '#475569',
                         cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        transition: 'all 0.15s ease',
                       }}
                     >
-                      Edit Platform
+                      <span>✏️</span> Edit Platform
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePlatform(p)}
+                      style={{
+                        padding: '7px 10px',
+                        background: '#FEF2F2',
+                        border: '1px solid #FCA5A5',
+                        borderRadius: '7px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: '#DC2626',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        transition: 'all 0.15s ease',
+                      }}
+                      title="Hapus Platform"
+                    >
+                      <span>🗑️</span> Hapus
                     </button>
                   </div>
                 </div>
 
                 {/* Services Container */}
-                <div style={{ padding: '20px' }}>
+                <div style={{ padding: '18px 20px' }}>
                   {filteredServices.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '30px 10px', color: '#94A3B8', fontSize: '13px' }}>
-                      Belum ada layanan untuk platform {p.nama_platform}. Klik tombol "Tambah Layanan" di atas.
+                      Belum ada layanan untuk platform {p.nama_platform}. Klik tombol "+ Tambah Layanan" di atas.
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                       {filteredServices.map((s) => {
                         const packages = s.packages || [];
                         return (
@@ -755,7 +751,7 @@ export default function SmmManager() {
                             <div
                               style={{
                                 padding: '12px 16px',
-                                background: '#FAFAFA',
+                                background: '#F8FAFC',
                                 borderBottom: '1px solid #E2E8F0',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -765,8 +761,8 @@ export default function SmmManager() {
                               }}
                             >
                               <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <span style={{ fontSize: '14px', fontWeight: '700', color: '#1E293B' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                  <span style={{ fontSize: '14.5px', fontWeight: '800', color: '#0F172A' }}>
                                     {s.nama_layanan}
                                   </span>
                                   <span
@@ -774,108 +770,120 @@ export default function SmmManager() {
                                       fontSize: '11px',
                                       fontWeight: '600',
                                       background: '#EFF6FF',
-                                      color: '#2563EB',
+                                      color: '#1D4ED8',
                                       padding: '2px 8px',
                                       borderRadius: '6px',
                                       border: '1px solid #BFDBFE',
                                     }}
                                   >
-                                    Target: {s.target_type}
+                                    🎯 Target: {s.target_type}
                                   </span>
                                   {!s.aktif && (
-                                    <span style={{ fontSize: '10px', background: '#F1F5F9', color: '#64748B', padding: '2px 6px', borderRadius: '4px' }}>
+                                    <span style={{ fontSize: '10.5px', background: '#F1F5F9', color: '#64748B', padding: '2px 7px', borderRadius: '4px', fontWeight: '600' }}>
                                       Nonaktif
                                     </span>
                                   )}
                                 </div>
                                 {s.deskripsi && (
-                                  <p style={{ fontSize: '11.5px', color: '#64748B', margin: '2px 0 0 0' }}>
+                                  <p style={{ fontSize: '12px', color: '#64748B', margin: '3px 0 0 0' }}>
                                     {s.deskripsi}
                                   </p>
                                 )}
                               </div>
 
-                              <div style={{ display: 'flex', gap: '6px' }}>
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                                 <button
+                                  type="button"
                                   onClick={() => openCreatePaket(s.id)}
                                   style={{
-                                    padding: '5px 10px',
+                                    padding: '6px 12px',
                                     background: '#7C3AED',
                                     color: '#FFFFFF',
                                     border: 'none',
                                     borderRadius: '6px',
-                                    fontSize: '11.5px',
+                                    fontSize: '12px',
                                     fontWeight: '600',
                                     cursor: 'pointer',
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '4px',
+                                    boxShadow: '0 1px 2px rgba(124, 58, 237, 0.2)',
                                   }}
                                 >
                                   <span>➕</span> Tambah Paket
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => openEditLayanan(s)}
                                   style={{
-                                    padding: '5px 8px',
+                                    padding: '6px 10px',
                                     background: '#FFFFFF',
                                     border: '1px solid #CBD5E1',
                                     borderRadius: '6px',
-                                    fontSize: '11.5px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
                                     color: '#475569',
                                     cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
                                   }}
                                   title="Edit Layanan"
                                 >
-                                  ✏️ Edit
+                                  <span>✏️</span> Edit
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => handleDeleteLayanan(s)}
                                   style={{
-                                    padding: '5px 8px',
-                                    background: '#FFFFFF',
+                                    padding: '6px 10px',
+                                    background: '#FEF2F2',
                                     border: '1px solid #FCA5A5',
                                     borderRadius: '6px',
-                                    fontSize: '11.5px',
-                                    color: '#EF4444',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: '#DC2626',
                                     cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
                                   }}
                                   title="Hapus Layanan"
                                 >
-                                  🗑️
+                                  <span>🗑️</span> Hapus
                                 </button>
                               </div>
                             </div>
 
                             {/* Service Packages Table */}
                             {packages.length === 0 ? (
-                              <div style={{ padding: '20px', textAlign: 'center', color: '#94A3B8', fontSize: '12.5px' }}>
-                                Belum ada paket harga untuk layanan ini. Klik tombol "+ Tambah Paket".
+                              <div style={{ padding: '24px', textAlign: 'center', color: '#94A3B8', fontSize: '12.5px' }}>
+                                Belum ada paket harga untuk layanan ini. Klik tombol "+ Tambah Paket" di atas.
                               </div>
                             ) : (
                               <div style={{ overflowX: 'auto' }}>
-                                <table style={{ width: '100%', minWidth: '700px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse', textAlign: 'left' }}>
                                   <thead>
                                     <tr style={{ background: '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', width: '150px', borderRight: '1px solid #E2E8F0' }}>
+                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', width: '150px', borderRight: '1px solid #E2E8F0' }}>
                                         Kuantitas Order
                                       </th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', width: '120px', borderRight: '1px solid #E2E8F0' }}>
+                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', width: '130px', borderRight: '1px solid #E2E8F0' }}>
                                         Badge / Tipe
                                       </th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', width: '130px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', width: '130px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
                                         Harga Modal
                                       </th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', width: '140px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', width: '140px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
                                         Harga Jual (Web)
                                       </th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', width: '130px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', width: '130px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
                                         Estimasi Profit
                                       </th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', width: '90px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
+                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', width: '90px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                                         Status
                                       </th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', width: '100px', textAlign: 'center' }}>
+                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', width: '130px', textAlign: 'center' }}>
                                         Aksi
                                       </th>
                                     </tr>
@@ -890,82 +898,116 @@ export default function SmmManager() {
                                             borderBottom: '1px solid #F1F5F9',
                                             transition: 'background 0.15s ease',
                                           }}
+                                          onMouseEnter={(e) => (e.currentTarget.style.background = '#F8FAFC')}
+                                          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                                         >
-                                          <td style={{ padding: '10px 14px', fontSize: '13px', fontWeight: '700', color: '#0F172A', borderRight: '1px solid #E2E8F0' }}>
+                                          {/* Kuantitas Order */}
+                                          <td style={{ padding: '10px 14px', fontSize: '13.5px', fontWeight: '800', color: '#0F172A', borderRight: '1px solid #E2E8F0' }}>
                                             {Number(pkg.jumlah_order).toLocaleString('id-ID')}
                                           </td>
+
+                                          {/* Badge / Tipe */}
                                           <td style={{ padding: '10px 14px', fontSize: '12px', borderRight: '1px solid #E2E8F0' }}>
                                             {pkg.is_popular ? (
                                               <span
                                                 style={{
                                                   background: '#FEF3C7',
-                                                  color: '#D97706',
+                                                  color: '#B45309',
                                                   fontWeight: '700',
-                                                  fontSize: '10px',
-                                                  padding: '2px 7px',
+                                                  fontSize: '10.5px',
+                                                  padding: '2px 8px',
                                                   borderRadius: '4px',
                                                   border: '1px solid #FDE68A',
+                                                  display: 'inline-block',
                                                 }}
                                               >
                                                 ⭐ BEST SELLER
                                               </span>
                                             ) : (
-                                              <span style={{ color: '#94A3B8', fontSize: '11px' }}>Reguler</span>
+                                              <span style={{ color: '#64748B', fontSize: '12px', fontWeight: '500' }}>
+                                                Reguler
+                                              </span>
                                             )}
                                           </td>
-                                          <td style={{ padding: '10px 14px', fontSize: '12.5px', color: '#64748B', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+
+                                          {/* Harga Modal */}
+                                          <td style={{ padding: '10px 14px', fontSize: '12.5px', color: '#64748B', textAlign: 'right', borderRight: '1px solid #E2E8F0', fontVariantNumeric: 'tabular-nums' }}>
                                             Rp {formatRupiah(pkg.harga_modal)}
                                           </td>
-                                          <td style={{ padding: '10px 14px', fontSize: '13px', fontWeight: '700', color: '#7C3AED', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+
+                                          {/* Harga Jual */}
+                                          <td style={{ padding: '10px 14px', fontSize: '13.5px', fontWeight: '800', color: '#7C3AED', textAlign: 'right', borderRight: '1px solid #E2E8F0', fontVariantNumeric: 'tabular-nums' }}>
                                             Rp {formatRupiah(pkg.harga_jual)}
                                           </td>
-                                          <td style={{ padding: '10px 14px', fontSize: '12px', fontWeight: '600', color: profit >= 0 ? '#059669' : '#DC2626', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
-                                            +Rp {formatRupiah(profit)}
+
+                                          {/* Estimasi Profit */}
+                                          <td style={{ padding: '10px 14px', fontSize: '12.5px', fontWeight: '700', color: profit >= 0 ? '#059669' : '#DC2626', textAlign: 'right', borderRight: '1px solid #E2E8F0', fontVariantNumeric: 'tabular-nums' }}>
+                                            +{formatRupiah(profit)}
                                           </td>
+
+                                          {/* Status */}
                                           <td style={{ padding: '10px 14px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                                             <span
                                               style={{
                                                 fontSize: '11px',
-                                                fontWeight: '600',
+                                                fontWeight: '700',
                                                 padding: '2px 8px',
                                                 borderRadius: '6px',
                                                 background: pkg.aktif ? '#ECFDF5' : '#F1F5F9',
                                                 color: pkg.aktif ? '#059669' : '#64748B',
+                                                border: pkg.aktif ? '1px solid #A7F3D0' : '1px solid #E2E8F0',
                                               }}
                                             >
                                               {pkg.aktif ? 'Aktif' : 'Off'}
                                             </span>
                                           </td>
+
+                                          {/* Aksi Buttons */}
                                           <td style={{ padding: '10px 14px', textAlign: 'center' }}>
-                                            <div style={{ display: 'inline-flex', gap: '6px' }}>
+                                            <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'center' }}>
                                               <button
+                                                type="button"
                                                 onClick={() => openEditPaket(pkg)}
                                                 style={{
                                                   background: '#FFFFFF',
                                                   border: '1px solid #CBD5E1',
-                                                  borderRadius: '4px',
-                                                  padding: '4px 8px',
-                                                  fontSize: '11px',
+                                                  borderRadius: '5px',
+                                                  padding: '4px 9px',
+                                                  fontSize: '11.5px',
                                                   fontWeight: '600',
                                                   color: '#334155',
                                                   cursor: 'pointer',
+                                                  display: 'inline-flex',
+                                                  alignItems: 'center',
+                                                  gap: '3px',
+                                                  transition: 'all 0.15s ease',
                                                 }}
+                                                title="Edit Paket"
                                               >
-                                                Edit
+                                                <span>✏️</span>
+                                                <span>Edit</span>
                                               </button>
                                               <button
+                                                type="button"
                                                 onClick={() => handleDeletePaket(pkg)}
                                                 style={{
-                                                  background: '#FFFFFF',
+                                                  background: '#FEF2F2',
                                                   border: '1px solid #FCA5A5',
-                                                  borderRadius: '4px',
-                                                  padding: '4px 7px',
-                                                  fontSize: '11px',
-                                                  color: '#EF4444',
+                                                  borderRadius: '5px',
+                                                  padding: '4px 9px',
+                                                  fontSize: '11.5px',
+                                                  fontWeight: '600',
+                                                  color: '#DC2626',
                                                   cursor: 'pointer',
+                                                  display: 'inline-flex',
+                                                  alignItems: 'center',
+                                                  gap: '3px',
+                                                  transition: 'all 0.15s ease',
                                                 }}
+                                                title="Hapus Paket"
                                               >
-                                                ✕
+                                                <span>🗑️</span>
+                                                <span>Hapus</span>
                                               </button>
                                             </div>
                                           </td>

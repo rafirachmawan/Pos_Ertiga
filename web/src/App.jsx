@@ -12,6 +12,7 @@ import Footer from './components/Footer';
 import DigitalServicesSection from './components/DigitalServicesSection';
 import LogamMuliaSection from './components/LogamMuliaSection';
 import SmmSection from './components/SmmSection';
+import WebDevSection from './components/WebDevSection';
 import { fetchTokoInfo, fetchPublicCategories, fetchPublicProducts } from './lib/api';
 import { formatRupiah } from './lib/format';
 
@@ -43,6 +44,15 @@ export default function App() {
     }
     if (serviceId === 'emas') {
       const el = document.getElementById('logam-mulia-section');
+      if (el) {
+        const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        window.scrollTo({ top, behavior: 'smooth' });
+        return;
+      }
+    }
+    if (serviceId === 'appdev' || serviceId === 'web' || serviceId === 'it') {
+      const el = document.getElementById('jasa-web-section');
       if (el) {
         const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
         const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
@@ -266,6 +276,7 @@ export default function App() {
               onOpenServiceModal={handleOpenDigitalModal}
               onCloseServiceModal={() => setActiveDigitalModal(null)}
             />
+            <WebDevSection storeInfo={storeInfo} />
           </>
         ) : (
           <>
@@ -352,6 +363,9 @@ export default function App() {
               onOpenServiceModal={handleOpenDigitalModal}
               onCloseServiceModal={() => setActiveDigitalModal(null)}
             />
+
+            {/* 5. Jasa Pembuatan Website & Aplikasi Custom (Section Langsung di Halaman Toko) */}
+            <WebDevSection storeInfo={storeInfo} />
           </>
         )}
 

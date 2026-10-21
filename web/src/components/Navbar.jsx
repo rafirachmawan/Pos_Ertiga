@@ -201,7 +201,7 @@ export default function Navbar({
             </span>
             <span
               className="mp-subnav-pill"
-              onClick={() => onOpenDigitalModal && onOpenDigitalModal('appdev')}
+              onClick={() => scrollToSection('jasa-web-section')}
             >
               💻 Jasa Pembuatan Web & POS
             </span>

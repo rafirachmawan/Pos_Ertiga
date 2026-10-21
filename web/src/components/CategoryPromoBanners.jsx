@@ -48,7 +48,16 @@ export default function CategoryPromoBanners({ onSelectCategory, onOpenDigital }
       tag: 'Solusi Bisnis',
       color: '#059669',
       bg: '#ECFDF5',
-      action: () => onOpenDigital && onOpenDigital('appdev'),
+      action: () => {
+        const el = document.getElementById('jasa-web-section');
+        if (el) {
+          const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
+          const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+          window.scrollTo({ top, behavior: 'smooth' });
+        } else if (onOpenDigital) {
+          onOpenDigital('appdev');
+        }
+      },
       btnText: 'Konsultasi',
       icon: (
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

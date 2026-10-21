@@ -87,7 +87,14 @@ export default function MarketplaceQuickIcons({
       label: 'Jasa Web & POS',
       icon: '💻',
       bg: '#ECFDF5',
-      action: () => onOpenDigitalModal('appdev'),
+      action: () => {
+        const el = document.getElementById('jasa-web-section');
+        if (el) {
+          const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
+          const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      },
     },
   ];
 

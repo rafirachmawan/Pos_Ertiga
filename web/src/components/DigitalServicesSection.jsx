@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { PPOB_SERVICES_META } from '../data/digitalServices';
 import PPOBServiceModal from './services/PPOBServiceModal';
-import AppDevServiceModal from './services/AppDevServiceModal';
 
 export default function DigitalServicesSection({ storeInfo, activeServiceModal, onCloseServiceModal, onOpenServiceModal }) {
   const [internalModal, setInternalModal] = useState(null);
@@ -109,11 +108,6 @@ export default function DigitalServicesSection({ storeInfo, activeServiceModal, 
         onClose={closeModal}
         storeInfo={storeInfo}
         initialCategoryId={selectedPpobCategory}
-      />
-      <AppDevServiceModal
-        isOpen={currentModal === 'appdev'}
-        onClose={closeModal}
-        storeInfo={storeInfo}
       />
     </section>
   );
