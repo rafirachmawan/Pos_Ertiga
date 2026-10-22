@@ -1,27 +1,44 @@
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 const { initializeSchema } = require('./migrations');
 const dbUtils = require('./dbUtils');
 
-// Produksi (Electron): USER_DATA_PATH diisi main.js dengan app.getPath('userData').
-// Development: file database berada di folder server/.
-let dbPath = path.resolve(__dirname, 'pos_database.sqlite');
-if (process.env.USER_DATA_PATH) {
-  dbPath = path.join(process.env.USER_DATA_PATH, 'pos_database.sqlite');
-}
+// Cek apakah mode Cloud Turso / LibSQL aktif melalui Environment Variable
+const tursoUrl = process.env.TURSO_DATABASE_URL || process.env.LIBSQL_URL;
+const tursoToken = process.env.TURSO_AUTH_TOKEN || process.env.LIBSQL_AUTH_TOKEN;
 
-fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+let db;
+let dbPath;
 
-console.log('[DB] Menggunakan database:', dbPath);
-
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('[DB] Gagal membuka database:', err.message);
-  } else {
-    console.log('[DB] Terhubung ke SQLite.');
+if (tursoUrl) {
+  const { createClient } = require('@libsql/client');
+  const safeLogUrl = tursoUrl.replace(/:\/\/.*@/, '://***@');
+  console.log('[DB] Mode Cloud: Terhubung ke Turso LibSQL (' + safeLogUrl + ')');
+  db = createClient({
+    url: tursoUrl,
+    authToken: tursoToken,
+  });
+  dbPath = tursoUrl;
+} else {
+  const sqlite3 = require('sqlite3').verbose();
+  // Produksi (Electron): USER_DATA_PATH diisi main.js dengan app.getPath('userData').
+  // Development: file database berada di folder server/.
+  dbPath = path.resolve(__dirname, 'pos_database.sqlite');
+  if (process.env.USER_DATA_PATH) {
+    dbPath = path.join(process.env.USER_DATA_PATH, 'pos_database.sqlite');
   }
-});
+
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  console.log('[DB] Menggunakan database lokal:', dbPath);
+
+  db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+      console.error('[DB] Gagal membuka database:', err.message);
+    } else {
+      console.log('[DB] Terhubung ke SQLite lokal.');
+    }
+  });
+}
 
 let initPromise = null;
 
@@ -46,10 +63,22 @@ function initializeDatabase() {
 
 function closeDatabase() {
   return new Promise((resolve, reject) => {
-    db.close((err) => {
-      if (err) reject(err);
-      else resolve();
-    });
+    if (!db) return resolve();
+    if (typeof db.close === 'function') {
+      try {
+        const res = db.close((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+        if (res && typeof res.then === 'function') {
+          res.then(resolve).catch(reject);
+        }
+      } catch (e) {
+        resolve();
+      }
+    } else {
+      resolve();
+    }
   });
 }
 

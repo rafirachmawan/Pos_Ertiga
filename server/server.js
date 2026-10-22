@@ -29,7 +29,7 @@ const HOST = process.env.HOST || '127.0.0.1';
 
 const isPackaged = process.env.APP_PACKAGED === 'true';
 
-const allowedOrigins = new Set([
+const baseAllowedOrigins = [
   'http://127.0.0.1:3001',
   'http://localhost:3001',
   'http://127.0.0.1:5173',
@@ -38,7 +38,21 @@ const allowedOrigins = new Set([
   'http://localhost:5174',
   'http://127.0.0.1:5175',
   'http://localhost:5175',
-]);
+];
+
+const customOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const allowedOriginsSet = new Set([...baseAllowedOrigins, ...customOrigins]);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // request server-to-server, curl, electron internal, atau same-origin
+  if (allowedOriginsSet.has(origin)) return true;
+  if (process.env.VERCEL && origin.endsWith('.vercel.app')) return true;
+  return false;
+}
 
 app.disable('x-powered-by');
 
@@ -47,31 +61,46 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS untuk development Vite (POS di 5173, Web Storefront di 5174/5175).
-if (!isPackaged) {
-  app.use(
-    cors({
-      origin: [
-        'http://127.0.0.1:5173',
-        'http://localhost:5173',
-        'http://127.0.0.1:5174',
-        'http://localhost:5174',
-        'http://127.0.0.1:5175',
-        'http://localhost:5175',
-      ],
-    })
-  );
-}
+// CORS middleware yang mendukung development lokal dan domain cloud
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
+    credentials: true,
+  })
+);
 
-// Tolak request mutasi dari origin asing (mis. halaman web lain).
+// Tolak request mutasi dari origin asing (mis. halaman web luar).
 app.use('/api', (req, res, next) => {
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
     const origin = req.get('origin');
-    if (origin && !allowedOrigins.has(origin)) {
+    if (origin && !isAllowedOrigin(origin)) {
       return res.status(403).json({ error: 'Origin tidak diizinkan' });
     }
   }
   next();
+});
+
+// Pastikan skema database diinisialisasi sebelum memproses request API
+let dbReadyPromise = null;
+app.use('/api', async (req, res, next) => {
+  if (!dbReadyPromise) {
+    dbReadyPromise = initializeDatabase().catch((err) => {
+      dbReadyPromise = null;
+      throw err;
+    });
+  }
+  try {
+    await dbReadyPromise;
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Database gagal diinisialisasi: ' + err.message });
+  }
 });
 
 // CSP hanya di build produksi. Dev butuh aturan longgar untuk Vite HMR.

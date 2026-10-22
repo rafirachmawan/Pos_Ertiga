@@ -1,3 +1,13 @@
+export const API_BASE = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  ''
+).replace(/\/$/, '');
+
+export function apiUrl(path) {
+  return `${API_BASE}${path}`;
+}
+
 // Fallback mock data in case POS backend is offline or starting up
 const FALLBACK_TOKO = {
   nama_toko: 'POS ERTIGA STORE',
@@ -56,7 +66,7 @@ const FALLBACK_PRODUCTS = [
 
 export async function fetchTokoInfo() {
   try {
-    const res = await fetch('/api/public/toko');
+    const res = await fetch(apiUrl('/api/public/toko'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
     return json.data || FALLBACK_TOKO;
@@ -68,7 +78,7 @@ export async function fetchTokoInfo() {
 
 export async function fetchPublicCategories() {
   try {
-    const res = await fetch('/api/public/kategori');
+    const res = await fetch(apiUrl('/api/public/kategori'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
     return json.data && json.data.length > 0 ? json.data : FALLBACK_CATEGORIES;
@@ -80,7 +90,7 @@ export async function fetchPublicCategories() {
 
 export async function fetchPublicProducts() {
   try {
-    const res = await fetch('/api/public/barang');
+    const res = await fetch(apiUrl('/api/public/barang'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
     return json.data && json.data.length > 0 ? json.data : FALLBACK_PRODUCTS;
@@ -130,7 +140,7 @@ export const FALLBACK_LOGAM_MULIA = [
 
 export async function fetchPublicLogamMulia() {
   try {
-    const res = await fetch('/api/public/logam-mulia');
+    const res = await fetch(apiUrl('/api/public/logam-mulia'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
     return json.data && json.data.length > 0 ? json.data : FALLBACK_LOGAM_MULIA;
@@ -202,7 +212,7 @@ export const FALLBACK_SMM = [
 
 export async function fetchPublicSmm() {
   try {
-    const res = await fetch('/api/public/smm');
+    const res = await fetch(apiUrl('/api/public/smm'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
     return json.data && json.data.length > 0 ? json.data : FALLBACK_SMM;
@@ -275,7 +285,7 @@ export const FALLBACK_FLASH_SALE = {
 
 export async function fetchPublicFlashSale() {
   try {
-    const res = await fetch('/api/public/flash-sale');
+    const res = await fetch(apiUrl('/api/public/flash-sale'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
     return json.data || FALLBACK_FLASH_SALE;
@@ -287,7 +297,7 @@ export async function fetchPublicFlashSale() {
 
 export async function fetchPublicPpob() {
   try {
-    const res = await fetch('/api/public/ppob');
+    const res = await fetch(apiUrl('/api/public/ppob'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
     return json.data && json.data.length > 0 ? json.data : null;
@@ -296,5 +306,18 @@ export async function fetchPublicPpob() {
     return null;
   }
 }
+
+export async function fetchPublicBanners() {
+  try {
+    const res = await fetch(apiUrl('/api/public/banners'));
+    if (!res.ok) throw new Error('Failed to fetch');
+    const json = await res.json();
+    return json.data || [];
+  } catch (err) {
+    console.warn('[API] Menggunakan data fallback banner:', err.message);
+    return [];
+  }
+}
+
 
 

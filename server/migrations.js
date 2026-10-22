@@ -21,6 +21,37 @@ async function addColumnIfMissing(db, table, column, definition) {
   return true;
 }
 
+async function getSchemaVersion(db) {
+  try {
+    const row = await get(db, 'PRAGMA user_version');
+    if (row && typeof row.user_version === 'number' && row.user_version > 0) {
+      return row.user_version;
+    }
+  } catch (_) {}
+
+  // Fallback ke tabel _schema_version (didukung penuh di Turso Cloud DB)
+  try {
+    await run(db, 'CREATE TABLE IF NOT EXISTS _schema_version (version INTEGER PRIMARY KEY)');
+    const vRow = await get(db, 'SELECT MAX(version) AS ver FROM _schema_version');
+    return vRow?.ver || 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+async function setSchemaVersion(db, version) {
+  // Simpan di PRAGMA untuk SQLite lokal
+  try {
+    await run(db, `PRAGMA user_version = ${version}`);
+  } catch (_) {}
+
+  // Simpan di tabel _schema_version agar selalu persisten di Turso Cloud
+  try {
+    await run(db, 'CREATE TABLE IF NOT EXISTS _schema_version (version INTEGER PRIMARY KEY)');
+    await run(db, 'INSERT OR REPLACE INTO _schema_version (version) VALUES (?)', [version]);
+  } catch (_) {}
+}
+
 async function backupBeforeMigration(db, dbPath) {
   if (!fs.existsSync(dbPath)) return null;
 
@@ -34,8 +65,7 @@ async function backupBeforeMigration(db, dbPath) {
   );
   if (!tables || tables.count === 0) return null;
 
-  const versionRow = await get(db, 'PRAGMA user_version');
-  const currentVersion = versionRow?.user_version || 0;
+  const currentVersion = await getSchemaVersion(db);
   if (currentVersion >= LATEST_VERSION) return null;
 
   const backupDir = path.join(path.dirname(dbPath), 'backups');
@@ -1091,8 +1121,7 @@ const migrations = [
 ];
 
 async function runMigrations(db) {
-  const row = await get(db, 'PRAGMA user_version');
-  let current = row?.user_version || 0;
+  let current = await getSchemaVersion(db);
 
   for (const migration of migrations) {
     if (migration.version <= current) continue;
@@ -1104,7 +1133,7 @@ async function runMigrations(db) {
     await run(db, 'BEGIN');
     try {
       await migration.up(db);
-      await run(db, `PRAGMA user_version = ${migration.version}`);
+      await setSchemaVersion(db, migration.version);
       await run(db, 'COMMIT');
       current = migration.version;
     } catch (err) {
@@ -1115,19 +1144,21 @@ async function runMigrations(db) {
     }
   }
 
-  await run(db, `PRAGMA user_version = ${Math.max(current, LATEST_VERSION)}`);
+  await setSchemaVersion(db, Math.max(current, LATEST_VERSION));
 }
 
 async function initializeSchema(db, dbPath) {
-  await run(db, 'PRAGMA foreign_keys = ON');
+  try {
+    await run(db, 'PRAGMA foreign_keys = ON');
+  } catch (_) {}
 
   try {
     await get(db, 'PRAGMA journal_mode = WAL');
-  } catch (err) {
-    console.warn('[DB] Gagal mengaktifkan WAL:', err.message);
-  }
+  } catch (_) {}
 
-  await run(db, 'PRAGMA busy_timeout = 5000');
+  try {
+    await run(db, 'PRAGMA busy_timeout = 5000');
+  } catch (_) {}
 
   const backupPath = await backupBeforeMigration(db, dbPath);
 

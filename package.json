@@ -9,6 +9,7 @@
     "dev:client": "npm --prefix client run dev",
     "dev:web": "npm --prefix web run dev",
     "dev": "concurrently -k \"npm:dev:server\" \"npm:dev:client\" \"npm:dev:web\"",
+    "sync:turso": "node server/scripts/sync-to-turso.js",
     "build:client": "cd client && npm install && npm run build",
     "build:web": "cd web && npm install && npm run build",
     "build": "npm run build:client",

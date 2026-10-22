@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import { fetchPublicBanners } from '../lib/api';
 
 const DEFAULT_SLIDES = [
   {
@@ -37,11 +37,10 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
 
   // Fetch banners from API
   useEffect(() => {
-    fetch('/api/public/banners')
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.data && res.data.length > 0) {
-          setSlides(res.data);
+    fetchPublicBanners()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setSlides(data);
         }
       })
       .catch(() => {
