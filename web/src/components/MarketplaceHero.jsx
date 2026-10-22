@@ -83,68 +83,33 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
                     <img
                       src={slide.gambar}
                       alt=""
-                      style={{
-                        position: 'absolute', right: '30px', top: '50%', transform: 'translateY(-50%)',
-                        maxHeight: '180px', maxWidth: '220px', objectFit: 'contain', opacity: 0.9, zIndex: 1,
-                      }}
+                      className="mp-carousel-img"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   )}
-                  <div style={{ maxWidth: '480px', color: '#FFFFFF', zIndex: 2 }}>
+                  <div className="mp-carousel-content" style={{ color: '#FFFFFF', zIndex: 2 }}>
                     {slide.badge && (
                       <span
+                        className="mp-carousel-badge"
                         style={{
-                          fontSize: '11px',
-                          fontWeight: '800',
                           color: slide.warna_accent || '#FFD700',
                           background: 'rgba(0,0,0,0.25)',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          letterSpacing: '0.05em',
-                          display: 'inline-block',
-                          marginBottom: '10px',
                         }}
                       >
                         {slide.badge}
                       </span>
                     )}
-                    <h2
-                      style={{
-                        fontSize: '24px',
-                        fontWeight: '800',
-                        lineHeight: '1.25',
-                        marginBottom: '8px',
-                        letterSpacing: '-0.02em',
-                      }}
-                    >
+                    <h2 className="mp-carousel-title">
                       {slide.judul}
                     </h2>
                     {slide.subjudul && (
-                      <p
-                        style={{
-                          fontSize: '13px',
-                          opacity: 0.9,
-                          marginBottom: '18px',
-                          lineHeight: '1.4',
-                        }}
-                      >
+                      <p className="mp-carousel-sub">
                         {slide.subjudul}
                       </p>
                     )}
                     <button
                       onClick={handleClick}
-                      style={{
-                        background: '#FFFFFF',
-                        color: '#111827',
-                        fontWeight: '700',
-                        fontSize: '12.5px',
-                        padding: '9px 18px',
-                        borderRadius: '6px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        transition: 'transform 0.15s ease',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                      className="mp-carousel-btn"
                     >
                       Lihat Selengkapnya →
                     </button>
@@ -178,27 +143,18 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
               onClick={() => onExploreProducts && onExploreProducts()}
             >
               <div>
-                <span
-                  style={{
-                    fontSize: '10.5px',
-                    fontWeight: '800',
-                    color: '#EE4D2D',
-                    background: '#FFFFFF',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                  }}
-                >
+                <span className="mp-side-card-badge" style={{ color: '#EE4D2D' }}>
                   FLASH SALE
                 </span>
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#1F2937', marginTop: '6px', marginBottom: '4px' }}>
+                <h3 className="mp-side-card-title">
                   Kejar Diskon Terbatas
                 </h3>
-                <p style={{ fontSize: '11.5px', color: '#6B7280', margin: 0 }}>
+                <p className="mp-side-card-sub">
                   Dapatkan potongan harga langsung belanja produk katalog hari ini.
                 </p>
               </div>
-              <div style={{ marginTop: '12px' }}>
-                <span style={{ fontSize: '11.5px', fontWeight: '700', color: '#EE4D2D' }}>
+              <div className="mp-side-card-link-wrap">
+                <span className="mp-side-card-link" style={{ color: '#EE4D2D' }}>
                   Lihat Promo →
                 </span>
               </div>
@@ -223,28 +179,19 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
               }}
             >
               <div>
-                <span
-                  style={{
-                    fontSize: '10.5px',
-                    fontWeight: '800',
-                    color: '#7C3AED',
-                    background: '#FFFFFF',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                  }}
-                >
+                <span className="mp-side-card-badge" style={{ color: '#7C3AED' }}>
                   BOOSTER MEDSOS
                 </span>
-                <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#1F2937', marginTop: '6px', marginBottom: '4px' }}>
+                <h3 className="mp-side-card-title">
                   Rasxmedia SMM
                 </h3>
-                <p style={{ fontSize: '11.5px', color: '#6B7280', margin: 0 }}>
-                  Follower, Like & Views TikTok, IG, YT bergaransi tanpa password.
+                <p className="mp-side-card-sub">
+                  Layanan followers, likes & views instan untuk akun media sosial Anda.
                 </p>
               </div>
-              <div style={{ marginTop: '12px' }}>
-                <span style={{ fontSize: '11.5px', fontWeight: '700', color: '#7C3AED' }}>
-                  Cek Layanan →
+              <div className="mp-side-card-link-wrap">
+                <span className="mp-side-card-link" style={{ color: '#7C3AED' }}>
+                  Order Sekarang →
                 </span>
               </div>
             </div>
