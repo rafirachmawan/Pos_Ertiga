@@ -676,7 +676,162 @@ input, textarea, select {
   transform: translateY(-3px);
 }
 
-/* ── Logam Mulia Section ─────────────────────── */
+/* ── Logam Mulia Section (Ide 3 - Soft Luxury Gold Edition) ── */
+.mp-gold-section {
+  position: relative;
+  background: linear-gradient(180deg, #FFFDF8 0%, #FFFFFF 100%);
+  border: 1.5px solid #FDE68A;
+  border-radius: 16px;
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.07), 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.mp-gold-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #D97706 0%, #F59E0B 50%, #FCD34D 100%);
+}
+
+.mp-gold-header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #FEF3C7;
+}
+
+.mp-gold-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 6px;
+}
+
+.mp-gold-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #78350F;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.mp-gold-subtitle {
+  font-size: 12.5px;
+  color: #78716C;
+  margin: 4px 0 0 0;
+  line-height: 1.45;
+}
+
+.mp-gold-trust-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mp-gold-trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #92400E;
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+
+.mp-gold-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.mp-gold-brand-tab {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #475569;
+}
+
+.mp-gold-brand-tab:hover:not(.active) {
+  border-color: #F59E0B;
+  background: #FFFDF8;
+  color: #92400E;
+}
+
+.mp-gold-brand-tab.active {
+  background: #FEF3C7;
+  border-color: #F59E0B;
+  color: #92400E;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.12);
+}
+
+.mp-gold-mode-toggle {
+  display: inline-flex;
+  background: #F1F5F9;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+}
+
+.mp-gold-mode-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+  color: #64748B;
+}
+
+.mp-gold-mode-btn.active-buy {
+  background: #03AC0E;
+  color: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(3, 172, 14, 0.25);
+}
+
+.mp-gold-mode-btn.active-buyback {
+  background: #D97706;
+  color: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(217, 119, 6, 0.25);
+}
+
 .mp-gold-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -706,54 +861,55 @@ input, textarea, select {
 
 .mp-gold-card {
   background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 10px;
+  border: 1px solid #FDE68A;
+  border-radius: 12px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .mp-gold-card:hover {
-  border-color: #03AC0E;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #D97706;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.14);
 }
 
 .mp-gold-thumb-wrap {
   width: 100%;
-  height: 150px;
+  height: 155px;
   position: relative;
   overflow: hidden;
-  background: #F8FAFC;
-  border-bottom: 1px solid #F1F5F9;
+  background: #FFFDF8;
+  border-bottom: 1px solid #FEF3C7;
 }
 
 .mp-gold-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.25s ease;
+  transition: transform 0.3s ease;
 }
 
 .mp-gold-card:hover .mp-gold-img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .mp-gold-gram-badge {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: #FFFFFF;
-  color: #0F172A;
-  border: 1px solid #E2E8F0;
-  font-size: 11px;
-  font-weight: 700;
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+  font-size: 11.5px;
+  font-weight: 800;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .mp-gold-badges-right {
@@ -771,6 +927,7 @@ input, textarea, select {
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
+  background: #FFFFFF;
 }
 
 /* ── Marketplace Products Grid ───────────────── */
@@ -1552,6 +1709,42 @@ input, textarea, select {
   }
 
   /* 6. Gold & SMM & WebDev Grids */
+  .mp-gold-section {
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+    margin-bottom: 16px !important;
+  }
+  .mp-gold-header-banner {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .mp-gold-title {
+    font-size: 16px !important;
+  }
+  .mp-gold-trust-badges {
+    width: 100%;
+    gap: 6px !important;
+  }
+  .mp-gold-trust-item {
+    font-size: 10px !important;
+    padding: 3px 7px !important;
+  }
+  .mp-gold-controls-row {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .mp-gold-mode-toggle {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+  }
+  .mp-gold-mode-btn {
+    text-align: center;
+    padding: 7px 4px !important;
+    font-size: 11px !important;
+  }
   .mp-gold-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
