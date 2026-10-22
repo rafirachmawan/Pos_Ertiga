@@ -2,7 +2,11 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const zlib = require('zlib');
-const sqlite3 = require('sqlite3');
+let sqlite3;
+try {
+  sqlite3 = require('sqlite3');
+} catch (_) {}
+
 const { dbPath, run } = require('./database');
 const { get, all } = require('./dbUtils');
 const { localDateKey } = require('./utils/date');
@@ -16,6 +20,9 @@ function ensureBackupDir() {
 }
 
 function openDatabase(file) {
+  if (!sqlite3) {
+    return Promise.reject(new Error('SQLite driver tidak tersedia di runtime ini'));
+  }
   return new Promise((resolve, reject) => {
     const connection = new sqlite3.Database(file, (err) => {
       if (err) reject(err);
