@@ -15,6 +15,9 @@ const Dashboard = () => {
   });
   const [grafik, setGrafik] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hoveredRow, setHoveredRow] = useState(null);
+  const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
     const load = async () => {
@@ -47,6 +50,12 @@ const Dashboard = () => {
     month: "long",
     year: "numeric",
   });
+
+  const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, items.length);
+  const paginatedItems = items.slice(startIndex, endIndex);
 
   return (
     <div>
@@ -225,9 +234,10 @@ const Dashboard = () => {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1fr 1fr 1fr",
-                  padding: "10px 24px",
+                  gridTemplateColumns: "minmax(200px, 2.5fr) minmax(120px, 1.2fr) minmax(90px, 1fr) minmax(90px, 1fr)",
+                  padding: "12px 24px",
                   background: "#F8FAFC",
+                  borderBottom: "1px solid var(--border-color)",
                 }}
               >
                 {["Produk", "Harga Jual", "Stok", "Status"].map((h) => (
@@ -236,148 +246,296 @@ const Dashboard = () => {
                     style={{
                       fontSize: "11px",
                       fontWeight: "700",
-                      color: "var(--text-muted)",
+                      color: "#64748B",
                       textTransform: "uppercase",
-                      letterSpacing: "0.5px",
+                      letterSpacing: "0.05em",
                     }}
                   >
                     {h}
                   </span>
                 ))}
               </div>
-              {items.map((item, i) => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "2fr 1fr 1fr 1fr",
-                    padding: "14px 24px",
-                    alignItems: "center",
-                    borderTop: "1px solid var(--border-color)",
-                    background: item.stok <= 5 ? "#FFFBEB" : "transparent",
-                    transition: "background 0.15s",
-                  }}
-                >
-                  {/* Produk */}
+
+              {/* Table rows */}
+              {paginatedItems.map((item) => {
+                const isCritical = item.stok <= 5;
+                const isHovered = hoveredRow === item.id;
+                let rowBg = "transparent";
+                if (isCritical) {
+                  rowBg = isHovered ? "#FEF3C7" : "#FFFBEB";
+                } else if (isHovered) {
+                  rowBg = "#F8FAFC";
+                }
+
+                return (
                   <div
+                    key={item.id}
+                    onMouseEnter={() => setHoveredRow(item.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
                     style={{
-                      display: "flex",
+                      display: "grid",
+                      gridTemplateColumns: "minmax(200px, 2.5fr) minmax(120px, 1.2fr) minmax(90px, 1fr) minmax(90px, 1fr)",
+                      padding: "13px 24px",
                       alignItems: "center",
-                      gap: "12px",
+                      borderBottom: "1px solid var(--border-color)",
+                      background: rowBg,
+                      transition: "background 0.15s ease",
                     }}
                   >
-                    {item.gambar && (
-                      <img
-                        src={item.gambar}
-                        alt={item.nama_barang}
+                    {/* Produk (Foto + Nama + Barcode) */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        minWidth: 0,
+                        paddingRight: "12px",
+                      }}
+                    >
+                      {item.gambar ? (
+                        <img
+                          src={item.gambar}
+                          alt={item.nama_barang}
+                          style={{
+                            width: "38px",
+                            height: "38px",
+                            borderRadius: "8px",
+                            objectFit: "cover",
+                            flexShrink: 0,
+                            border: "1px solid #E2E8F0",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "38px",
+                            height: "38px",
+                            borderRadius: "8px",
+                            background: "#F1F5F9",
+                            border: "1px solid #E2E8F0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "16px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          📦
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0, overflow: "hidden" }}>
+                        <p
+                          style={{
+                            fontWeight: "600",
+                            fontSize: "13px",
+                            color: "#0F172A",
+                            margin: 0,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                          title={item.nama_barang}
+                        >
+                          {item.nama_barang}
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "11px",
+                            color: "#64748B",
+                            margin: "2px 0 0 0",
+                            fontFamily: "monospace",
+                          }}
+                        >
+                          {item.barcode || "-"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Harga Jual */}
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "600",
+                        color: "#0F172A",
+                      }}
+                    >
+                      Rp {Number(item.harga_jual || 0).toLocaleString("id-ID")}
+                    </span>
+
+                    {/* Stok */}
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: "700",
+                        color: item.stok === 0 ? "#DC2626" : item.stok <= 5 ? "#D97706" : "#0F172A",
+                      }}
+                    >
+                      {item.stok}{" "}
+                      <span
                         style={{
-                          width: "34px",
-                          height: "34px",
-                          borderRadius: "6px",
-                          objectFit: "cover",
-                          flexShrink: 0,
+                          fontWeight: "400",
+                          color: "#64748B",
+                          fontSize: "12px",
                         }}
-                      />
-                    )}
+                      >
+                        {item.satuan || "pcs"}
+                      </span>
+                    </span>
+
+                    {/* Status */}
                     <div>
-                      <p
-                        style={{
-                          fontWeight: "600",
-                          fontSize: "14px",
-                          color: "var(--text-dark)",
-                        }}
-                      >
-                        {item.nama_barang}
-                      </p>
-                      <p
-                        style={{
-                          fontSize: "11px",
-                          color: "var(--text-muted)",
-                          marginTop: "2px",
-                        }}
-                      >
-                        {item.barcode}
-                      </p>
+                      {item.stok === 0 ? (
+                        <span
+                          style={{
+                            background: "#FEF2F2",
+                            color: "#DC2626",
+                            border: "1px solid #FEE2E2",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            padding: "3px 10px",
+                            borderRadius: "20px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#DC2626" }} />
+                          Habis
+                        </span>
+                      ) : item.stok <= 5 ? (
+                        <span
+                          style={{
+                            background: "#FFFBEB",
+                            color: "#B45309",
+                            border: "1px solid #FEF3C7",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            padding: "3px 10px",
+                            borderRadius: "20px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#D97706" }} />
+                          Kritis
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            background: "#ECFDF5",
+                            color: "#059669",
+                            border: "1px solid #D1FAE5",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            padding: "3px 10px",
+                            borderRadius: "20px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                          }}
+                        >
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10B981" }} />
+                          Aman
+                        </span>
+                      )}
                     </div>
                   </div>
-                  {/* Harga */}
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "var(--text-dark)",
-                    }}
-                  >
-                    Rp {item.harga_jual.toLocaleString("id-ID")}
-                  </span>
-                  {/* Stok */}
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "700",
-                      color: item.stok <= 5 ? "#DC2626" : "var(--text-dark)",
-                    }}
-                  >
-                    {item.stok}{" "}
-                    <span
-                      style={{
-                        fontWeight: "400",
-                        color: "var(--text-muted)",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {item.satuan}
-                    </span>
-                  </span>
-                  {/* Status */}
-                  {item.stok === 0 ? (
-                    <span
-                      style={{
-                        background: "#FEF2F2",
-                        color: "#DC2626",
-                        border: "1px solid #FEE2E2",
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        padding: "2px 8px",
-                        borderRadius: "6px",
-                        width: "fit-content",
-                      }}
-                    >
-                      Habis
-                    </span>
-                  ) : item.stok <= 5 ? (
-                    <span
-                      style={{
-                        background: "#FFFBEB",
-                        color: "#B45309",
-                        border: "1px solid #FEF3C7",
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        padding: "2px 8px",
-                        borderRadius: "6px",
-                        width: "fit-content",
-                      }}
-                    >
-                      Kritis
-                    </span>
-                  ) : (
-                    <span
-                      style={{
-                        background: "#ECFDF5",
-                        color: "#059669",
-                        border: "1px solid #D1FAE5",
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        padding: "2px 8px",
-                        borderRadius: "6px",
-                        width: "fit-content",
-                      }}
-                    >
-                      Aman
-                    </span>
-                  )}
+                );
+              })}
+
+              {/* Pagination Controls */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "14px 24px",
+                  background: "#FFFFFF",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                }}
+              >
+                <div style={{ fontSize: "12px", color: "#64748B" }}>
+                  Menampilkan{" "}
+                  <strong style={{ color: "#0F172A", fontWeight: "600" }}>
+                    {items.length === 0 ? 0 : startIndex + 1} - {endIndex}
+                  </strong>{" "}
+                  dari{" "}
+                  <strong style={{ color: "#0F172A", fontWeight: "600" }}>
+                    {items.length}
+                  </strong>{" "}
+                  produk
                 </div>
-              ))}
+
+                {totalPages > 1 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <button
+                      type="button"
+                      disabled={activePage === 1}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #CBD5E1",
+                        background: activePage === 1 ? "#F1F5F9" : "#FFFFFF",
+                        color: activePage === 1 ? "#94A3B8" : "#0F172A",
+                        cursor: activePage === 1 ? "not-allowed" : "pointer",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      ‹ Sebelumnya
+                    </button>
+
+                    <div style={{ display: "flex", gap: "4px" }}>
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => setCurrentPage(page)}
+                          style={{
+                            minWidth: "30px",
+                            height: "30px",
+                            padding: "0 6px",
+                            borderRadius: "6px",
+                            border: activePage === page ? "none" : "1px solid #CBD5E1",
+                            background: activePage === page ? "#0F172A" : "#FFFFFF",
+                            color: activePage === page ? "#FFFFFF" : "#334155",
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={activePage === totalPages}
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #CBD5E1",
+                        background: activePage === totalPages ? "#F1F5F9" : "#FFFFFF",
+                        color: activePage === totalPages ? "#94A3B8" : "#0F172A",
+                        cursor: activePage === totalPages ? "not-allowed" : "pointer",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      Berikutnya ›
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

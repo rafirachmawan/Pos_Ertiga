@@ -34,6 +34,9 @@ const Inventory = () => {
   const [showInactive, setShowInactive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilterCategory, setSelectedFilterCategory] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hoveredRowId, setHoveredRowId] = useState(null);
+  const ITEMS_PER_PAGE = 5;
 
   // Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -305,6 +308,16 @@ const Inventory = () => {
     });
   }, [items, searchQuery, selectedFilterCategory]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedFilterCategory, showInactive]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredItems.length);
+  const paginatedItems = filteredItems.slice(startIndex, endIndex);
+
   const actionBtn = {
     padding: '5px 10px',
     fontSize: '11.5px',
@@ -448,7 +461,12 @@ const Inventory = () => {
         </div>
 
         <div style={{ fontSize: '13px', color: '#64748B' }}>
-          Menampilkan <strong>{filteredItems.length}</strong> dari <strong>{items.length}</strong> produk
+          Menampilkan <strong>{filteredItems.length === 0 ? 0 : startIndex + 1} - {endIndex}</strong> dari <strong>{filteredItems.length}</strong> produk
+          {filteredItems.length !== items.length && (
+            <span style={{ color: '#94A3B8', marginLeft: '4px' }}>
+              (total {items.length})
+            </span>
+          )}
         </div>
       </div>
 
@@ -461,34 +479,49 @@ const Inventory = () => {
         boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
       }}>
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', minWidth: '1040px', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <table style={{ width: '100%', minWidth: '920px', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '56px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '52px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                   Gambar
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '110px', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '95px', borderRight: '1px solid #E2E8F0' }}>
                   Barcode
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: '220px', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 12px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: '180px', borderRight: '1px solid #E2E8F0' }}>
                   Nama Barang
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '110px', borderRight: '1px solid #E2E8F0' }}>
                   Kategori
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '115px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '100px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
                   Harga Modal
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '115px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '100px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
                   Harga Jual
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '140px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '115px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                   Stok Barang
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '120px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '95px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                   Status Web
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '200px', minWidth: '190px', textAlign: 'center' }}>
+                <th style={{
+                  padding: '11px 8px',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  color: '#64748B',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  width: '165px',
+                  minWidth: '160px',
+                  textAlign: 'center',
+                  position: 'sticky',
+                  right: 0,
+                  background: '#F8FAFC',
+                  boxShadow: '-3px 0 6px -2px rgba(0,0,0,0.06)',
+                  zIndex: 2,
+                }}>
                   Aksi
                 </th>
               </tr>
@@ -500,25 +533,26 @@ const Inventory = () => {
                     Tidak ada barang yang cocok dengan pencarian
                   </td>
                 </tr>
-              ) : filteredItems.map((item) => (
+              ) : paginatedItems.map((item) => (
                 <tr
                   key={item.id}
                   style={{
                     opacity: item.aktif ? 1 : 0.5,
                     borderBottom: '1px solid #F1F5F9',
+                    background: hoveredRowId === item.id ? '#F8FAFC' : 'transparent',
                     transition: 'background 0.15s ease',
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#F8FAFC')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  onMouseEnter={() => setHoveredRowId(item.id)}
+                  onMouseLeave={() => setHoveredRowId(null)}
                 >
                   {/* 1. Gambar & Quick Image Edit */}
-                  <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '10px 8px', textAlign: 'center', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
                     <div
                       onClick={() => openQuickImageModal(item)}
                       style={{
                         position: 'relative',
-                        width: '42px',
-                        height: '42px',
+                        width: '40px',
+                        height: '40px',
                         cursor: 'pointer',
                         borderRadius: '8px',
                         overflow: 'hidden',
@@ -558,13 +592,13 @@ const Inventory = () => {
                   </td>
 
                   {/* 2. Barcode (No Wrap) */}
-                  <td style={{ padding: '12px 14px', fontSize: '12px', fontWeight: '600', color: '#475569', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '10px 8px', fontSize: '11.5px', fontWeight: '600', color: '#475569', fontFamily: 'monospace', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
                     {item.barcode}
                   </td>
 
                   {/* 3. Nama Barang */}
-                  <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <td style={{ padding: '10px 12px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                       <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                         <span>{item.nama_barang}</span>
                         {Number(item.tampil_online) === 1 && (
@@ -576,7 +610,7 @@ const Inventory = () => {
                               background: '#EFF6FF',
                               color: '#2563EB',
                               border: '1px solid #BFDBFE',
-                              padding: '1px 6px',
+                              padding: '1px 5px',
                               borderRadius: '4px',
                               whiteSpace: 'nowrap',
                             }}
@@ -586,7 +620,7 @@ const Inventory = () => {
                         )}
                       </div>
                       {item.deskripsi && (
-                        <div style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '280px' }}>
+                        <div style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '240px' }}>
                           {item.deskripsi}
                         </div>
                       )}
@@ -594,14 +628,14 @@ const Inventory = () => {
                   </td>
 
                   {/* 4. Kategori (No Wrap) */}
-                  <td style={{ padding: '12px 14px', verticalAlign: 'middle', whiteSpace: 'nowrap', borderRight: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '10px 8px', verticalAlign: 'middle', whiteSpace: 'nowrap', borderRight: '1px solid #F1F5F9' }}>
                     {item.nama_kategori ? (
                       <span style={{
                         background: '#F1F5F9',
                         color: '#334155',
                         fontSize: '11px',
                         fontWeight: '600',
-                        padding: '3px 9px',
+                        padding: '3px 8px',
                         borderRadius: '6px',
                         display: 'inline-block',
                         whiteSpace: 'nowrap',
@@ -614,23 +648,23 @@ const Inventory = () => {
                   </td>
 
                   {/* 5. Harga Modal */}
-                  <td style={{ padding: '12px 14px', fontSize: '12.5px', color: '#64748B', textAlign: 'right', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '10px 8px', fontSize: '12px', color: '#64748B', textAlign: 'right', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
                     Rp {formatRupiah(item.harga_modal)}
                   </td>
 
                   {/* 6. Harga Jual */}
-                  <td style={{ padding: '12px 14px', fontSize: '13px', fontWeight: '800', color: '#0F172A', textAlign: 'right', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '10px 8px', fontSize: '12.5px', fontWeight: '800', color: '#0F172A', textAlign: 'right', whiteSpace: 'nowrap', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
                     Rp {formatRupiah(item.harga_jual)}
                   </td>
 
                   {/* 7. Stok Barang & Quick Adjust */}
-                  <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap', borderRight: '1px solid #F1F5F9' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '10px 8px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap', borderRight: '1px solid #F1F5F9' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', whiteSpace: 'nowrap' }}>
                       <span
                         style={{
-                          padding: '3px 8px',
+                          padding: '3px 7px',
                           borderRadius: '6px',
-                          fontSize: '11.5px',
+                          fontSize: '11px',
                           fontWeight: '700',
                           whiteSpace: 'nowrap',
                           background: item.stok <= 5 ? '#FEF2F2' : '#F0FDF4',
@@ -643,8 +677,8 @@ const Inventory = () => {
                       <button
                         onClick={() => openQuickStockModal(item)}
                         style={{
-                          padding: '3px 7px',
-                          fontSize: '11px',
+                          padding: '3px 6px',
+                          fontSize: '10.5px',
                           fontWeight: '600',
                           background: '#FFFFFF',
                           color: '#475569',
@@ -661,11 +695,11 @@ const Inventory = () => {
                   </td>
 
                   {/* 8. Status Web Toko Online */}
-                  <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap', borderRight: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '10px 8px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap', borderRight: '1px solid #F1F5F9' }}>
                     <button
                       onClick={() => toggleTampilOnline(item)}
                       style={{
-                        padding: '4px 10px',
+                        padding: '4px 9px',
                         borderRadius: '20px',
                         fontSize: '11px',
                         fontWeight: '700',
@@ -685,16 +719,27 @@ const Inventory = () => {
                     </button>
                   </td>
 
-                  {/* 9. Aksi */}
-                  <td style={{ padding: '12px 14px', textAlign: 'center', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
-                    <div style={{ display: 'inline-flex', gap: '5px', whiteSpace: 'nowrap' }}>
+                  {/* 9. Aksi (Sticky right - never cut off) */}
+                  <td style={{
+                    padding: '10px 8px',
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                    whiteSpace: 'nowrap',
+                    position: 'sticky',
+                    right: 0,
+                    background: hoveredRowId === item.id ? '#F8FAFC' : '#FFFFFF',
+                    boxShadow: '-3px 0 6px -2px rgba(0,0,0,0.06)',
+                    zIndex: 1,
+                    transition: 'background 0.15s ease',
+                  }}>
+                    <div style={{ display: 'inline-flex', gap: '4px', whiteSpace: 'nowrap', alignItems: 'center' }}>
                       {item.aktif ? (
                         <>
                           <button
                             onClick={() => openRestockModal(item)}
                             style={{
-                              padding: '4px 10px',
-                              fontSize: '11.5px',
+                              padding: '4px 7px',
+                              fontSize: '11px',
                               fontWeight: '700',
                               borderRadius: '6px',
                               cursor: 'pointer',
@@ -702,6 +747,7 @@ const Inventory = () => {
                               background: '#EFF6FF',
                               color: '#2563EB',
                               whiteSpace: 'nowrap',
+                              transition: 'all 0.15s ease',
                             }}
                             title="Tambah stok masuk"
                           >
@@ -710,8 +756,8 @@ const Inventory = () => {
                           <button
                             onClick={() => editItem(item)}
                             style={{
-                              padding: '4px 10px',
-                              fontSize: '11.5px',
+                              padding: '4px 7px',
+                              fontSize: '11px',
                               fontWeight: '700',
                               borderRadius: '6px',
                               cursor: 'pointer',
@@ -719,6 +765,7 @@ const Inventory = () => {
                               background: '#FFFFFF',
                               color: '#334155',
                               whiteSpace: 'nowrap',
+                              transition: 'all 0.15s ease',
                             }}
                             title="Edit produk lengkap"
                           >
@@ -727,8 +774,8 @@ const Inventory = () => {
                           <button
                             onClick={() => deleteItem(item.id)}
                             style={{
-                              padding: '4px 10px',
-                              fontSize: '11.5px',
+                              padding: '4px 7px',
+                              fontSize: '11px',
                               fontWeight: '700',
                               borderRadius: '6px',
                               cursor: 'pointer',
@@ -736,6 +783,7 @@ const Inventory = () => {
                               background: '#FEF2F2',
                               color: '#DC2626',
                               whiteSpace: 'nowrap',
+                              transition: 'all 0.15s ease',
                             }}
                             title="Hapus produk"
                           >
@@ -747,7 +795,7 @@ const Inventory = () => {
                           onClick={() => restoreItem(item.id)}
                           style={{
                             padding: '4px 10px',
-                            fontSize: '11.5px',
+                            fontSize: '11px',
                             fontWeight: '700',
                             borderRadius: '6px',
                             cursor: 'pointer',
@@ -766,6 +814,99 @@ const Inventory = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* 4. Pagination Footer */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px 18px',
+            background: '#FFFFFF',
+            borderTop: '1px solid #E2E8F0',
+            flexWrap: 'wrap',
+            gap: '10px',
+          }}
+        >
+          <div style={{ fontSize: '12.5px', color: '#64748B' }}>
+            Menampilkan{' '}
+            <strong style={{ color: '#0F172A', fontWeight: '700' }}>
+              {filteredItems.length === 0 ? 0 : startIndex + 1} - {endIndex}
+            </strong>{' '}
+            dari{' '}
+            <strong style={{ color: '#0F172A', fontWeight: '700' }}>
+              {filteredItems.length}
+            </strong>{' '}
+            produk
+          </div>
+
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                disabled={activePage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #CBD5E1',
+                  background: activePage === 1 ? '#F1F5F9' : '#FFFFFF',
+                  color: activePage === 1 ? '#94A3B8' : '#0F172A',
+                  cursor: activePage === 1 ? 'not-allowed' : 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                ‹ Sebelumnya
+              </button>
+
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    style={{
+                      minWidth: '30px',
+                      height: '30px',
+                      padding: '0 6px',
+                      borderRadius: '6px',
+                      border: activePage === page ? 'none' : '1px solid #CBD5E1',
+                      background: activePage === page ? '#0F172A' : '#FFFFFF',
+                      color: activePage === page ? '#FFFFFF' : '#334155',
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                disabled={activePage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #CBD5E1',
+                  background: activePage === totalPages ? '#F1F5F9' : '#FFFFFF',
+                  color: activePage === totalPages ? '#94A3B8' : '#0F172A',
+                  cursor: activePage === totalPages ? 'not-allowed' : 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Berikutnya ›
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

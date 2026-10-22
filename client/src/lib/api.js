@@ -14,8 +14,12 @@ export async function api(path, options = {}) {
   };
 
   if (body !== undefined) {
-    request.headers['Content-Type'] = 'application/json';
-    request.body = JSON.stringify(body);
+    if (typeof FormData !== 'undefined' && body instanceof FormData) {
+      request.body = body;
+    } else {
+      request.headers['Content-Type'] = 'application/json';
+      request.body = JSON.stringify(body);
+    }
   }
 
   if (!request.signal && typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
@@ -34,7 +38,7 @@ export async function api(path, options = {}) {
 
   const contentType = response.headers.get('content-type') || '';
   const data = contentType.includes('application/json')
-    ? await response.json()
+    ? await response.json().catch(() => null)
     : null;
 
   if (!response.ok) {

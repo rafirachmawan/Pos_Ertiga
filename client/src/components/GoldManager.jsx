@@ -30,6 +30,9 @@ export default function GoldManager() {
   const [loading, setLoading] = useState(true);
   const [selectedMerkFilter, setSelectedMerkFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hoveredRowId, setHoveredRowId] = useState(null);
+  const ITEMS_PER_PAGE = 5;
 
   // Merk Modal state
   const [showMerkModal, setShowMerkModal] = useState(false);
@@ -213,6 +216,16 @@ export default function GoldManager() {
       (it.deskripsi || '').toLowerCase().includes(q);
     return matchMerk && matchSearch;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedMerkFilter, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredItems.length);
+  const paginatedItems = filteredItems.slice(startIndex, endIndex);
 
   return (
     <div style={{ padding: '0 0 40px 0' }}>
@@ -437,41 +450,62 @@ export default function GoldManager() {
         </div>
 
         <div style={{ fontSize: '13px', color: '#64748B' }}>
-          Menampilkan <strong>{filteredItems.length}</strong> varian emas ready
+          Menampilkan <strong>{filteredItems.length === 0 ? 0 : startIndex + 1} - {endIndex}</strong> dari <strong>{filteredItems.length}</strong> varian emas ready
+          {filteredItems.length !== items.length && (
+            <span style={{ color: '#94A3B8', marginLeft: '4px' }}>
+              (total {items.length})
+            </span>
+          )}
         </div>
       </div>
 
       {/* 4. Items Table */}
       <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', minWidth: '1040px', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '60px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '52px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                   Foto
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '150px', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 10px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
                   Merk / Produsen
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 10px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '120px', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
                   Ukuran Gramatur
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', textAlign: 'right', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 10px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '115px', textAlign: 'right', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
                   Harga Jual
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '140px', textAlign: 'right', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 10px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '115px', textAlign: 'right', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
                   Harga Buyback
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '120px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '100px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
                   Stok Ready
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: '240px', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 12px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: '180px', borderRight: '1px solid #E2E8F0' }}>
                   Deskripsi & Keterangan
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '120px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '100px', textAlign: 'center', whiteSpace: 'nowrap', borderRight: '1px solid #E2E8F0' }}>
                   Status Web
                 </th>
-                <th style={{ padding: '13px 14px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '150px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                <th style={{
+                  padding: '11px 8px',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  color: '#64748B',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  width: '135px',
+                  minWidth: '130px',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  position: 'sticky',
+                  right: 0,
+                  background: '#F8FAFC',
+                  boxShadow: '-3px 0 6px -2px rgba(0,0,0,0.06)',
+                  zIndex: 2,
+                }}>
                   Aksi
                 </th>
               </tr>
@@ -484,23 +518,24 @@ export default function GoldManager() {
                   </td>
                 </tr>
               ) : (
-                filteredItems.map((it) => (
+                paginatedItems.map((it) => (
                   <tr
                     key={it.id}
                     style={{
                       borderBottom: '1px solid #F1F5F9',
                       opacity: it.aktif ? 1 : 0.6,
+                      background: hoveredRowId === it.id ? '#F8FAFC' : 'transparent',
                       transition: 'background 0.15s ease',
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#F8FAFC')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    onMouseEnter={() => setHoveredRowId(it.id)}
+                    onMouseLeave={() => setHoveredRowId(null)}
                   >
                     {/* Foto */}
-                    <td style={{ padding: '10px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'center' }}>
+                    <td style={{ padding: '8px 8px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'center' }}>
                       <div
                         style={{
-                          width: '44px',
-                          height: '44px',
+                          width: '40px',
+                          height: '40px',
                           borderRadius: '8px',
                           overflow: 'hidden',
                           background: '#FEF3C7',
@@ -508,6 +543,7 @@ export default function GoldManager() {
                           display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
+                          margin: '0 auto',
                         }}
                       >
                         {it.gambar ? (
@@ -520,22 +556,23 @@ export default function GoldManager() {
                             }}
                           />
                         ) : (
-                          <span style={{ fontSize: '18px' }}>🪙</span>
+                          <span style={{ fontSize: '16px' }}>🪙</span>
                         )}
                       </div>
                     </td>
 
                     {/* 1. Merk */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 10px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', whiteSpace: 'nowrap' }}>
                       <span
                         style={{
                           background: '#FEF3C7',
                           color: '#B45309',
                           fontSize: '11px',
                           fontWeight: '700',
-                          padding: '3px 9px',
+                          padding: '3px 8px',
                           borderRadius: '6px',
                           border: '1px solid #FDE68A',
+                          display: 'inline-block',
                         }}
                       >
                         {it.nama_merk}
@@ -543,16 +580,16 @@ export default function GoldManager() {
                     </td>
 
                     {/* 2. Gramatur */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', whiteSpace: 'nowrap' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '13.5px', fontWeight: '800', color: '#0F172A' }}>
+                    <td style={{ padding: '10px 10px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>
                           {it.gramatur}
                         </span>
                         {Number(it.is_favorit) === 1 && (
                           <span
                             title="Produk Favorit / Best Seller"
                             style={{
-                              fontSize: '9.5px',
+                              fontSize: '9px',
                               fontWeight: '800',
                               background: '#FEE2E2',
                               color: '#DC2626',
@@ -567,24 +604,24 @@ export default function GoldManager() {
                     </td>
 
                     {/* 3. Harga Jual */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '800', color: '#0F172A' }}>
+                    <td style={{ padding: '10px 10px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#0F172A' }}>
                         Rp {formatRupiah(it.harga_jual)}
                       </span>
                     </td>
 
                     {/* 4. Harga Buyback */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <span style={{ fontSize: '12.5px', fontWeight: '600', color: '#64748B' }}>
+                    <td style={{ padding: '10px 10px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: '#64748B' }}>
                         Rp {formatRupiah(it.harga_beli)}
                       </span>
                     </td>
 
                     {/* 5. Stok Ready */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 8px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'center', whiteSpace: 'nowrap' }}>
                       <span
                         style={{
-                          padding: '3px 8px',
+                          padding: '3px 7px',
                           borderRadius: '6px',
                           fontSize: '11px',
                           fontWeight: '700',
@@ -598,49 +635,65 @@ export default function GoldManager() {
                     </td>
 
                     {/* 6. Deskripsi */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', fontSize: '12px', color: '#475569' }}>
+                    <td style={{ padding: '10px 12px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', fontSize: '11.5px', color: '#475569' }}>
                       {it.deskripsi ? (
-                        <span>{it.deskripsi}</span>
+                        <div style={{ maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={it.deskripsi}>
+                          {it.deskripsi}
+                        </div>
                       ) : (
-                        <span style={{ color: '#CBD5E1', fontStyle: 'italic' }}>Tidak ada deskripsi</span>
+                        <span style={{ color: '#CBD5E1', fontStyle: 'italic' }}>—</span>
                       )}
                     </td>
 
                     {/* 7. Status Web */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '10px 8px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9', textAlign: 'center', whiteSpace: 'nowrap' }}>
                       <button
                         type="button"
                         onClick={() => handleToggleItemActive(it)}
                         style={{
-                          padding: '4px 9px',
+                          padding: '4px 8px',
                           borderRadius: '20px',
                           fontSize: '11px',
                           fontWeight: '700',
                           cursor: 'pointer',
                           border: 'none',
+                          whiteSpace: 'nowrap',
                           background: it.aktif ? '#E8F8EE' : '#F1F5F9',
                           color: it.aktif ? '#03AC0E' : '#64748B',
+                          transition: 'all 0.15s ease',
                         }}
                       >
                         {it.aktif ? '● Tampil Web' : '○ Sembunyi'}
                       </button>
                     </td>
 
-                    {/* 8. Aksi */}
-                    <td style={{ padding: '12px 14px', verticalAlign: 'middle', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                      <div style={{ display: 'inline-flex', gap: '6px' }}>
+                    {/* 8. Aksi (Sticky right - never cut off) */}
+                    <td style={{
+                      padding: '10px 8px',
+                      verticalAlign: 'middle',
+                      textAlign: 'center',
+                      whiteSpace: 'nowrap',
+                      position: 'sticky',
+                      right: 0,
+                      background: hoveredRowId === it.id ? '#F8FAFC' : '#FFFFFF',
+                      boxShadow: '-3px 0 6px -2px rgba(0,0,0,0.06)',
+                      zIndex: 1,
+                      transition: 'background 0.15s ease',
+                    }}>
+                      <div style={{ display: 'inline-flex', gap: '4px', alignItems: 'center' }}>
                         <button
                           type="button"
                           onClick={() => openEditItem(it)}
                           style={{
-                            padding: '4px 10px',
-                            fontSize: '11.5px',
+                            padding: '4px 8px',
+                            fontSize: '11px',
                             fontWeight: '700',
                             borderRadius: '6px',
                             border: '1px solid #CBD5E1',
                             background: '#FFFFFF',
                             color: '#334155',
                             cursor: 'pointer',
+                            transition: 'all 0.15s ease',
                           }}
                         >
                           Edit
@@ -649,14 +702,15 @@ export default function GoldManager() {
                           type="button"
                           onClick={() => handleDeleteItem(it)}
                           style={{
-                            padding: '4px 10px',
-                            fontSize: '11.5px',
+                            padding: '4px 8px',
+                            fontSize: '11px',
                             fontWeight: '700',
                             borderRadius: '6px',
                             border: '1px solid #FECACA',
                             background: '#FEF2F2',
                             color: '#DC2626',
                             cursor: 'pointer',
+                            transition: 'all 0.15s ease',
                           }}
                         >
                           Hapus
@@ -668,6 +722,99 @@ export default function GoldManager() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* 5. Pagination Footer */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px 18px',
+            background: '#FFFFFF',
+            borderTop: '1px solid #E2E8F0',
+            flexWrap: 'wrap',
+            gap: '10px',
+          }}
+        >
+          <div style={{ fontSize: '12.5px', color: '#64748B' }}>
+            Menampilkan{' '}
+            <strong style={{ color: '#0F172A', fontWeight: '700' }}>
+              {filteredItems.length === 0 ? 0 : startIndex + 1} - {endIndex}
+            </strong>{' '}
+            dari{' '}
+            <strong style={{ color: '#0F172A', fontWeight: '700' }}>
+              {filteredItems.length}
+            </strong>{' '}
+            varian emas
+          </div>
+
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <button
+                type="button"
+                disabled={activePage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #CBD5E1',
+                  background: activePage === 1 ? '#F1F5F9' : '#FFFFFF',
+                  color: activePage === 1 ? '#94A3B8' : '#0F172A',
+                  cursor: activePage === 1 ? 'not-allowed' : 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                ‹ Sebelumnya
+              </button>
+
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    style={{
+                      minWidth: '30px',
+                      height: '30px',
+                      padding: '0 6px',
+                      borderRadius: '6px',
+                      border: activePage === page ? 'none' : '1px solid #CBD5E1',
+                      background: activePage === page ? '#0F172A' : '#FFFFFF',
+                      color: activePage === page ? '#FFFFFF' : '#334155',
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                disabled={activePage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #CBD5E1',
+                  background: activePage === totalPages ? '#F1F5F9' : '#FFFFFF',
+                  color: activePage === totalPages ? '#94A3B8' : '#0F172A',
+                  cursor: activePage === totalPages ? 'not-allowed' : 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                Berikutnya ›
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
