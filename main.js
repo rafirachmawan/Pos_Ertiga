@@ -62,15 +62,7 @@ async function bootstrap() {
   try {
     await serverModule.startServer(3001, '127.0.0.1');
   } catch (err) {
-    console.error('[MAIN] Server gagal start:', err);
-    dialog.showErrorBox(
-      'Server gagal dijalankan',
-      err.code === 'EADDRINUSE'
-        ? 'Port 3001 sedang dipakai aplikasi lain. Tutup aplikasi tersebut lalu coba lagi.'
-        : err.message
-    );
-    app.quit();
-    return;
+    console.warn('[MAIN] Server lokal cadangan tidak dapat dimulai:', err.message);
   }
 
   registerIpcHandlers();
@@ -91,6 +83,7 @@ function createWindow() {
     show: false,
     backgroundColor: '#F8FAFC',
     autoHideMenuBar: true,
+    title: 'POS Ertiga',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -105,10 +98,21 @@ function createWindow() {
     mainWindow.show();
   });
 
-  mainWindow.loadURL('http://127.0.0.1:3001');
+  const KASIR_URL = process.env.POS_APP_URL || 'https://pos-ertiga-ytp8.vercel.app';
+  console.log('[MAIN] Memuat Kasir URL:', KASIR_URL);
+
+  mainWindow.loadURL(KASIR_URL).catch((err) => {
+    console.warn('[MAIN] Gagal memuat cloud URL, fallback ke server lokal:', err.message);
+    mainWindow.loadURL('http://127.0.0.1:3001');
+  });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    const allowed = ['http://127.0.0.1:3001', 'http://localhost:3001'];
+    const allowed = [
+      'http://127.0.0.1:3001',
+      'http://localhost:3001',
+      'https://pos-ertiga-ytp8.vercel.app',
+      'https://pos-ertiga.vercel.app',
+    ];
     if (allowed.some((base) => url.startsWith(base))) return;
 
     event.preventDefault();
