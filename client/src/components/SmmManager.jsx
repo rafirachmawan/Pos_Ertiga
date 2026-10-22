@@ -1493,13 +1493,16 @@ export default function SmmManager() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
-                    Harga Modal (Rp)
+                    Harga Modal
                   </label>
                   <input
-                    type="number"
-                    placeholder="Misal: 58000"
-                    value={paketForm.harga_modal}
-                    onChange={(e) => setPaketForm({ ...paketForm, harga_modal: e.target.value })}
+                    type="text"
+                    placeholder="Rp 0"
+                    value={paketForm.harga_modal ? `Rp ${Number(paketForm.harga_modal).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setPaketForm({ ...paketForm, harga_modal: val ? Number(val) : '' });
+                    }}
                     style={{
                       width: '100%',
                       padding: '9px 12px',
@@ -1513,14 +1516,17 @@ export default function SmmManager() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
-                    Harga Jual Web (Rp) *
+                    Harga Jual Web *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     required
-                    placeholder="Misal: 79000"
-                    value={paketForm.harga_jual}
-                    onChange={(e) => setPaketForm({ ...paketForm, harga_jual: e.target.value })}
+                    placeholder="Rp 0"
+                    value={paketForm.harga_jual ? `Rp ${Number(paketForm.harga_jual).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setPaketForm({ ...paketForm, harga_jual: val ? Number(val) : '' });
+                    }}
                     style={{
                       width: '100%',
                       padding: '9px 12px',

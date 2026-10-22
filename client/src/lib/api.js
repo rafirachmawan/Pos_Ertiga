@@ -1,6 +1,4 @@
-// Development: Vite berjalan di 5173, server di 3001.
-// Production/Electron: frontend dan API berada di origin yang sama.
-export const API_BASE = import.meta.env.DEV ? 'http://127.0.0.1:3001' : '';
+export const API_BASE = '';
 
 export function apiUrl(path) {
   return `${API_BASE}${path}`;

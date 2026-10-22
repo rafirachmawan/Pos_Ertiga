@@ -835,14 +835,16 @@ export default function GoldManager() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px', color: '#334155' }}>
-                    Harga Jual (Rp) *
+                    Harga Jual *
                   </label>
                   <input
-                    type="number"
-                    min="0"
-                    placeholder="Misal: 1485000"
-                    value={itemForm.harga_jual}
-                    onChange={(e) => setItemForm({ ...itemForm, harga_jual: e.target.value })}
+                    type="text"
+                    placeholder="Rp 0"
+                    value={itemForm.harga_jual ? `Rp ${Number(itemForm.harga_jual).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setItemForm({ ...itemForm, harga_jual: val ? Number(val) : '' });
+                    }}
                     required
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '7px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
                   />
@@ -850,14 +852,16 @@ export default function GoldManager() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px', color: '#334155' }}>
-                    Harga Buyback (Rp)
+                    Harga Buyback
                   </label>
                   <input
-                    type="number"
-                    min="0"
-                    placeholder="Misal: 1350000"
-                    value={itemForm.harga_beli}
-                    onChange={(e) => setItemForm({ ...itemForm, harga_beli: e.target.value })}
+                    type="text"
+                    placeholder="Rp 0"
+                    value={itemForm.harga_beli ? `Rp ${Number(itemForm.harga_beli).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setItemForm({ ...itemForm, harga_beli: val ? Number(val) : '' });
+                    }}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '7px', border: '1px solid #CBD5E1', boxSizing: 'border-box' }}
                   />
                 </div>

@@ -358,18 +358,17 @@ const POS = () => {
               style={{
                 height: '36px',
                 padding: '0 14px',
-                background: '#03AC0E',
+                background: '#0F172A',
                 color: '#FFFFFF',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '12.5px',
-                fontWeight: '700',
+                fontWeight: '600',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                boxShadow: '0 2px 4px rgba(3, 172, 14, 0.2)',
               }}
             >
               + Pulsa & Non-Pakaian
@@ -552,40 +551,47 @@ const POS = () => {
                   background: '#FFFFFF',
                   border: '1px solid #E2E8F0',
                   borderRadius: '10px',
-                  padding: '12px',
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
+                  overflow: 'hidden',
                   transition: 'border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease'
                 }}
               >
                 {item.gambar ? (
-                  <div style={{ width: '100%', height: '110px', marginBottom: '10px', borderRadius: '6px', overflow: 'hidden', background: '#F8FAFC' }}>
+                  <div style={{ width: '100%', height: '150px', overflow: 'hidden', background: '#F8FAFC' }}>
                     <img src={item.gambar} alt={item.nama_barang} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 ) : (
-                  <div style={{ width: '100%', height: '70px', marginBottom: '10px', borderRadius: '6px', background: '#F8FAFC', border: '1px dashed #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: '#94A3B8', fontSize: '11px', fontWeight: '600' }}>Tanpa Foto</span>
+                  <div style={{ width: '100%', height: '150px', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ color: '#94A3B8', fontSize: '11.5px', fontWeight: '500' }}>Tanpa Foto</span>
                   </div>
                 )}
-                <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#0F172A', minHeight: '34px', lineHeight: 1.3, margin: '0 0 8px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {item.nama_barang}
-                </h4>
-                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                  <span style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>
-                    Rp {item.harga_jual.toLocaleString('id-ID')}
-                  </span>
-                  <span style={{
-                    fontSize: '10.5px',
-                    fontWeight: '600',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    background: item.stok > 5 ? '#ECFDF5' : '#FFFBEB',
-                    color: item.stok > 5 ? '#059669' : '#B45309',
-                    border: `1px solid ${item.stok > 5 ? '#D1FAE5' : '#FEF3C7'}`
-                  }}>
-                    {item.stok} {item.satuan}
-                  </span>
+                <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#0F172A', lineHeight: 1.3, margin: '0 0 4px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {item.nama_barang}
+                  </h4>
+                  {item.barcode && (
+                    <div style={{ fontSize: '10.5px', fontWeight: '500', color: '#94A3B8', marginBottom: '8px' }}>
+                      Kode: {item.barcode}
+                    </div>
+                  )}
+                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>
+                      Rp {item.harga_jual.toLocaleString('id-ID')}
+                    </span>
+                    <span style={{
+                      fontSize: '10.5px',
+                      fontWeight: '600',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      background: item.stok > 5 ? '#ECFDF5' : '#FFFBEB',
+                      color: item.stok > 5 ? '#059669' : '#B45309',
+                      border: `1px solid ${item.stok > 5 ? '#D1FAE5' : '#FEF3C7'}`
+                    }}>
+                      {item.stok} {item.satuan}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))
@@ -701,10 +707,10 @@ const POS = () => {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#64748B', marginBottom: '8px' }}>
             <span>Diskon</span>
-            <div style={{ display: 'flex', alignItems: 'center', width: '110px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', width: '120px' }}>
               <input
                 type="text"
-                value={diskon ? diskon.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
+                value={diskon ? `Rp ${Number(diskon).toLocaleString('id-ID')}` : ''}
                 onChange={e => setDiskon(Number(e.target.value.replace(/[^0-9]/g, '')))}
                 style={{ width: '100%', padding: '4px 8px', fontSize: '12px', textAlign: 'right', fontWeight: '600', color: '#DC2626', borderRadius: '4px', border: '1px solid #E2E8F0' }}
                 placeholder="Rp 0"
@@ -734,13 +740,13 @@ const POS = () => {
 
           <div style={{ marginBottom: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <span style={{ fontSize: '11.5px', fontWeight: '600', color: '#64748B' }}>Bayar (Rp)</span>
+              <span style={{ fontSize: '11.5px', fontWeight: '600', color: '#64748B' }}>Bayar</span>
               <input
                 type="text"
-                value={amountTendered ? amountTendered.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : ''}
+                value={amountTendered ? `Rp ${Number(amountTendered).toLocaleString('id-ID')}` : ''}
                 onChange={e => setAmountTendered(Number(e.target.value.replace(/[^0-9]/g, '')))}
-                style={{ width: '130px', padding: '5px 8px', fontSize: '13px', textAlign: 'right', fontWeight: '700', color: '#2563EB', borderRadius: '6px', border: '1px solid #E2E8F0' }}
-                placeholder="0"
+                style={{ width: '140px', padding: '5px 8px', fontSize: '13px', textAlign: 'right', fontWeight: '700', color: '#2563EB', borderRadius: '6px', border: '1px solid #E2E8F0' }}
+                placeholder="Rp 0"
               />
             </div>
 
@@ -844,14 +850,33 @@ const POS = () => {
             {/* Modal Header */}
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0F172A' }}>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#0F172A' }}>
                   Penjualan Non-Pakaian / Pulsa & Layanan Digital
                 </h3>
                 <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: '#64748B' }}>
                   Pilih produk pulsa/token atau input item manual untuk dicetak ke struk kasir
                 </p>
               </div>
-              <button onClick={() => setShowDigitalModal(false)} style={{ background: '#F1F5F9', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', color: '#64748B' }}>✕</button>
+              <button
+                type="button"
+                onClick={() => setShowDigitalModal(false)}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '6px',
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#64748B',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                }}
+              >
+                ✕
+              </button>
             </div>
 
             {/* Modal Navigation Tabs */}
@@ -861,13 +886,13 @@ const POS = () => {
                 onClick={() => setDigitalTab('quick')}
                 style={{
                   flex: 1,
-                  padding: '11px',
+                  padding: '10px',
                   background: digitalTab === 'quick' ? '#FFFFFF' : 'transparent',
                   border: 'none',
-                  borderBottom: digitalTab === 'quick' ? '2px solid #03AC0E' : 'none',
-                  fontWeight: '700',
-                  fontSize: '13px',
-                  color: digitalTab === 'quick' ? '#03AC0E' : '#64748B',
+                  borderBottom: digitalTab === 'quick' ? '2px solid #0F172A' : 'none',
+                  fontWeight: '600',
+                  fontSize: '12.5px',
+                  color: digitalTab === 'quick' ? '#0F172A' : '#64748B',
                   cursor: 'pointer',
                 }}
               >
@@ -878,13 +903,13 @@ const POS = () => {
                 onClick={() => setDigitalTab('manual')}
                 style={{
                   flex: 1,
-                  padding: '11px',
+                  padding: '10px',
                   background: digitalTab === 'manual' ? '#FFFFFF' : 'transparent',
                   border: 'none',
-                  borderBottom: digitalTab === 'manual' ? '2px solid #03AC0E' : 'none',
-                  fontWeight: '700',
-                  fontSize: '13px',
-                  color: digitalTab === 'manual' ? '#03AC0E' : '#64748B',
+                  borderBottom: digitalTab === 'manual' ? '2px solid #0F172A' : 'none',
+                  fontWeight: '600',
+                  fontSize: '12.5px',
+                  color: digitalTab === 'manual' ? '#0F172A' : '#64748B',
                   cursor: 'pointer',
                 }}
               >
@@ -897,7 +922,7 @@ const POS = () => {
               {digitalTab === 'quick' ? (
                 <div>
                   {/* Category Filter Chips */}
-                  <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '4px' }}>
+                  <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '2px' }}>
                     {[
                       { key: 'all', label: 'Semua' },
                       { key: 'pulsa', label: 'Pulsa' },
@@ -911,11 +936,12 @@ const POS = () => {
                         style={{
                           padding: '5px 12px',
                           borderRadius: '6px',
-                          border: 'none',
-                          fontSize: '12px',
-                          fontWeight: ppobFilter === tab.key ? '700' : '500',
-                          background: ppobFilter === tab.key ? '#0F172A' : '#F1F5F9',
-                          color: ppobFilter === tab.key ? '#FFFFFF' : '#475569',
+                          border: '1px solid',
+                          borderColor: ppobFilter === tab.key ? '#0F172A' : '#E2E8F0',
+                          fontSize: '11.5px',
+                          fontWeight: '600',
+                          background: ppobFilter === tab.key ? '#0F172A' : '#FFFFFF',
+                          color: ppobFilter === tab.key ? '#FFFFFF' : '#64748B',
                           cursor: 'pointer',
                           whiteSpace: 'nowrap',
                         }}
@@ -927,61 +953,60 @@ const POS = () => {
 
                   {/* Grid of PPOB items */}
                   {ppobItems.length === 0 ? (
-                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748B' }}>
+                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748B', fontSize: '13px' }}>
                       Memuat daftar produk PPOB...
                     </div>
                   ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
                       {ppobItems
                         .filter((p) => ppobFilter === 'all' || p.kategori_kode === ppobFilter)
                         .map((p) => (
                           <div
                             key={p.id}
+                            onClick={() =>
+                              addCustomToCart({
+                                nama_barang: p.nama_produk,
+                                harga_jual: p.harga_jual,
+                                harga_modal: p.harga_modal,
+                                qty: 1,
+                              })
+                            }
                             style={{
                               background: '#FFFFFF',
                               border: '1px solid #E2E8F0',
                               borderRadius: '8px',
-                              padding: '12px',
+                              padding: '10px 12px',
                               display: 'flex',
                               flexDirection: 'column',
                               justifyContent: 'space-between',
+                              cursor: 'pointer',
+                              transition: 'border-color 0.15s ease, background 0.15s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = '#0F172A';
+                              e.currentTarget.style.background = '#F8FAFC';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#E2E8F0';
+                              e.currentTarget.style.background = '#FFFFFF';
                             }}
                           >
                             <div>
-                              <div style={{ fontSize: '10px', fontWeight: '700', color: '#03AC0E', textTransform: 'uppercase', marginBottom: '2px' }}>
+                              <div style={{ display: 'inline-block', fontSize: '9.5px', fontWeight: '700', color: '#475569', background: '#F1F5F9', padding: '1px 5px', borderRadius: '4px', textTransform: 'uppercase', marginBottom: '4px' }}>
                                 {p.operator}
                               </div>
-                              <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+                              <div style={{ fontSize: '12.5px', fontWeight: '600', color: '#0F172A', marginBottom: '6px', lineHeight: 1.3 }}>
                                 {p.nama_produk}
                               </div>
-                              <div style={{ fontSize: '13px', fontWeight: '800', color: '#2563EB' }}>
-                                Rp {p.harga_jual.toLocaleString('id-ID')}
-                              </div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                addCustomToCart({
-                                  nama_barang: p.nama_produk,
-                                  harga_jual: p.harga_jual,
-                                  harga_modal: p.harga_modal,
-                                  qty: 1,
-                                })
-                              }
-                              style={{
-                                marginTop: '10px',
-                                padding: '6px 10px',
-                                background: '#F1F5F9',
-                                color: '#0F172A',
-                                border: '1px solid #CBD5E1',
-                                borderRadius: '6px',
-                                fontSize: '11.5px',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                              }}
-                            >
-                              + Masuk Kasir
-                            </button>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #F1F5F9' }}>
+                              <span style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>
+                                Rp {p.harga_jual.toLocaleString('id-ID')}
+                              </span>
+                              <span style={{ fontSize: '11px', fontWeight: '600', color: '#2563EB' }}>
+                                + Kasir
+                              </span>
+                            </div>
                           </div>
                         ))}
                     </div>
@@ -1014,26 +1039,32 @@ const POS = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                        Harga Jual (Rp) *
+                        Harga Jual *
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         required
-                        placeholder="mis. 52000"
-                        value={manualForm.harga_jual}
-                        onChange={(e) => setManualForm({ ...manualForm, harga_jual: e.target.value })}
+                        placeholder="Rp 0"
+                        value={manualForm.harga_jual ? `Rp ${Number(manualForm.harga_jual).toLocaleString('id-ID')}` : ''}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          setManualForm({ ...manualForm, harga_jual: val ? Number(val) : '' });
+                        }}
                         style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: '700', boxSizing: 'border-box' }}
                       />
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                        Harga Modal (Rp, opsional untuk laba)
+                        Harga Modal (opsional untuk laba)
                       </label>
                       <input
-                        type="number"
-                        placeholder="mis. 49800"
-                        value={manualForm.harga_modal}
-                        onChange={(e) => setManualForm({ ...manualForm, harga_modal: e.target.value })}
+                        type="text"
+                        placeholder="Rp 0"
+                        value={manualForm.harga_modal ? `Rp ${Number(manualForm.harga_modal).toLocaleString('id-ID')}` : ''}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          setManualForm({ ...manualForm, harga_modal: val ? Number(val) : '' });
+                        }}
                         style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
                       />
                     </div>
@@ -1062,7 +1093,7 @@ const POS = () => {
                     </button>
                     <button
                       type="submit"
-                      style={{ padding: '8px 20px', background: '#03AC0E', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', color: '#FFFFFF' }}
+                      style={{ padding: '8px 20px', background: '#0F172A', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: '#FFFFFF' }}
                     >
                       + Masukkan ke Keranjang Kasir
                     </button>

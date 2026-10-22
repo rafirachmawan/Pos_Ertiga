@@ -1036,31 +1036,35 @@ export default function FlashSaleManager() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                    Harga Asli / Coret (Rp) <span style={{ color: '#EF4444' }}>*</span>
+                    Harga Asli / Coret <span style={{ color: '#EF4444' }}>*</span>
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     required
-                    min="1"
-                    value={form.harga_asli}
-                    onChange={(e) => handlePriceChange('harga_asli', e.target.value)}
-                    placeholder="mis. 50000"
+                    value={form.harga_asli ? `Rp ${Number(form.harga_asli).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      handlePriceChange('harga_asli', val ? Number(val) : '');
+                    }}
+                    placeholder="Rp 0"
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
                   />
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                    Harga Flash Sale (Rp) <span style={{ color: '#EF4444' }}>*</span>
+                    Harga Flash Sale <span style={{ color: '#EF4444' }}>*</span>
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     required
-                    min="1"
-                    value={form.harga_diskon}
-                    onChange={(e) => handlePriceChange('harga_diskon', e.target.value)}
-                    placeholder="mis. 40000"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
+                    value={form.harga_diskon ? `Rp ${Number(form.harga_diskon).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      handlePriceChange('harga_diskon', val ? Number(val) : '');
+                    }}
+                    placeholder="Rp 0"
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', fontWeight: '700' }}
                   />
                 </div>
               </div>

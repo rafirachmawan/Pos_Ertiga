@@ -162,6 +162,7 @@ router.get(
        FROM flash_sale_items fsi
        LEFT JOIN barang b ON fsi.barang_id = b.id
        WHERE fsi.aktif = 1
+         AND (fsi.barang_id IS NULL OR (b.aktif = 1 AND b.deleted_at IS NULL))
        ORDER BY fsi.urutan ASC, fsi.id ASC`
     );
 

@@ -72,7 +72,7 @@ export default function LogamMuliaSection({ storeInfo }) {
 
     const unitPrice = mode === 'buy' ? orderingItem.harga_jual : (orderingItem.harga_beli || orderingItem.harga_jual * 0.9);
     const totalPrice = unitPrice * qty;
-    const storePhone = storeInfo?.alamat_toko?.match(/08[0-9-]+/)?.[0] || '6281234567890';
+    const storePhone = storeInfo?.telepon || storeInfo?.alamat_toko?.match(/08[0-9-]+/)?.[0] || '6281234567890';
 
     const waUrl = generateWhatsAppGoldUrl({
       storePhone,

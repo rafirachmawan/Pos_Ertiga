@@ -636,25 +636,33 @@ export default function PpobManager() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                    Harga Modal (Rp)
+                    Harga Modal
                   </label>
                   <input
-                    type="number"
-                    value={formData.harga_modal}
-                    onChange={(e) => setFormData({ ...formData, harga_modal: Number(e.target.value) })}
+                    type="text"
+                    placeholder="Rp 0"
+                    value={formData.harga_modal ? `Rp ${Number(formData.harga_modal).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setFormData({ ...formData, harga_modal: val ? Number(val) : 0 });
+                    }}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px' }}
                   />
                 </div>
 
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                    Harga Jual (Rp) *
+                    Harga Jual *
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     required
-                    value={formData.harga_jual}
-                    onChange={(e) => setFormData({ ...formData, harga_jual: Number(e.target.value) })}
+                    placeholder="Rp 0"
+                    value={formData.harga_jual ? `Rp ${Number(formData.harga_jual).toLocaleString('id-ID')}` : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, '');
+                      setFormData({ ...formData, harga_jual: val ? Number(val) : 0 });
+                    }}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: '700' }}
                   />
                 </div>

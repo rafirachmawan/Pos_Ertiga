@@ -88,7 +88,7 @@ export default function SmmSection({ storeInfo }) {
       return;
     }
 
-    const storePhone = storeInfo?.alamat_toko?.match(/08[0-9-]+/)?.[0] || '6281234567890';
+    const storePhone = storeInfo?.telepon || storeInfo?.alamat_toko?.match(/08[0-9-]+/)?.[0] || '6281234567890';
 
     const waUrl = generateWhatsAppSmmUrl({
       storePhone,
