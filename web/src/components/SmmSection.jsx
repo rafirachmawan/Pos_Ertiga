@@ -30,7 +30,7 @@ const PlatformIcon = ({ slug, isSelected }) => {
   return null;
 };
 
-export default function SmmSection({ storeInfo }) {
+export default function SmmSection({ storeInfo, embedded = false }) {
   const [platforms, setPlatforms] = useState(FALLBACK_SMM);
   const [selectedPlatformId, setSelectedPlatformId] = useState(FALLBACK_SMM[0]?.id || 1);
   const [loading, setLoading] = useState(false);
@@ -104,34 +104,60 @@ export default function SmmSection({ storeInfo }) {
     setOrderingService(null);
   };
 
-  return (
-    <section id="booster-sosmed-section" className="mp-section-card" style={{ marginBottom: '24px' }}>
+  const Wrapper = embedded ? 'div' : 'section';
+  const wrapperProps = embedded
+    ? { id: 'booster-sosmed-section' }
+    : { id: 'booster-sosmed-section', className: 'mp-section-card', style: { marginBottom: '24px' } };
 
-      {/* 1. Header Section */}
-      <div className="mp-section-header">
-        <div>
-          <h2 className="mp-section-title">
-            <span>Booster Sosial Media (SMM Panel)</span>
-          </h2>
-          <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
+  return (
+    <Wrapper {...wrapperProps}>
+
+      {/* 1. Header / Subtitle Section */}
+      {embedded ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', margin: '10px 0 16px 0', flexWrap: 'wrap' }}>
+          <p style={{ fontSize: '12.5px', color: '#6B7280', margin: 0 }}>
             Tingkatkan kredibilitas akun TikTok, Instagram & YouTube Anda. Aman dan tanpa password.
           </p>
+          <span
+            style={{
+              fontSize: '11.5px',
+              fontWeight: '600',
+              color: '#475569',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              padding: '4px 10px',
+              borderRadius: '4px',
+            }}
+          >
+            Garansi & Tanpa Password
+          </span>
         </div>
+      ) : (
+        <div className="mp-section-header">
+          <div>
+            <h2 className="mp-section-title">
+              <span>Booster Sosial Media (SMM Panel)</span>
+            </h2>
+            <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
+              Tingkatkan kredibilitas akun TikTok, Instagram & YouTube Anda. Aman dan tanpa password.
+            </p>
+          </div>
 
-        <span
-          style={{
-            fontSize: '11.5px',
-            fontWeight: '600',
-            color: '#475569',
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            padding: '4px 10px',
-            borderRadius: '4px',
-          }}
-        >
-          Garansi & Tanpa Password
-        </span>
-      </div>
+          <span
+            style={{
+              fontSize: '11.5px',
+              fontWeight: '600',
+              color: '#475569',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              padding: '4px 10px',
+              borderRadius: '4px',
+            }}
+          >
+            Garansi & Tanpa Password
+          </span>
+        </div>
+      )}
 
       {/* 2. Platform Tabs (Clean pills) */}
       <div
@@ -604,6 +630,6 @@ export default function SmmSection({ storeInfo }) {
           </div>
         </div>
       )}
-    </section>
+    </Wrapper>
   );
 }

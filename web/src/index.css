@@ -1,40 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
+  --font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
   /* Tokopedia & Shopee Marketplace Palette */
-  --primary: #03AC0E;
+  --primary: #03ac0e;
   --primary-hover: #028e0b;
-  --primary-light: #E8F8EE;
-  --shopee-orange: #EE4D2D;
-  --shopee-orange-hover: #D73211;
-  --shopee-orange-light: #FFF5F1;
-  --flash-sale-red: #D94040;
-  
-  --bg-page: #F5F6F8;
-  --bg-card: #FFFFFF;
-  --bg-subtle: #F8F9FA;
-  
+  --primary-light: #e8f8ee;
+  --shopee-orange: #ee4d2d;
+  --shopee-orange-hover: #d73211;
+  --shopee-orange-light: #fff5f1;
+  --flash-sale-red: #d94040;
+
+  --bg-page: #f5f6f8;
+  --bg-card: #ffffff;
+  --bg-subtle: #f8f9fa;
+
   --text-primary: #212121;
-  --text-secondary: #6D7588;
-  --text-muted: #9AA2B1;
-  
-  --border-light: #E5E7EB;
-  --border-subtle: #F0F2F5;
-  --border-active: #03AC0E;
-  
+  --text-secondary: #6d7588;
+  --text-muted: #9aa2b1;
+
+  --border-light: #e5e7eb;
+  --border-subtle: #f0f2f5;
+  --border-active: #03ac0e;
+
   --shadow-sm: 0 1px 4px rgba(141, 150, 170, 0.12);
   --shadow-card: 0 2px 8px rgba(141, 150, 170, 0.16);
   --shadow-hover: 0 8px 24px rgba(141, 150, 170, 0.22);
   --shadow-header: 0 4px 16px rgba(0, 0, 0, 0.05);
-  
+
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-full: 9999px;
-  
+
   --transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
@@ -62,7 +63,9 @@ button {
   transition: var(--transition);
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   font-family: inherit;
 }
 
@@ -85,15 +88,15 @@ input, textarea, select {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: #FFFFFF;
+  background: #ffffff;
   border-bottom: 1px solid var(--border-light);
   box-shadow: var(--shadow-header);
 }
 
 /* Top Notification / Utility Bar */
 .mp-topbar {
-  background: #F8F9FA;
-  border-bottom: 1px solid #ECEFF1;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eceff1;
   font-size: 11.5px;
   color: var(--text-secondary);
   padding: 6px 0;
@@ -106,7 +109,8 @@ input, textarea, select {
   gap: 12px;
 }
 
-.mp-topbar-left, .mp-topbar-right {
+.mp-topbar-left,
+.mp-topbar-right {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -150,11 +154,11 @@ input, textarea, select {
   width: 38px;
   height: 38px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, #03AC0E 0%, #008709 100%);
+  background: linear-gradient(135deg, #03ac0e 0%, #008709 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 800;
   font-size: 19px;
   box-shadow: 0 2px 6px rgba(3, 172, 14, 0.3);
@@ -173,8 +177,8 @@ input, textarea, select {
 .mp-brand-badge {
   font-size: 10px;
   font-weight: 700;
-  color: #FFFFFF;
-  background: #EE4D2D;
+  color: #ffffff;
+  background: #ee4d2d;
   padding: 1px 6px;
   border-radius: 4px;
   letter-spacing: 0.04em;
@@ -195,9 +199,11 @@ input, textarea, select {
   align-items: center;
   border: 2px solid var(--primary);
   border-radius: var(--radius-sm);
-  background: #FFFFFF;
+  background: #ffffff;
   overflow: hidden;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .mp-search-input-box:focus-within {
@@ -217,7 +223,7 @@ input, textarea, select {
 
 .mp-search-btn {
   background: var(--primary);
-  color: #FFFFFF;
+  color: #ffffff;
   width: 52px;
   height: 38px;
   display: flex;
@@ -273,7 +279,7 @@ input, textarea, select {
   gap: 8px;
   padding: 8px 14px;
   border-radius: var(--radius-sm);
-  background: #FFFFFF;
+  background: #ffffff;
   border: 1px solid var(--border-light);
   color: var(--text-primary);
   font-size: 13px;
@@ -293,12 +299,12 @@ input, textarea, select {
   top: -6px;
   right: -6px;
   background: var(--shopee-orange);
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 11px;
   font-weight: 700;
   padding: 1px 6px;
   border-radius: var(--radius-full);
-  border: 2px solid #FFFFFF;
+  border: 2px solid #ffffff;
   line-height: 1.2;
 }
 
@@ -308,8 +314,8 @@ input, textarea, select {
   gap: 6px;
   padding: 8px 14px;
   border-radius: var(--radius-sm);
-  background: #25D366;
-  color: #FFFFFF;
+  background: #25d366;
+  color: #ffffff;
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
@@ -425,7 +431,7 @@ input, textarea, select {
 
 .mp-carousel-dot.active {
   width: 22px;
-  background: #FFFFFF;
+  background: #ffffff;
 }
 
 .mp-side-banners {
@@ -443,7 +449,9 @@ input, textarea, select {
   justify-content: space-between;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
 }
 
 .mp-side-banner-card:hover {
@@ -457,7 +465,7 @@ input, textarea, select {
 }
 
 .mp-quick-card {
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
   padding: 14px 18px;
@@ -524,10 +532,10 @@ input, textarea, select {
 
 /* ── Flash Sale Section ──────────────────────── */
 .mp-flash-sale {
-  background: linear-gradient(135deg, #FF4500 0%, #EE4D2D 100%);
+  background: linear-gradient(135deg, #ff4500 0%, #ee4d2d 100%);
   border-radius: var(--radius-md);
   padding: 18px 20px;
-  color: #FFFFFF;
+  color: #ffffff;
   margin-bottom: 24px;
   box-shadow: 0 4px 14px rgba(238, 77, 45, 0.25);
 }
@@ -548,8 +556,8 @@ input, textarea, select {
 }
 
 .mp-flash-badge {
-  background: #FFFFFF;
-  color: #EE4D2D;
+  background: #ffffff;
+  color: #ee4d2d;
   font-size: 13px;
   font-weight: 800;
   padding: 4px 10px;
@@ -570,7 +578,7 @@ input, textarea, select {
 
 .mp-countdown-digit {
   background: #000000;
-  color: #FFFFFF;
+  color: #ffffff;
   padding: 3px 6px;
   border-radius: 4px;
   min-width: 24px;
@@ -585,7 +593,7 @@ input, textarea, select {
   -webkit-overflow-scrolling: touch;
   padding-bottom: 6px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.4) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
   scroll-behavior: smooth;
 }
 
@@ -598,7 +606,7 @@ input, textarea, select {
 }
 
 .mp-flash-grid::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.4);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 4px;
 }
 
@@ -611,7 +619,7 @@ input, textarea, select {
 .mp-flash-nav-btn {
   background: rgba(255, 255, 255, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #FFFFFF;
+  color: #ffffff;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -624,13 +632,13 @@ input, textarea, select {
 }
 
 .mp-flash-nav-btn:hover {
-  background: #FFFFFF;
-  color: #EE4D2D;
+  background: #ffffff;
+  color: #ee4d2d;
   transform: scale(1.05);
 }
 
 .mp-flash-card {
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: var(--radius-sm);
   overflow: hidden;
   color: var(--text-primary);
@@ -676,162 +684,135 @@ input, textarea, select {
   transform: translateY(-3px);
 }
 
-/* ── Logam Mulia Section (Ide 3 - Soft Luxury Gold Edition) ── */
-.mp-gold-section {
+/* ── Tokopedia-Style Tab Bar ─────────────────── */
+.tp-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 0;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.tp-tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.tp-tab-item {
   position: relative;
-  background: linear-gradient(180deg, #FFFDF8 0%, #FFFFFF 100%);
-  border: 1.5px solid #FDE68A;
-  border-radius: 16px;
-  padding: 22px 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.07), 0 1px 3px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-}
-
-.mp-gold-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #D97706 0%, #F59E0B 50%, #FCD34D 100%);
-}
-
-.mp-gold-header-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #FEF3C7;
-}
-
-.mp-gold-tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #FEF3C7;
-  color: #92400E;
-  border: 1px solid #FDE68A;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  margin-bottom: 6px;
-}
-
-.mp-gold-title {
-  font-size: 19px;
-  font-weight: 800;
-  color: #78350F;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-.mp-gold-subtitle {
-  font-size: 12.5px;
-  color: #78716C;
-  margin: 4px 0 0 0;
-  line-height: 1.45;
-}
-
-.mp-gold-trust-badges {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.mp-gold-trust-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #92400E;
-  background: #FEF3C7;
-  border: 1px solid #FDE68A;
-  padding: 5px 10px;
-  border-radius: 6px;
-}
-
-.mp-gold-controls-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
-
-.mp-gold-brand-tab {
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
   white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
-  border: 1px solid #E2E8F0;
-  background: #FFFFFF;
-  color: #475569;
-}
-
-.mp-gold-brand-tab:hover:not(.active) {
-  border-color: #F59E0B;
-  background: #FFFDF8;
-  color: #92400E;
-}
-
-.mp-gold-brand-tab.active {
-  background: #FEF3C7;
-  border-color: #F59E0B;
-  color: #92400E;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.12);
-}
-
-.mp-gold-mode-toggle {
-  display: inline-flex;
-  background: #F1F5F9;
-  padding: 3px;
-  border-radius: 8px;
-  border: 1px solid #E2E8F0;
-}
-
-.mp-gold-mode-btn {
-  padding: 6px 14px;
-  border-radius: 6px;
-  border: none;
-  font-size: 12px;
-  font-weight: 700;
   cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tp-tab-item:hover {
+  color: #03AC0E;
+}
+
+.tp-tab-item.active {
+  color: #03AC0E;
+  font-weight: 700;
+  border-bottom-color: #03AC0E;
+}
+
+/* ── Sub-Category Pills (Turunan dari Pakaian) ── */
+.tp-subcat-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 0 4px 0;
+}
+
+.tp-subcat-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+  max-width: 100%;
+}
+
+.tp-subcat-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.tp-subcat-pill {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #F3F4F6;
+  color: #4B5563;
+  border: 1px solid transparent;
   transition: all 0.15s ease;
-  background: transparent;
-  color: #64748B;
 }
 
-.mp-gold-mode-btn.active-buy {
-  background: #03AC0E;
-  color: #FFFFFF;
-  box-shadow: 0 1px 4px rgba(3, 172, 14, 0.25);
+.tp-subcat-pill:hover {
+  background: #E5E7EB;
+  color: #111827;
 }
 
-.mp-gold-mode-btn.active-buyback {
-  background: #D97706;
-  color: #FFFFFF;
-  box-shadow: 0 1px 4px rgba(217, 119, 6, 0.25);
+.tp-subcat-pill.active {
+  background: #E8F8EE;
+  color: #03AC0E;
+  font-weight: 700;
+  border-color: #03AC0E;
 }
 
+.tp-subcat-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.tp-subcat-count {
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.tp-sort-select {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  outline: none;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .tp-subcat-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .tp-subcat-actions {
+    margin-left: 0;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+/* ── Logam Mulia Section ─────────────────────── */
 .mp-gold-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -860,56 +841,55 @@ input, textarea, select {
 }
 
 .mp-gold-card {
-  background: #FFFFFF;
-  border: 1px solid #FDE68A;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
   position: relative;
 }
 
 .mp-gold-card:hover {
-  border-color: #D97706;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.14);
+  border-color: #03ac0e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
 }
 
 .mp-gold-thumb-wrap {
   width: 100%;
-  height: 155px;
+  height: 150px;
   position: relative;
   overflow: hidden;
-  background: #FFFDF8;
-  border-bottom: 1px solid #FEF3C7;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .mp-gold-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease;
 }
 
 .mp-gold-card:hover .mp-gold-img {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .mp-gold-gram-badge {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: #FEF3C7;
-  color: #92400E;
-  border: 1px solid #FDE68A;
-  font-size: 11.5px;
-  font-weight: 800;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  font-size: 11px;
+  font-weight: 700;
   padding: 3px 8px;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
 }
 
 .mp-gold-badges-right {
@@ -927,12 +907,11 @@ input, textarea, select {
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
-  background: #FFFFFF;
 }
 
 /* ── Marketplace Products Grid ───────────────── */
 .mp-section-card {
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
   padding: 18px 20px;
@@ -982,7 +961,7 @@ input, textarea, select {
 
 /* Marketplace Product Card (Shopee & Tokopedia Style) */
 .mp-product-card {
-  background: #FFFFFF;
+  background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -990,7 +969,10 @@ input, textarea, select {
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    border-color var(--transition);
 }
 
 .mp-product-card:hover {
@@ -1003,7 +985,7 @@ input, textarea, select {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #F8F9FA;
+  background: #f8f9fa;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1026,7 +1008,7 @@ input, textarea, select {
   top: 6px;
   left: 6px;
   background: var(--primary);
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 9.5px;
   font-weight: 700;
   padding: 2px 6px;
@@ -1039,8 +1021,8 @@ input, textarea, select {
   position: absolute;
   top: 6px;
   right: 6px;
-  background: #FEE2E2;
-  color: #DC2626;
+  background: #fee2e2;
+  color: #dc2626;
   font-size: 10px;
   font-weight: 700;
   padding: 2px 6px;
@@ -1095,7 +1077,7 @@ input, textarea, select {
 }
 
 .mp-product-star {
-  color: #FFB800;
+  color: #ffb800;
   display: inline-flex;
   align-items: center;
   font-weight: 600;
@@ -1115,7 +1097,7 @@ input, textarea, select {
   margin-top: 8px;
   width: 100%;
   padding: 6px 0;
-  background: #FFFFFF;
+  background: #ffffff;
   border: 1px solid var(--primary);
   color: var(--primary);
   font-size: 11.5px;
@@ -1130,12 +1112,12 @@ input, textarea, select {
 
 .mp-product-btn-add:hover {
   background: var(--primary);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 /* ── Digital Services & PPOB Widget ──────────── */
 .mp-services-card {
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
   padding: 20px;
@@ -1180,7 +1162,7 @@ input, textarea, select {
 
 /* ── Marketplace Footer ──────────────────────── */
 .mp-footer {
-  background: #FFFFFF;
+  background: #ffffff;
   border-top: 1px solid var(--border-light);
   margin-top: 40px;
   color: var(--text-secondary);
@@ -1224,7 +1206,8 @@ input, textarea, select {
   gap: 8px;
 }
 
-.mp-footer-links a, .mp-footer-links li {
+.mp-footer-links a,
+.mp-footer-links li {
   color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.15s ease;
@@ -1238,8 +1221,8 @@ input, textarea, select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -1275,13 +1258,21 @@ input, textarea, select {
 }
 
 @keyframes mpFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes mpSlideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 .cart-drawer-content {
@@ -1291,7 +1282,7 @@ input, textarea, select {
   bottom: 0;
   width: 100%;
   max-width: 420px;
-  background: #FFFFFF;
+  background: #ffffff;
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   z-index: 101;
   display: flex;
@@ -1307,7 +1298,7 @@ input, textarea, select {
   right: 20px;
   z-index: 40;
   background: var(--primary);
-  color: #FFFFFF;
+  color: #ffffff;
   padding: 11px 18px;
   border-radius: var(--radius-full);
   display: flex;
@@ -1316,7 +1307,9 @@ input, textarea, select {
   box-shadow: 0 4px 20px rgba(3, 172, 14, 0.35);
   font-weight: 700;
   font-size: 13px;
-  transition: transform var(--transition), background-color var(--transition);
+  transition:
+    transform var(--transition),
+    background-color var(--transition);
 }
 
 .floating-cart-btn:hover {
@@ -1371,13 +1364,13 @@ input, textarea, select {
 }
 
 .mp-carousel-btn {
-  background: #FFFFFF;
+  background: #ffffff;
   color: #111827;
   font-weight: 700;
   font-size: 12.5px;
   padding: 9px 18px;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: transform 0.15s ease;
 }
 
@@ -1388,7 +1381,7 @@ input, textarea, select {
 .mp-side-card-badge {
   font-size: 10.5px;
   font-weight: 800;
-  background: #FFFFFF;
+  background: #ffffff;
   padding: 2px 6px;
   border-radius: 4px;
   display: inline-block;
@@ -1397,14 +1390,14 @@ input, textarea, select {
 .mp-side-card-title {
   font-size: 15px;
   font-weight: 800;
-  color: #1F2937;
+  color: #1f2937;
   margin-top: 6px;
   margin-bottom: 4px;
 }
 
 .mp-side-card-sub {
   font-size: 11.5px;
-  color: #6B7280;
+  color: #6b7280;
   margin: 0;
   line-height: 1.4;
 }
@@ -1709,42 +1702,6 @@ input, textarea, select {
   }
 
   /* 6. Gold & SMM & WebDev Grids */
-  .mp-gold-section {
-    padding: 14px 12px !important;
-    border-radius: 12px !important;
-    margin-bottom: 16px !important;
-  }
-  .mp-gold-header-banner {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 8px !important;
-  }
-  .mp-gold-title {
-    font-size: 16px !important;
-  }
-  .mp-gold-trust-badges {
-    width: 100%;
-    gap: 6px !important;
-  }
-  .mp-gold-trust-item {
-    font-size: 10px !important;
-    padding: 3px 7px !important;
-  }
-  .mp-gold-controls-row {
-    flex-direction: column;
-    align-items: stretch !important;
-    gap: 10px !important;
-  }
-  .mp-gold-mode-toggle {
-    width: 100%;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-  }
-  .mp-gold-mode-btn {
-    text-align: center;
-    padding: 7px 4px !important;
-    font-size: 11px !important;
-  }
   .mp-gold-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;

@@ -35,6 +35,7 @@ const Inventory = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilterCategory, setSelectedFilterCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [barcodeSortOrder, setBarcodeSortOrder] = useState('asc'); // 'asc' | 'desc'
   const [hoveredRowId, setHoveredRowId] = useState(null);
   const ITEMS_PER_PAGE = 5;
 
@@ -291,9 +292,9 @@ const Inventory = () => {
     }
   };
 
-  // Filtered Items by Search & Category
+  // Filtered Items by Search & Category and sorted by barcode
   const filteredItems = useMemo(() => {
-    return items.filter((item) => {
+    const list = items.filter((item) => {
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
         !q ||
@@ -306,11 +307,20 @@ const Inventory = () => {
 
       return matchSearch && matchCat;
     });
-  }, [items, searchQuery, selectedFilterCategory]);
+
+    list.sort((a, b) => {
+      const codeA = String(a.barcode || '');
+      const codeB = String(b.barcode || '');
+      const cmp = codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
+      return barcodeSortOrder === 'desc' ? -cmp : cmp;
+    });
+
+    return list;
+  }, [items, searchQuery, selectedFilterCategory, barcodeSortOrder]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedFilterCategory, showInactive]);
+  }, [searchQuery, selectedFilterCategory, showInactive, barcodeSortOrder]);
 
   const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
   const activePage = Math.min(currentPage, totalPages);
@@ -485,8 +495,43 @@ const Inventory = () => {
                 <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '52px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                   Gambar
                 </th>
-                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '95px', borderRight: '1px solid #E2E8F0' }}>
-                  Barcode
+                <th
+                  onClick={() => setBarcodeSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
+                  title={`Urutkan barcode: ${barcodeSortOrder === 'asc' ? 'A-Z (klik untuk Z-A)' : 'Z-A (klik untuk A-Z)'}`}
+                  style={{
+                    padding: '11px 8px',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    color: '#0F172A',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    width: '105px',
+                    borderRight: '1px solid #E2E8F0',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    background: '#F1F5F9',
+                  }}
+                >
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <span>Barcode</span>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '4px',
+                        background: '#2563EB',
+                        color: '#FFFFFF',
+                        fontSize: '10px',
+                        fontWeight: '800',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {barcodeSortOrder === 'asc' ? '↑' : '↓'}
+                    </span>
+                  </div>
                 </th>
                 <th style={{ padding: '11px 12px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: '180px', borderRight: '1px solid #E2E8F0' }}>
                   Nama Barang

@@ -140,7 +140,14 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
                 background: 'linear-gradient(135deg, #FFF5F1 0%, #FFE6DC 100%)',
                 border: '1px solid #FFCCBC',
               }}
-              onClick={() => onExploreProducts && onExploreProducts()}
+              onClick={() => {
+                const el = document.getElementById('flash-sale-section');
+                if (el) {
+                  const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
+                  const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+                  window.scrollTo({ top, behavior: 'smooth' });
+                }
+              }}
             >
               <div>
                 <span className="mp-side-card-badge" style={{ color: '#EE4D2D' }}>

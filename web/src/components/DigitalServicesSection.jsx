@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PPOB_SERVICES_META } from '../data/digitalServices';
 import PPOBServiceModal from './services/PPOBServiceModal';
 
-export default function DigitalServicesSection({ storeInfo, activeServiceModal, onCloseServiceModal, onOpenServiceModal }) {
+export default function DigitalServicesSection({ storeInfo, activeServiceModal, onCloseServiceModal, onOpenServiceModal, embedded = false }) {
   const [internalModal, setInternalModal] = useState(null);
   const [selectedPpobCategory, setSelectedPpobCategory] = useState('pulsa');
 
@@ -17,32 +17,58 @@ export default function DigitalServicesSection({ storeInfo, activeServiceModal, 
     else setInternalModal(null);
   };
 
+  const Wrapper = embedded ? 'div' : 'section';
+  const wrapperProps = embedded
+    ? { id: 'ppob-section' }
+    : { id: 'ppob-section', className: 'mp-section-card', style: { marginBottom: '24px' } };
+
   return (
-    <section id="ppob-section" className="mp-section-card" style={{ marginBottom: '24px' }}>
+    <Wrapper {...wrapperProps}>
       {/* Header */}
-      <div className="mp-section-header">
-        <div>
-          <h2 className="mp-section-title">
-            <span>Top Up & Tagihan PPOB</span>
-          </h2>
-          <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
+      {embedded ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', margin: '10px 0 16px 0', flexWrap: 'wrap' }}>
+          <p style={{ fontSize: '12.5px', color: '#6B7280', margin: 0 }}>
             Pembelian pulsa, paket internet, pembayaran listrik PLN, serta top-up saldo e-wallet proses instan.
           </p>
+          <span
+            style={{
+              fontSize: '11.5px',
+              fontWeight: '600',
+              color: '#475569',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              padding: '4px 10px',
+              borderRadius: '4px',
+            }}
+          >
+            Transaksi 24 Jam
+          </span>
         </div>
-        <span
-          style={{
-            fontSize: '11.5px',
-            fontWeight: '600',
-            color: '#475569',
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            padding: '4px 10px',
-            borderRadius: '4px',
-          }}
-        >
-          Transaksi 24 Jam
-        </span>
-      </div>
+      ) : (
+        <div className="mp-section-header">
+          <div>
+            <h2 className="mp-section-title">
+              <span>Top Up & Tagihan PPOB</span>
+            </h2>
+            <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
+              Pembelian pulsa, paket internet, pembayaran listrik PLN, serta top-up saldo e-wallet proses instan.
+            </p>
+          </div>
+          <span
+            style={{
+              fontSize: '11.5px',
+              fontWeight: '600',
+              color: '#475569',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              padding: '4px 10px',
+              borderRadius: '4px',
+            }}
+          >
+            Transaksi 24 Jam
+          </span>
+        </div>
+      )}
 
       {/* Grid of 4 PPOB Services */}
       <div className="mp-services-grid">
@@ -120,6 +146,6 @@ export default function DigitalServicesSection({ storeInfo, activeServiceModal, 
         storeInfo={storeInfo}
         initialCategoryId={selectedPpobCategory}
       />
-    </section>
+    </Wrapper>
   );
 }

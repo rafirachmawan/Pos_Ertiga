@@ -9,9 +9,11 @@ export default function Navbar({
   searchQuery,
   onSearchChange,
   activeTab = 'products',
+  activeSpecialTab = null,
   onTabChange,
   onSelectCategory,
   onOpenDigitalModal,
+  onSelectSpecialTab,
 }) {
 
 
@@ -164,46 +166,62 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* 3. Sub-Navigation Category Links (Shopee & Tokopedia Style) */}
+      {/* 3. Sub-Navigation Category Links (Tokopedia Style) */}
       <div style={{ background: '#FFFFFF', borderTop: '1px solid #F0F2F5' }}>
         <div className="marketplace-container">
           <div className="mp-subnav">
             <span
-              className={`mp-subnav-pill ${activeTab === 'products' ? 'active' : ''}`}
+              className={`mp-subnav-pill ${activeSpecialTab === null ? 'active' : ''}`}
               onClick={() => {
-                if (activeTab !== 'products' && onTabChange) onTabChange('products');
-                setTimeout(() => scrollToSection('katalog-produk'), 50);
+                if (onTabChange) onTabChange('products');
+                if (onSelectCategory) onSelectCategory(null);
+                if (onSelectSpecialTab) onSelectSpecialTab(null);
+                scrollToSection('unified-feed');
               }}
             >
-              Katalog Belanja
+              Pakaian
             </span>
             <span
               className="mp-subnav-pill"
-              onClick={() => scrollToSection('flash-sale-section')}
+              onClick={() => {
+                scrollToSection('flash-sale-section');
+              }}
             >
               Flash Sale
             </span>
             <span
-              className="mp-subnav-pill"
-              onClick={() => scrollToSection('ppob-section')}
+              className={`mp-subnav-pill ${activeSpecialTab === 'gold' ? 'active' : ''}`}
+              onClick={() => {
+                if (onSelectSpecialTab) onSelectSpecialTab('gold');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             >
-              Top Up & Tagihan PPOB
+              Logam Mulia
             </span>
             <span
-              className="mp-subnav-pill"
-              onClick={() => scrollToSection('logam-mulia-section')}
-            >
-              Logam Mulia Emas
-            </span>
-            <span
-              className="mp-subnav-pill"
-              onClick={() => scrollToSection('booster-sosmed-section')}
+              className={`mp-subnav-pill ${activeSpecialTab === 'smm' ? 'active' : ''}`}
+              onClick={() => {
+                if (onSelectSpecialTab) onSelectSpecialTab('smm');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             >
               Booster Sosmed
             </span>
             <span
-              className="mp-subnav-pill"
-              onClick={() => scrollToSection('jasa-web-section')}
+              className={`mp-subnav-pill ${activeSpecialTab === 'ppob' ? 'active' : ''}`}
+              onClick={() => {
+                if (onSelectSpecialTab) onSelectSpecialTab('ppob');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
+              Top Up & Tagihan
+            </span>
+            <span
+              className={`mp-subnav-pill ${activeSpecialTab === 'webdev' ? 'active' : ''}`}
+              onClick={() => {
+                if (onSelectSpecialTab) onSelectSpecialTab('webdev');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             >
               Jasa Web & POS
             </span>

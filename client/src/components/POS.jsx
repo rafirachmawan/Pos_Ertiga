@@ -480,52 +480,70 @@ const POS = () => {
           </div>
         )}
 
-        {/* Tab Kategori */}
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '14px', borderBottom: '1px solid #E2E8F0' }}>
+        {/* Tab Kategori Rapih & Modern */}
+        <div
+          className="pos-category-bar"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            overflowX: 'auto',
+            padding: '2px 0 12px 0',
+            marginBottom: '16px',
+            borderBottom: '1px solid #E2E8F0',
+          }}
+        >
           <button
+            type="button"
             onClick={() => setActiveKategori('')}
             style={{
-              padding: '6px 14px',
+              padding: '7px 18px',
               fontSize: '12.5px',
               fontWeight: '600',
-              borderRadius: '6px',
+              borderRadius: '20px',
               border: '1px solid',
               borderColor: activeKategori === '' ? '#0F172A' : '#E2E8F0',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
               transition: 'all 0.15s ease',
               background: activeKategori === '' ? '#0F172A' : '#FFFFFF',
-              color: activeKategori === '' ? '#FFFFFF' : '#64748B'
+              color: activeKategori === '' ? '#FFFFFF' : '#475569',
+              boxShadow: activeKategori === '' ? '0 2px 6px rgba(15,23,42,0.18)' : 'none',
             }}
           >
             Semua Produk
           </button>
-          {kategoriList.map(k => (
-            <button
-              key={k.id}
-              onClick={() => setActiveKategori(String(k.id))}
-              style={{
-                padding: '6px 14px',
-                fontSize: '12.5px',
-                fontWeight: '600',
-                borderRadius: '6px',
-                border: '1px solid',
-                borderColor: activeKategori === String(k.id) ? '#0F172A' : '#E2E8F0',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease',
-                background: activeKategori === String(k.id) ? '#0F172A' : '#FFFFFF',
-                color: activeKategori === String(k.id) ? '#FFFFFF' : '#64748B'
-              }}
-            >
-              {k.nama_kategori}
-            </button>
-          ))}
+          {kategoriList.map((k) => {
+            const isActive = activeKategori === String(k.id);
+            return (
+              <button
+                key={k.id}
+                type="button"
+                onClick={() => setActiveKategori(String(k.id))}
+                style={{
+                  padding: '7px 18px',
+                  fontSize: '12.5px',
+                  fontWeight: '600',
+                  borderRadius: '20px',
+                  border: '1px solid',
+                  borderColor: isActive ? '#0F172A' : '#E2E8F0',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease',
+                  background: isActive ? '#0F172A' : '#FFFFFF',
+                  color: isActive ? '#FFFFFF' : '#475569',
+                  boxShadow: isActive ? '0 2px 6px rgba(15,23,42,0.18)' : 'none',
+                }}
+              >
+                {k.nama_kategori}
+              </button>
+            );
+          })}
         </div>
 
         {/* Hasil pencarian info */}
         {searchQuery && (
-          <div style={{ marginBottom: '10px', fontSize: '13px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ marginBottom: '12px', fontSize: '13px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span>Menampilkan <strong>{filteredItems.length}</strong> produk untuk "<strong>{searchQuery}</strong>"</span>
             <button
               onClick={() => setSearchQuery('')}
@@ -542,7 +560,7 @@ const POS = () => {
               <p style={{ fontSize: '13px', marginTop: '4px' }}>Coba kata kunci atau kategori lain</p>
             </div>
           ) : (
-            filteredItems.map(item => (
+            filteredItems.map((item) => (
               <div
                 key={item.id}
                 className="product-card"
@@ -550,47 +568,198 @@ const POS = () => {
                 style={{
                   background: '#FFFFFF',
                   border: '1px solid #E2E8F0',
-                  borderRadius: '10px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
                   display: 'flex',
                   flexDirection: 'column',
                   overflow: 'hidden',
-                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease'
+                  padding: 0,
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#2563EB';
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.boxShadow = '0 10px 20px -4px rgba(15, 23, 42, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#E2E8F0';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
-                {item.gambar ? (
-                  <div style={{ width: '100%', height: '150px', overflow: 'hidden', background: '#F8FAFC' }}>
-                    <img src={item.gambar} alt={item.nama_barang} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                ) : (
-                  <div style={{ width: '100%', height: '150px', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: '#94A3B8', fontSize: '11.5px', fontWeight: '500' }}>Tanpa Foto</span>
-                  </div>
-                )}
-                <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#0F172A', lineHeight: 1.3, margin: '0 0 4px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {item.nama_barang}
-                  </h4>
-                  {item.barcode && (
-                    <div style={{ fontSize: '10.5px', fontWeight: '500', color: '#94A3B8', marginBottom: '8px' }}>
-                      Kode: {item.barcode}
+                {/* Gambar Produk & Badges */}
+                <div
+                  style={{
+                    width: '100%',
+                    height: '145px',
+                    minHeight: '145px',
+                    maxHeight: '145px',
+                    overflow: 'hidden',
+                    background: '#F8FAFC',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                  }}
+                >
+                  {item.gambar ? (
+                    <img
+                      src={item.gambar}
+                      alt={item.nama_barang}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                        transition: 'transform 0.3s ease',
+                      }}
+                    />
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', color: '#94A3B8' }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                      <span style={{ fontSize: '11px', fontWeight: '500' }}>Tanpa Foto</span>
                     </div>
                   )}
-                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>
-                      Rp {item.harga_jual.toLocaleString('id-ID')}
+
+                  {/* Kategori Badge (kiri atas) */}
+                  {item.nama_kategori && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        left: '8px',
+                        fontSize: '10px',
+                        fontWeight: '600',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        background: 'rgba(15, 23, 42, 0.72)',
+                        backdropFilter: 'blur(4px)',
+                        color: '#FFFFFF',
+                        letterSpacing: '0.02em',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      {item.nama_kategori}
                     </span>
-                    <span style={{
+                  )}
+
+                  {/* Stok Badge (kanan atas) */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
                       fontSize: '10.5px',
-                      fontWeight: '600',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                      background: item.stok > 5 ? '#ECFDF5' : '#FFFBEB',
-                      color: item.stok > 5 ? '#059669' : '#B45309',
-                      border: `1px solid ${item.stok > 5 ? '#D1FAE5' : '#FEF3C7'}`
-                    }}>
-                      {item.stok} {item.satuan}
+                      fontWeight: '700',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      background: item.stok > 5 ? '#ECFDF5' : item.stok > 0 ? '#FEF3C7' : '#FEE2E2',
+                      color: item.stok > 5 ? '#065F46' : item.stok > 0 ? '#92400E' : '#991B1B',
+                      border: `1px solid ${item.stok > 5 ? '#A7F3D0' : item.stok > 0 ? '#FDE68A' : '#FECACA'}`,
+                      letterSpacing: '0.01em',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    {item.stok > 0 ? `Stok: ${item.stok} ${item.satuan || 'pcs'}` : 'Habis'}
+                  </span>
+                </div>
+
+                {/* Info Produk (Nama, Kode, Harga) */}
+                <div style={{ padding: '12px 14px 14px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  {/* Kode Barang / Barcode */}
+                  <div style={{ marginBottom: '6px' }}>
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '11px',
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                        fontWeight: '600',
+                        color: '#475569',
+                        background: '#F1F5F9',
+                        border: '1px solid #E2E8F0',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="3" y1="5" x2="3" y2="19" />
+                        <line x1="7" y1="5" x2="7" y2="19" />
+                        <line x1="11" y1="5" x2="11" y2="19" />
+                        <line x1="15" y1="5" x2="15" y2="19" />
+                        <line x1="17" y1="5" x2="17" y2="19" />
+                        <line x1="21" y1="5" x2="21" y2="19" />
+                      </svg>
+                      {item.barcode ? `Kode: ${item.barcode}` : 'Tanpa Barcode'}
                     </span>
+                  </div>
+
+                  {/* Nama Barang */}
+                  <h4
+                    title={item.nama_barang}
+                    style={{
+                      fontSize: '13.5px',
+                      fontWeight: '700',
+                      color: '#0F172A',
+                      lineHeight: 1.35,
+                      margin: '0 0 10px 0',
+                      minHeight: '36px',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {item.nama_barang}
+                  </h4>
+
+                  {/* Harga Jual & Quick Add Icon */}
+                  <div
+                    style={{
+                      marginTop: 'auto',
+                      paddingTop: '8px',
+                      borderTop: '1px dashed #E2E8F0',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      width: '100%',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '10px', color: '#94A3B8', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Harga
+                      </div>
+                      <span style={{ fontSize: '15.5px', fontWeight: '800', color: '#2563EB', letterSpacing: '-0.02em' }}>
+                        Rp {Number(item.harga_jual).toLocaleString('id-ID')}
+                      </span>
+                    </div>
+
+                    <div
+                      title="Klik untuk tambah ke keranjang"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        background: '#EFF6FF',
+                        border: '1px solid #BFDBFE',
+                        color: '#2563EB',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        fontWeight: '700',
+                        flexShrink: 0,
+                      }}
+                    >
+                      +
+                    </div>
                   </div>
                 </div>
               </div>

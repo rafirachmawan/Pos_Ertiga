@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { APP_DEV_DATA } from '../data/digitalServices';
 import { generateWhatsAppAppDevUrl } from '../lib/whatsapp';
 
-export default function WebDevSection({ storeInfo }) {
+export default function WebDevSection({ storeInfo, embedded = false }) {
   const [selectedPackage, setSelectedPackage] = useState(APP_DEV_DATA.packages[1]); // Default E-Commerce
   const [projectBrief, setProjectBrief] = useState('');
   const [budgetRange, setBudgetRange] = useState('Rp 1.000.000 - Rp 3.000.000');
@@ -42,34 +42,60 @@ export default function WebDevSection({ storeInfo }) {
     window.open(waUrl, '_blank');
   };
 
+  const Wrapper = embedded ? 'div' : 'section';
+  const wrapperProps = embedded
+    ? { id: 'jasa-web-section' }
+    : { id: 'jasa-web-section', className: 'mp-section-card', style: { marginBottom: '24px' } };
+
   return (
-    <section id="jasa-web-section" className="mp-section-card" style={{ marginBottom: '24px' }}>
+    <Wrapper {...wrapperProps}>
       
-      {/* 1. Header Section */}
-      <div className="mp-section-header">
-        <div>
-          <h2 className="mp-section-title">
-            <span>Jasa Pembuatan Website & Aplikasi Custom</span>
-          </h2>
-          <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
+      {/* 1. Header / Subtitle Section */}
+      {embedded ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', margin: '10px 0 16px 0', flexWrap: 'wrap' }}>
+          <p style={{ fontSize: '12.5px', color: '#6B7280', margin: 0 }}>
             Solusi digital profesional: Landing Page, Toko Online E-Commerce, Sistem Kasir POS & Software Bisnis Custom.
           </p>
+          <span
+            style={{
+              fontSize: '11.5px',
+              fontWeight: '600',
+              color: '#475569',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              padding: '4px 10px',
+              borderRadius: '4px',
+            }}
+          >
+            Garansi & Full Support
+          </span>
         </div>
+      ) : (
+        <div className="mp-section-header">
+          <div>
+            <h2 className="mp-section-title">
+              <span>Jasa Pembuatan Website & Aplikasi Custom</span>
+            </h2>
+            <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '2px 0 0 0' }}>
+              Solusi digital profesional: Landing Page, Toko Online E-Commerce, Sistem Kasir POS & Software Bisnis Custom.
+            </p>
+          </div>
 
-        <span
-          style={{
-            fontSize: '11.5px',
-            fontWeight: '600',
-            color: '#475569',
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            padding: '4px 10px',
-            borderRadius: '4px',
-          }}
-        >
-          Garansi & Full Support
-        </span>
-      </div>
+          <span
+            style={{
+              fontSize: '11.5px',
+              fontWeight: '600',
+              color: '#475569',
+              background: '#F8FAFC',
+              border: '1px solid #E2E8F0',
+              padding: '4px 10px',
+              borderRadius: '4px',
+            }}
+          >
+            Garansi & Full Support
+          </span>
+        </div>
+      )}
 
       {/* 2. Key Value Highlights Bar */}
       <div
@@ -382,6 +408,6 @@ export default function WebDevSection({ storeInfo }) {
         </form>
       </div>
 
-    </section>
+    </Wrapper>
   );
 }

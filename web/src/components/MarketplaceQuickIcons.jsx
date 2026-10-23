@@ -5,6 +5,7 @@ export default function MarketplaceQuickIcons({
   onSelectCategory,
   onOpenDigitalModal,
   onSwitchTab,
+  onSelectSpecialTab,
 }) {
   const quickItems = [
     {
@@ -17,9 +18,10 @@ export default function MarketplaceQuickIcons({
       ),
       bg: '#EFF6FF',
       action: () => {
-        const found = categories.find((c) => c.nama_kategori.toLowerCase().includes('pakaian'));
-        onSelectCategory(found ? found.id : null);
-        onSwitchTab('products');
+        const found = categories.find((c) => c.nama_kategori.toLowerCase().includes('pria') || c.nama_kategori.toLowerCase().includes('pakaian'));
+        if (onSelectSpecialTab) onSelectSpecialTab(null);
+        if (onSelectCategory) onSelectCategory(found ? found.id : null);
+        if (onSwitchTab) onSwitchTab('products');
       },
     },
     {
@@ -34,8 +36,9 @@ export default function MarketplaceQuickIcons({
       bg: '#FDF2F8',
       action: () => {
         const found = categories.find((c) => c.nama_kategori.toLowerCase().includes('hijab'));
-        onSelectCategory(found ? found.id : null);
-        onSwitchTab('products');
+        if (onSelectSpecialTab) onSelectSpecialTab(null);
+        if (onSelectCategory) onSelectCategory(found ? found.id : null);
+        if (onSwitchTab) onSwitchTab('products');
       },
     },
     {
@@ -51,8 +54,9 @@ export default function MarketplaceQuickIcons({
       bg: '#FFFBEB',
       action: () => {
         const found = categories.find((c) => c.nama_kategori.toLowerCase().includes('aksesoris'));
-        onSelectCategory(found ? found.id : null);
-        onSwitchTab('products');
+        if (onSelectSpecialTab) onSelectSpecialTab(null);
+        if (onSelectCategory) onSelectCategory(found ? found.id : null);
+        if (onSwitchTab) onSwitchTab('products');
       },
     },
     {
@@ -90,12 +94,8 @@ export default function MarketplaceQuickIcons({
       ),
       bg: '#FEF9C3',
       action: () => {
-        const el = document.getElementById('logam-mulia-section');
-        if (el) {
-          const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
-          const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-          window.scrollTo({ top, behavior: 'smooth' });
-        }
+        if (onSelectSpecialTab) onSelectSpecialTab('gold');
+        if (onSwitchTab) onSwitchTab('gold');
       },
     },
     {
@@ -108,12 +108,8 @@ export default function MarketplaceQuickIcons({
       ),
       bg: '#F5F3FF',
       action: () => {
-        const el = document.getElementById('booster-sosmed-section');
-        if (el) {
-          const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
-          const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-          window.scrollTo({ top, behavior: 'smooth' });
-        }
+        if (onSelectSpecialTab) onSelectSpecialTab('smm');
+        if (onSwitchTab) onSwitchTab('smm');
       },
     },
     {
@@ -127,12 +123,8 @@ export default function MarketplaceQuickIcons({
       ),
       bg: '#ECFDF5',
       action: () => {
-        const el = document.getElementById('jasa-web-section');
-        if (el) {
-          const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
-          const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-          window.scrollTo({ top, behavior: 'smooth' });
-        }
+        if (onSelectSpecialTab) onSelectSpecialTab('webdev');
+        if (onSwitchTab) onSwitchTab('webdev');
       },
     },
   ];

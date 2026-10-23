@@ -16,49 +16,62 @@ import WebDevSection from './components/WebDevSection';
 import { fetchTokoInfo, fetchPublicCategories, fetchPublicProducts } from './lib/api';
 import { formatRupiah } from './lib/format';
 
+// Stable shuffle using Fisher-Yates with a seed
+function shuffleArray(arr, seed = 42) {
+  const result = [...arr];
+  let s = seed;
+  for (let i = result.length - 1; i > 0; i--) {
+    s = (s * 16807 + 0) % 2147483647;
+    const j = s % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 export default function App() {
   const [storeInfo, setStoreInfo] = useState(null);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter, Search, Tab & Sort
-  const [activeMainTab, setActiveMainTab] = useState('products');
+  // Unified single-section state
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [activeSpecialTab, setActiveSpecialTab] = useState(null); // 'gold' | 'smm' | 'ppob' | 'webdev' | null
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
   const [activeDigitalModal, setActiveDigitalModal] = useState(null);
 
   const productsSectionRef = useRef(null);
 
-  // Helper untuk membuka modal atau scroll ke section
+  // Helper for scroll to section by ID
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  };
+
+  // Helper for quick icon / subnav linking to special tabs
   const handleOpenDigitalModal = (serviceId) => {
     if (serviceId === 'rasxmedia' || serviceId === 'smm') {
-      const el = document.getElementById('booster-sosmed-section');
-      if (el) {
-        const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
-        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-        window.scrollTo({ top, behavior: 'smooth' });
-        return;
-      }
+      setActiveSpecialTab('smm');
+      setSelectedCategory(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
     if (serviceId === 'emas') {
-      const el = document.getElementById('logam-mulia-section');
-      if (el) {
-        const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
-        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-        window.scrollTo({ top, behavior: 'smooth' });
-        return;
-      }
+      setActiveSpecialTab('gold');
+      setSelectedCategory(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
     if (serviceId === 'appdev' || serviceId === 'web' || serviceId === 'it') {
-      const el = document.getElementById('jasa-web-section');
-      if (el) {
-        const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 135;
-        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-        window.scrollTo({ top, behavior: 'smooth' });
-        return;
-      }
+      setActiveSpecialTab('webdev');
+      setSelectedCategory(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
     setActiveDigitalModal(serviceId);
   };
@@ -116,11 +129,7 @@ export default function App() {
   };
 
   const scrollToProducts = () => {
-    if (productsSectionRef.current) {
-      const headerHeight = document.querySelector('.mp-header')?.offsetHeight || 140;
-      const elementTop = productsSectionRef.current.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: elementTop - headerHeight - 10, behavior: 'smooth' });
-    }
+    scrollToSection('unified-feed');
   };
 
   // Add to cart handler
@@ -156,9 +165,9 @@ export default function App() {
     setCart((prev) => prev.filter((item) => item.id !== productId));
   };
 
-  // Filtered & Sorted Products
+  // Filtered & Sorted Products (For You = shuffled, Category = filtered)
   const filteredProducts = useMemo(() => {
-    const list = products.filter((p) => {
+    let list = products.filter((p) => {
       const matchCategory =
         selectedCategory === null || p.kategori_id === selectedCategory;
       const q = searchQuery.toLowerCase().trim();
@@ -168,6 +177,11 @@ export default function App() {
         (p.nama_kategori || '').toLowerCase().includes(q);
       return matchCategory && matchSearch;
     });
+
+    // When "For You" (no category selected, no special tab), shuffle
+    if (selectedCategory === null && activeSpecialTab === null && !searchQuery.trim()) {
+      list = shuffleArray(list);
+    }
 
     if (sortBy === 'price_asc') {
       return [...list].sort((a, b) => (a.harga_jual || 0) - (b.harga_jual || 0));
@@ -179,10 +193,24 @@ export default function App() {
       return [...list].sort((a, b) => (a.nama_barang || '').localeCompare(b.nama_barang || ''));
     }
     return list;
-  }, [products, selectedCategory, searchQuery, sortBy]);
+  }, [products, selectedCategory, activeSpecialTab, searchQuery, sortBy]);
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const totalCartPrice = cart.reduce((sum, item) => sum + item.harga_jual * item.qty, 0);
+
+  // Determine section title for all patent tabs
+  const getSectionTitle = () => {
+    if (searchQuery) return `Hasil Pencarian "${searchQuery}"`;
+    if (activeSpecialTab === 'gold') return 'Logam Mulia Emas 24K';
+    if (activeSpecialTab === 'smm') return 'Booster Sosial Media (SMM Panel)';
+    if (activeSpecialTab === 'ppob') return 'Top Up & Tagihan Digital (PPOB)';
+    if (activeSpecialTab === 'webdev') return 'Jasa Pembuatan Website & Aplikasi';
+    if (selectedCategory !== null) {
+      const cat = categories.find((c) => c.id === selectedCategory);
+      return cat ? `Pakaian - ${cat.nama_kategori}` : 'Koleksi Pakaian';
+    }
+    return 'Koleksi Pakaian';
+  };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F5F6F8' }}>
@@ -213,7 +241,7 @@ export default function App() {
         </div>
       )}
 
-      {/* 1. Shopee & Tokopedia Marketplace Header */}
+      {/* 1. Marketplace Header */}
       <Navbar
         storeName={storeInfo?.nama_toko || 'POS ERTIGA STORE'}
         storeAddress={storeInfo?.alamat_toko || 'Sumberjo Kulon, Ngunut'}
@@ -222,71 +250,197 @@ export default function App() {
         onOpenCart={() => setIsCartOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        activeTab={activeMainTab}
-        onTabChange={(tab) => {
-          setActiveMainTab(tab);
-          if (tab === 'products') scrollToProducts();
-        }}
+        activeTab="products"
+        activeSpecialTab={activeSpecialTab}
+        onTabChange={() => scrollToProducts()}
         onSelectCategory={(catId) => {
           setSelectedCategory(catId);
+          setActiveSpecialTab(null);
           scrollToProducts();
         }}
         onOpenDigitalModal={handleOpenDigitalModal}
-      />
-
-      {/* 2. Main Hero Banner & Side Promo (Always prominent on marketplace home) */}
-      <MarketplaceHero
-        onExploreProducts={scrollToProducts}
-        onOpenDigitalModal={handleOpenDigitalModal}
-      />
-
-      {/* 3. Tokopedia-Style Quick Icons (Pakaian, Hijab, Aksesoris, Pulsa, Listrik, Emas, SMM, Web) */}
-      <MarketplaceQuickIcons
-        categories={categories}
-        onSelectCategory={(catId) => {
-          setSelectedCategory(catId);
-          scrollToProducts();
-        }}
-        onOpenDigitalModal={handleOpenDigitalModal}
-        onSwitchTab={(tab) => {
-          setActiveMainTab(tab);
-          scrollToProducts();
+        onSelectSpecialTab={(tabId) => {
+          setActiveSpecialTab(tabId);
+          setSelectedCategory(null);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
 
-      {/* 4. Flash Sale / Kejar Diskon Section */}
-      <FlashSaleSection
-        products={products}
-        onSelectProduct={setSelectedProduct}
-        onAddToCart={handleAddToCart}
-        onOpenDigitalModal={handleOpenDigitalModal}
-      />
+      {/* === SPECIAL TAB FULL PAGE VIEW === */}
+      {activeSpecialTab ? (
+        <main className="marketplace-container" style={{ flex: 1, paddingBottom: '30px', paddingTop: '20px' }}>
+          {/* Breadcrumb / Back Navigation */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginBottom: '20px',
+            padding: '14px 20px',
+            background: '#FFFFFF',
+            borderRadius: '12px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+          }}>
+            <button
+              onClick={() => {
+                setActiveSpecialTab(null);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'none',
+                border: '1px solid #E5E7EB',
+                borderRadius: '8px',
+                padding: '8px 14px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#03AC0E',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => { e.target.style.background = '#F0FFF4'; e.target.style.borderColor = '#03AC0E'; }}
+              onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderColor = '#E5E7EB'; }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Kembali
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6B7280' }}>
+              <span
+                style={{ cursor: 'pointer', color: '#03AC0E', fontWeight: '500' }}
+                onClick={() => {
+                  setActiveSpecialTab(null);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                Beranda
+              </span>
+              <span style={{ color: '#D1D5DB' }}>›</span>
+              <span style={{ fontWeight: '600', color: '#1F2937' }}>
+                {activeSpecialTab === 'gold' && 'Logam Mulia'}
+                {activeSpecialTab === 'smm' && 'Booster Sosmed'}
+                {activeSpecialTab === 'ppob' && 'Top Up & Tagihan'}
+                {activeSpecialTab === 'webdev' && 'Jasa Web & POS'}
+              </span>
+            </div>
+          </div>
 
-      {/* 5. Main Content Area */}
-      <main className="marketplace-container" ref={productsSectionRef} style={{ flex: 1, paddingBottom: '30px' }}>
-        
-        {/* If user selected Digital Services tab specifically */}
-        {activeMainTab === 'digital' ? (
-          <>
-            <LogamMuliaSection storeInfo={storeInfo} />
-            <SmmSection storeInfo={storeInfo} />
-            <DigitalServicesSection
-              storeInfo={storeInfo}
-              activeServiceModal={activeDigitalModal}
-              onOpenServiceModal={handleOpenDigitalModal}
-              onCloseServiceModal={() => setActiveDigitalModal(null)}
-            />
-            <WebDevSection storeInfo={storeInfo} />
-          </>
-        ) : (
-          <>
-            {/* Products Card Section (Tokopedia "Rekomendasi Untuk Anda") */}
-            <div id="katalog-produk" className="mp-section-card">
-              <div className="mp-section-header">
+          {/* Special Section Content */}
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '12px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            padding: '24px',
+            minHeight: '400px',
+          }}>
+            {activeSpecialTab === 'gold' && (
+              <LogamMuliaSection storeInfo={storeInfo} embedded />
+            )}
+            {activeSpecialTab === 'smm' && (
+              <SmmSection storeInfo={storeInfo} embedded />
+            )}
+            {activeSpecialTab === 'ppob' && (
+              <DigitalServicesSection
+                storeInfo={storeInfo}
+                activeServiceModal={activeDigitalModal}
+                onOpenServiceModal={handleOpenDigitalModal}
+                onCloseServiceModal={() => setActiveDigitalModal(null)}
+                embedded
+              />
+            )}
+            {activeSpecialTab === 'webdev' && (
+              <WebDevSection storeInfo={storeInfo} embedded />
+            )}
+          </div>
+        </main>
+      ) : (
+        <>
+          {/* 2. Main Hero Banner */}
+          <MarketplaceHero
+            onExploreProducts={scrollToProducts}
+            onOpenDigitalModal={handleOpenDigitalModal}
+          />
+
+          {/* ── Section Divider: Flash Sale ── */}
+          <div className="marketplace-container">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              margin: '28px 0 18px',
+            }}>
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, #E5E7EB, #D1D5DB)' }} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 18px',
+                background: '#FFF7ED',
+                border: '1px solid #FED7AA',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: '700',
+                color: '#EA580C',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+              }}>
+                <span style={{ fontSize: '14px' }}>⚡</span>
+                Promo & Flash Sale
+              </div>
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to left, transparent, #E5E7EB, #D1D5DB)' }} />
+            </div>
+          </div>
+
+          {/* 4. Flash Sale */}
+          <FlashSaleSection
+            products={products}
+            onSelectProduct={setSelectedProduct}
+            onAddToCart={handleAddToCart}
+            onOpenDigitalModal={handleOpenDigitalModal}
+          />
+
+          {/* ── Section Divider: Koleksi Pakaian ── */}
+          <div className="marketplace-container">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              margin: '28px 0 18px',
+            }}>
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, #E5E7EB, #D1D5DB)' }} />
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 18px',
+                background: '#F0FDF4',
+                border: '1px solid #BBF7D0',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: '700',
+                color: '#16A34A',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+              }}>
+                <span style={{ fontSize: '14px' }}>👕</span>
+                Katalog Produk
+              </div>
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to left, transparent, #E5E7EB, #D1D5DB)' }} />
+            </div>
+          </div>
+
+          {/* 5. SINGLE UNIFIED FEED (Pakaian Products Only) */}
+          <main className="marketplace-container" ref={productsSectionRef} style={{ flex: 1, paddingBottom: '30px' }}>
+            
+            <div id="unified-feed" className="mp-section-card">
+              {/* Section Header */}
+              <div className="mp-section-header" style={{ borderBottom: 'none', paddingBottom: '8px', marginBottom: '4px' }}>
                 <h2 className="mp-section-title">
-                  <span>
-                    {searchQuery ? `Hasil Pencarian "${searchQuery}"` : 'Rekomendasi Produk Pilihan'}
-                  </span>
+                  <span>{getSectionTitle() || ''}</span>
                 </h2>
 
                 {searchQuery && (
@@ -296,6 +450,9 @@ export default function App() {
                       fontSize: '12px',
                       color: '#03AC0E',
                       fontWeight: '600',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
                     }}
                   >
                     Reset Pencarian ✕
@@ -303,7 +460,7 @@ export default function App() {
                 )}
               </div>
 
-              {/* Category Filter Pills & Sort Selector */}
+              {/* Tokopedia-style tab bar (For You + Categories) */}
               <CategoryFilter
                 categories={categories}
                 selectedCategory={selectedCategory}
@@ -311,6 +468,8 @@ export default function App() {
                 totalProductsCount={filteredProducts.length}
                 sortBy={sortBy}
                 onSortChange={setSortBy}
+                activeSpecialTab={activeSpecialTab}
+                onSelectSpecialTab={setActiveSpecialTab}
               />
 
               {/* Products Grid */}
@@ -332,7 +491,7 @@ export default function App() {
                     Produk tidak ditemukan
                   </p>
                   <p style={{ fontSize: '12.5px', margin: 0 }}>
-                    Coba kata kunci lain atau pilih kategori "Semua Produk".
+                    Coba kata kunci lain atau pilih kategori lainnya.
                   </p>
                 </div>
               ) : (
@@ -349,28 +508,11 @@ export default function App() {
               )}
             </div>
 
-            {/* 2. Investasi Logam Mulia Emas 24K (Section Langsung di Halaman Toko) */}
-            <LogamMuliaSection storeInfo={storeInfo} />
+          </main>
+        </>
+      )}
 
-            {/* 3. Booster Sosial Media (SMM Panel - Section Langsung di Halaman Toko) */}
-            <SmmSection storeInfo={storeInfo} />
-
-            {/* 4. Top Up & Tagihan PPOB Section */}
-            <DigitalServicesSection
-              storeInfo={storeInfo}
-              activeServiceModal={activeDigitalModal}
-              onOpenServiceModal={handleOpenDigitalModal}
-              onCloseServiceModal={() => setActiveDigitalModal(null)}
-            />
-
-            {/* 5. Jasa Pembuatan Website & Aplikasi Custom (Section Langsung di Halaman Toko) */}
-            <WebDevSection storeInfo={storeInfo} />
-          </>
-        )}
-
-      </main>
-
-      {/* Floating Cart Button (visible on mobile / scroll) */}
+      {/* Floating Cart Button */}
       {totalCartCount > 0 && (
         <button
           className="floating-cart-btn"
@@ -417,8 +559,6 @@ export default function App() {
           showToast('Pesanan berhasil dibuat! Silakan lanjutkan kirim pesan di WhatsApp.');
         }}
       />
-
-
 
       {/* Footer */}
       <Footer storeInfo={storeInfo} />
