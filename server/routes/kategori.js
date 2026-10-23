@@ -28,19 +28,37 @@ router.post(
   '/',
   asyncHandler(async (req, res) => {
     const nama = String(req.body.nama_kategori ?? '').trim();
+    const kode = String(req.body.kode ?? '').trim().toUpperCase();
     if (!nama) throw httpError(400, 'Nama kategori wajib diisi');
     if (nama.length > 100) {
       throw httpError(400, 'Nama kategori maksimal 100 karakter');
     }
+    if (kode.length > 20) {
+      throw httpError(400, 'Kode kategori maksimal 20 karakter');
+    }
+
+    if (kode) {
+      const existingKode = await get(
+        'SELECT id, nama_kategori FROM kategori WHERE UPPER(kode) = ?',
+        [kode]
+      );
+      if (existingKode) {
+        throw httpError(
+          400,
+          `Kode "${kode}" sudah digunakan oleh kategori "${existingKode.nama_kategori}"`
+        );
+      }
+    }
 
     try {
       const result = await run(
-        'INSERT INTO kategori (nama_kategori) VALUES (?)',
-        [nama]
+        'INSERT INTO kategori (nama_kategori, kode) VALUES (?, ?)',
+        [nama, kode || null]
       );
       res.json({
         id: result.lastID,
         nama_kategori: nama,
+        kode: kode || null,
         message: 'Kategori ditambahkan',
       });
     } catch (err) {
@@ -57,13 +75,33 @@ router.put(
   asyncHandler(async (req, res) => {
     const id = toInt(req.params.id, 0);
     const nama = String(req.body.nama_kategori ?? '').trim();
+    const kode = String(req.body.kode ?? '').trim().toUpperCase();
     if (id <= 0) throw httpError(400, 'ID kategori tidak valid');
     if (!nama) throw httpError(400, 'Nama kategori wajib diisi');
+    if (nama.length > 100) {
+      throw httpError(400, 'Nama kategori maksimal 100 karakter');
+    }
+    if (kode.length > 20) {
+      throw httpError(400, 'Kode kategori maksimal 20 karakter');
+    }
+
+    if (kode) {
+      const existingKode = await get(
+        'SELECT id, nama_kategori FROM kategori WHERE UPPER(kode) = ? AND id != ?',
+        [kode, id]
+      );
+      if (existingKode) {
+        throw httpError(
+          400,
+          `Kode "${kode}" sudah digunakan oleh kategori "${existingKode.nama_kategori}"`
+        );
+      }
+    }
 
     try {
       const result = await run(
-        'UPDATE kategori SET nama_kategori = ? WHERE id = ?',
-        [nama, id]
+        'UPDATE kategori SET nama_kategori = ?, kode = ? WHERE id = ?',
+        [nama, kode || null, id]
       );
       if (!result.changes) throw httpError(404, 'Kategori tidak ditemukan');
       res.json({ message: 'Kategori berhasil diupdate' });

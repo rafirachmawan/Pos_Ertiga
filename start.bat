@@ -2,7 +2,7 @@
 echo ==============================================
 echo   Memulai POS ERTIGA (Mode Pengembangan)
 echo ==============================================
-start "POS Backend Server :3001" cmd /k "node server/server.js"
+start "POS Backend Server :3001" cmd /k "node --watch server/server.js"
 start "POS Kasir Desktop :5173" cmd /k "npm --prefix client run dev"
 start "POS E-Commerce Web :5174" cmd /k "npm --prefix web run dev"
 echo.

@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 13;
+const LATEST_VERSION = 14;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -165,6 +165,7 @@ async function createBaselineTables(db) {
     db,
     `CREATE TABLE IF NOT EXISTS kategori (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kode VARCHAR(20),
       nama_kategori VARCHAR(100) UNIQUE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`
@@ -1116,6 +1117,13 @@ const migrations = [
           );
         }
       }
+    },
+  },
+  {
+    version: 14,
+    name: 'tambah kolom kode di tabel kategori produk',
+    async up(db) {
+      await addColumnIfMissing(db, 'kategori', 'kode', 'VARCHAR(20)');
     },
   },
 ];

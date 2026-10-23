@@ -13,6 +13,7 @@ import GoldManager from './components/GoldManager'
 import SmmManager from './components/SmmManager'
 import FlashSaleManager from './components/FlashSaleManager'
 import PpobManager from './components/PpobManager'
+import GlobalLoader from './components/GlobalLoader'
 import { api } from './lib/api'
 import './index.css'
 
@@ -24,7 +25,7 @@ function App() {
   useEffect(() => {
     if (!isLoggedIn) return;
     const fetchStock = () => {
-      api('/api/barang')
+      api('/api/barang', { silent: true })
         .then(data => {
           if (data.data) {
             const count = data.data.filter(item => Number(item.stok) <= 5).length;
@@ -38,12 +39,13 @@ function App() {
     // Also fetch every time tab changes to keep it updated
   }, [isLoggedIn, activeTab]);
 
-  if (!isLoggedIn) {
-    return <Login onLogin={() => setIsLoggedIn(true)} />;
-  }
-
   return (
-    <div className="app-container">
+    <>
+      <GlobalLoader />
+      {!isLoggedIn ? (
+        <Login onLogin={() => setIsLoggedIn(true)} />
+      ) : (
+        <div className="app-container">
       <div className="sidebar">
 
         {/* Logo */}
@@ -140,6 +142,8 @@ function App() {
         {activeTab === 'ppob' && <PpobManager />}
       </div>
     </div>
+      )}
+    </>
   )
 
 }

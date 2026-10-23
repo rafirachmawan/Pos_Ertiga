@@ -5,12 +5,14 @@ const Master = () => {
   const [kategoriList, setKategoriList] = useState([]);
   const [barangList, setBarangList] = useState([]);
   const [newKategori, setNewKategori] = useState('');
+  const [newKode, setNewKode] = useState('');
   const [searchKategori, setSearchKategori] = useState('');
   const [loading, setLoading] = useState(true);
 
   // State untuk edit inline
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState('');
+  const [editingKode, setEditingKode] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
 
   const fetchData = async () => {
@@ -37,14 +39,19 @@ const Master = () => {
   const addKategori = async (e) => {
     e.preventDefault();
     const trimmed = newKategori.trim();
-    if (!trimmed) return;
+    const trimmedKode = newKode.trim().toUpperCase();
+    if (!trimmed) {
+      alert('Nama kategori wajib diisi');
+      return;
+    }
 
     try {
       await api('/api/kategori', {
         method: 'POST',
-        body: { nama_kategori: trimmed },
+        body: { nama_kategori: trimmed, kode: trimmedKode },
       });
       setNewKategori('');
+      setNewKode('');
       fetchData();
     } catch (err) {
       alert(err.message);
@@ -53,16 +60,19 @@ const Master = () => {
 
   const startEdit = (k) => {
     setEditingId(k.id);
-    setEditingName(k.nama_kategori);
+    setEditingName(k.nama_kategori || '');
+    setEditingKode(k.kode || '');
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditingName('');
+    setEditingKode('');
   };
 
   const saveEdit = async (id) => {
     const trimmed = editingName.trim();
+    const trimmedKode = editingKode.trim().toUpperCase();
     if (!trimmed) {
       alert('Nama kategori tidak boleh kosong');
       return;
@@ -72,10 +82,11 @@ const Master = () => {
       setSavingEdit(true);
       await api(`/api/kategori/${id}`, {
         method: 'PUT',
-        body: { nama_kategori: trimmed },
+        body: { nama_kategori: trimmed, kode: trimmedKode },
       });
       setEditingId(null);
       setEditingName('');
+      setEditingKode('');
       fetchData();
     } catch (err) {
       alert(err.message);
@@ -102,8 +113,12 @@ const Master = () => {
 
   // Filter kategori
   const filteredKategori = useMemo(() => {
-    return kategoriList.filter((k) =>
-      k.nama_kategori.toLowerCase().includes(searchKategori.toLowerCase())
+    const q = searchKategori.toLowerCase().trim();
+    if (!q) return kategoriList;
+    return kategoriList.filter(
+      (k) =>
+        k.nama_kategori.toLowerCase().includes(q) ||
+        (k.kode && k.kode.toLowerCase().includes(q))
     );
   }, [kategoriList, searchKategori]);
 
@@ -297,6 +312,27 @@ const Master = () => {
             <form onSubmit={addKategori} style={{ display: 'flex', gap: '8px' }}>
               <input
                 type="text"
+                placeholder="Kode (cth: B)"
+                value={newKode}
+                onChange={(e) => setNewKode(e.target.value.toUpperCase())}
+                maxLength={10}
+                title="Kode prefix untuk kategori produk (misal: B untuk Baju Anak)"
+                style={{
+                  width: '120px',
+                  height: '36px',
+                  padding: '0 10px',
+                  borderRadius: '8px',
+                  border: '1px solid #CBD5E1',
+                  fontSize: '12.5px',
+                  fontWeight: '700',
+                  color: '#1E293B',
+                  background: '#F8FAFC',
+                  textTransform: 'uppercase',
+                  boxSizing: 'border-box',
+                }}
+              />
+              <input
+                type="text"
                 placeholder="Ketik nama kategori baru..."
                 value={newKategori}
                 onChange={(e) => setNewKategori(e.target.value)}
@@ -334,16 +370,19 @@ const Master = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
               <tr>
-                <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '40px' }}>
+                <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '36px' }}>
                   No
                 </th>
-                <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '85px' }}>
+                  Kode
+                </th>
+                <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Nama Kategori
                 </th>
-                <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '120px' }}>
+                <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '110px' }}>
                   Jumlah Produk
                 </th>
-                <th style={{ padding: '10px 16px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', textAlign: 'right' }}>
+                <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', textAlign: 'right' }}>
                   Aksi
                 </th>
               </tr>
@@ -351,13 +390,13 @@ const Master = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', padding: '40px 16px', color: '#94A3B8', fontSize: '13px' }}>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px 16px', color: '#94A3B8', fontSize: '13px' }}>
                     Memuat daftar kategori...
                   </td>
                 </tr>
               ) : filteredKategori.length === 0 ? (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', padding: '48px 16px', color: '#94A3B8' }}>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '48px 16px', color: '#94A3B8' }}>
                     <p style={{ fontWeight: '600', fontSize: '13.5px', color: '#64748B', marginBottom: '4px' }}>
                       {searchKategori ? 'Kategori tidak ditemukan' : 'Belum ada kategori'}
                     </p>
@@ -377,60 +416,86 @@ const Master = () => {
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F8FAFC')}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    <td style={{ padding: '12px 16px', fontSize: '12px', color: '#94A3B8', fontWeight: '500' }}>
+                    <td style={{ padding: '12px 14px', fontSize: '12px', color: '#94A3B8', fontWeight: '500' }}>
                       {idx + 1}
                     </td>
 
-                    {/* Nama Kategori / Edit Form */}
-                    <td style={{ padding: '12px 16px' }}>
+                    {/* Kode Kategori */}
+                    <td style={{ padding: '8px 14px' }}>
                       {editingId === k.id ? (
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                          <input
-                            type="text"
-                            value={editingName}
-                            onChange={(e) => setEditingName(e.target.value)}
-                            autoFocus
-                            style={{
-                              padding: '4px 8px',
-                              fontSize: '13px',
-                              borderRadius: '6px',
-                              border: '1px solid #2563EB',
-                              outline: 'none',
-                              flex: 1,
-                            }}
-                          />
-                          <button
-                            disabled={savingEdit}
-                            onClick={() => saveEdit(k.id)}
-                            style={{
-                              padding: '4px 10px',
-                              background: '#2563EB',
-                              color: '#FFFFFF',
-                              border: 'none',
-                              borderRadius: '6px',
-                              fontSize: '11.5px',
-                              fontWeight: '600',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Simpan
-                          </button>
-                          <button
-                            type="button"
-                            onClick={cancelEdit}
-                            style={{
-                              padding: '4px 8px',
-                              background: '#F1F5F9',
-                              color: '#64748B',
-                              border: '1px solid #CBD5E1',
-                              borderRadius: '6px',
-                              fontSize: '11.5px',
-                              cursor: 'pointer',
-                            }}
-                          >
-                            Batal
-                          </button>
-                        </div>
+                        <input
+                          type="text"
+                          placeholder="Kode"
+                          value={editingKode}
+                          onChange={(e) => setEditingKode(e.target.value.toUpperCase())}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveEdit(k.id);
+                            if (e.key === 'Escape') cancelEdit();
+                          }}
+                          maxLength={10}
+                          style={{
+                            width: '70px',
+                            height: '32px',
+                            padding: '0 8px',
+                            fontSize: '12.5px',
+                            fontWeight: '700',
+                            borderRadius: '6px',
+                            border: '1.5px solid #2563EB',
+                            background: '#FFFFFF',
+                            outline: 'none',
+                            textTransform: 'uppercase',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      ) : k.kode ? (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            background: '#EFF6FF',
+                            color: '#1D4ED8',
+                            border: '1px solid #DBEAFE',
+                            letterSpacing: '0.04em',
+                            fontFamily: 'monospace',
+                          }}
+                        >
+                          {k.kode}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#CBD5E1', fontSize: '12px', fontStyle: 'italic' }}>
+                          -
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Nama Kategori / Edit Form */}
+                    <td style={{ padding: '8px 14px' }}>
+                      {editingId === k.id ? (
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveEdit(k.id);
+                            if (e.key === 'Escape') cancelEdit();
+                          }}
+                          autoFocus
+                          style={{
+                            width: '100%',
+                            height: '32px',
+                            padding: '0 10px',
+                            fontSize: '13px',
+                            borderRadius: '6px',
+                            border: '1.5px solid #2563EB',
+                            background: '#FFFFFF',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                          }}
+                        />
                       ) : (
                         <div style={{ fontWeight: '600', color: '#0F172A', fontSize: '13.5px' }}>
                           {k.nama_kategori}
@@ -439,7 +504,7 @@ const Master = () => {
                     </td>
 
                     {/* Jumlah Produk */}
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ padding: '12px 14px' }}>
                       <span
                         style={{
                           display: 'inline-block',
@@ -457,39 +522,75 @@ const Master = () => {
                     </td>
 
                     {/* Aksi */}
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '6px' }}>
-                        <button
-                          onClick={() => startEdit(k)}
-                          style={{
-                            padding: '4px 8px',
-                            background: '#FFFFFF',
-                            color: '#334155',
-                            border: '1px solid #CBD5E1',
-                            borderRadius: '6px',
-                            fontSize: '11.5px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Ubah
-                        </button>
-                        <button
-                          onClick={() => deleteKategori(k.id, k.nama_kategori, k.total_produk || 0)}
-                          style={{
-                            padding: '4px 8px',
-                            background: '#FEF2F2',
-                            color: '#DC2626',
-                            border: '1px solid #FECACA',
-                            borderRadius: '6px',
-                            fontSize: '11.5px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Hapus
-                        </button>
-                      </div>
+                    <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                      {editingId === k.id ? (
+                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                          <button
+                            disabled={savingEdit}
+                            onClick={() => saveEdit(k.id)}
+                            style={{
+                              padding: '5px 10px',
+                              background: '#2563EB',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '11.5px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Simpan
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEdit}
+                            style={{
+                              padding: '5px 8px',
+                              background: '#F1F5F9',
+                              color: '#64748B',
+                              border: '1px solid #CBD5E1',
+                              borderRadius: '6px',
+                              fontSize: '11.5px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                          <button
+                            onClick={() => startEdit(k)}
+                            style={{
+                              padding: '4px 8px',
+                              background: '#FFFFFF',
+                              color: '#334155',
+                              border: '1px solid #CBD5E1',
+                              borderRadius: '6px',
+                              fontSize: '11.5px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Ubah
+                          </button>
+                          <button
+                            onClick={() => deleteKategori(k.id, k.nama_kategori, k.total_produk || 0)}
+                            style={{
+                              padding: '4px 8px',
+                              background: '#FEF2F2',
+                              color: '#DC2626',
+                              border: '1px solid #FECACA',
+                              borderRadius: '6px',
+                              fontSize: '11.5px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -562,9 +663,10 @@ const Master = () => {
               Tips Penggunaan Kategori
             </div>
             <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#64748B', lineHeight: '1.6' }}>
+              <li>Kode prefix (misal: <strong>B</strong> untuk Baju Anak) dapat dipilih di menu <strong>Kelola Barang</strong> untuk penomoran SKU/barcode barang secara otomatis.</li>
               <li>Kategori yang dibuat di sini akan otomatis muncul sebagai filter tab di menu <strong>Transaksi Kasir</strong>.</li>
               <li>Menghapus kategori tidak akan menghapus produk, produk tersebut hanya akan dialihkan menjadi tanpa kategori.</li>
-              <li>Nama kategori dapat diubah sewaktu-waktu dengan menekan tombol <strong>Ubah</strong>.</li>
+              <li>Kode dan nama kategori dapat diubah sewaktu-waktu dengan menekan tombol <strong>Ubah</strong>.</li>
             </ul>
           </div>
 

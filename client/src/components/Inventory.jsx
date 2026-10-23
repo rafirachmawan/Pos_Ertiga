@@ -50,6 +50,11 @@ const Inventory = () => {
   const [imageInputMode, setImageInputMode] = useState('upload'); // 'upload' | 'url'
   const [imageUrlInput, setImageUrlInput] = useState('');
 
+  // Barcode prefix & number states
+  const [barcodePrefix, setBarcodePrefix] = useState('');
+  const [barcodeNumber, setBarcodeNumber] = useState('');
+  const [isManualBarcode, setIsManualBarcode] = useState(false);
+
   // Restock & Quick Adjust states
   const [restockData, setRestockData] = useState({ barang_id: null, qty: 1, keterangan: '' });
   const [quickStockTarget, setQuickStockTarget] = useState(null);
@@ -90,7 +95,31 @@ const Inventory = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'kategori_id') {
+      const catId = Number(value);
+      const cat = (kategoriList || []).find((k) => k.id === catId);
+      const catKode = cat?.kode ? cat.kode.trim().toUpperCase() : '';
+      setBarcodePrefix(catKode);
+      const newBarcode = catKode ? `${catKode}${barcodeNumber}` : (barcodeNumber || '');
+      setFormData((prev) => ({
+        ...prev,
+        kategori_id: value,
+        barcode: isManualBarcode ? prev.barcode : newBarcode,
+      }));
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleBarcodeNumberChange = (e) => {
+    const rawVal = e.target.value.replace(/\s+/g, '');
+    setBarcodeNumber(rawVal);
+    const newBarcode = barcodePrefix ? `${barcodePrefix}${rawVal}` : rawVal;
+    setFormData((prev) => ({
+      ...prev,
+      barcode: newBarcode,
+    }));
   };
 
   // Image compression
@@ -154,6 +183,11 @@ const Inventory = () => {
       finalPayload.gambar = imageUrlInput.trim();
     }
 
+    if (!finalPayload.barcode || !finalPayload.barcode.trim()) {
+      alert('Kode Barang / SKU wajib diisi');
+      return;
+    }
+
     try {
       await api(url, { method, body: finalPayload });
       closeModal();
@@ -175,6 +209,32 @@ const Inventory = () => {
     setDisplayHargaJual(formatRupiah(item.harga_jual));
     setImageUrlInput(item.gambar && item.gambar.startsWith('http') ? item.gambar : '');
     setImageInputMode(item.gambar && item.gambar.startsWith('http') ? 'url' : 'upload');
+
+    // Parse barcode prefix and number
+    const code = String(item.barcode || '').trim();
+    const categoriesWithCodes = (kategoriList || [])
+      .filter((k) => k.kode && k.kode.trim())
+      .sort((a, b) => b.kode.length - a.kode.length);
+
+    let foundPrefix = null;
+    const cat = (kategoriList || []).find((k) => k.id === item.kategori_id);
+    if (cat?.kode && code.startsWith(cat.kode)) {
+      foundPrefix = cat.kode;
+    } else {
+      const match = categoriesWithCodes.find((k) => code.startsWith(k.kode));
+      if (match) foundPrefix = match.kode;
+    }
+
+    if (foundPrefix) {
+      setBarcodePrefix(foundPrefix);
+      setBarcodeNumber(code.slice(foundPrefix.length));
+      setIsManualBarcode(false);
+    } else {
+      setBarcodePrefix('');
+      setBarcodeNumber(code);
+      setIsManualBarcode(true);
+    }
+
     setIsModalOpen(true);
   };
 
@@ -183,6 +243,9 @@ const Inventory = () => {
     setDisplayHargaModal('');
     setDisplayHargaJual('');
     setImageUrlInput('');
+    setBarcodePrefix('');
+    setBarcodeNumber('');
+    setIsManualBarcode(false);
     setIsModalOpen(false);
   };
 
@@ -379,6 +442,9 @@ const Inventory = () => {
               setDisplayHargaJual('');
               setImageUrlInput('');
               setImageInputMode('upload');
+              setBarcodePrefix('');
+              setBarcodeNumber('');
+              setIsManualBarcode(false);
               setIsModalOpen(true);
             }}
             style={{
@@ -958,7 +1024,7 @@ const Inventory = () => {
       {/* ── Modal Tambah / Edit Produk Lengkap ──────────────── */}
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto', padding: '28px 32px', maxWidth: '580px' }}>
+          <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto', padding: '28px 32px', maxWidth: '620px' }}>
             <h3 style={{ fontSize: '19px', fontWeight: '800', color: '#0F172A', margin: '0 0 20px 0' }}>
               {formData.id ? 'Edit Barang & Produk' : 'Tambah Barang Baru'}
             </h3>
@@ -1063,59 +1129,242 @@ const Inventory = () => {
                 )}
               </div>
 
-              {/* Barcode & Nama */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px' }}>
-                <div className="form-group">
-                  <label>Kode Barang / SKU</label>
-                  <input name="barcode" value={formData.barcode} onChange={handleChange} required style={{ boxShadow: 'none' }} />
+              {/* 1. Nama Barang (Full Width) */}
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
+                  Nama Barang / Produk
+                </label>
+                <input
+                  name="nama_barang"
+                  placeholder="Contoh: Baju Anak Lengan Pendek Katun..."
+                  value={formData.nama_barang}
+                  onChange={handleChange}
+                  required
+                  style={{
+                    height: '42px',
+                    padding: '0 14px',
+                    fontSize: '13.5px',
+                    borderRadius: '8px',
+                    border: '1px solid #CBD5E1',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    boxShadow: 'none',
+                  }}
+                />
+              </div>
+
+              {/* 2. Kategori Produk & Kode Barang / SKU (Side by Side) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                {/* Kategori */}
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
+                    Kategori Produk
+                  </label>
+                  <select
+                    name="kategori_id"
+                    value={formData.kategori_id || ''}
+                    onChange={handleChange}
+                    style={{
+                      height: '42px',
+                      padding: '0 32px 0 12px',
+                      fontSize: '13px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      boxShadow: 'none',
+                      backgroundPosition: 'right 10px center',
+                    }}
+                  >
+                    <option value="">-- Tanpa Kategori --</option>
+                    {kategoriList.map((k) => (
+                      <option key={k.id} value={k.id}>
+                        {k.kode ? `[${k.kode}] ` : ''}{k.nama_kategori}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <div className="form-group">
-                  <label>Nama Barang</label>
-                  <input name="nama_barang" value={formData.nama_barang} onChange={handleChange} required style={{ boxShadow: 'none' }} />
+
+                {/* Kode Barang / SKU */}
+                <div className="form-group" style={{ margin: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>
+                      Kode Barang / SKU
+                    </label>
+                    {barcodePrefix && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!isManualBarcode) {
+                            setIsManualBarcode(true);
+                          } else {
+                            setIsManualBarcode(false);
+                            setFormData((prev) => ({
+                              ...prev,
+                              barcode: `${barcodePrefix}${barcodeNumber}`,
+                            }));
+                          }
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#2563EB',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                      >
+                        {isManualBarcode ? `← Gunakan Kode [${barcodePrefix}]` : 'Manual / Scan →'}
+                      </button>
+                    )}
+                  </div>
+
+                  {!isManualBarcode && barcodePrefix ? (
+                    <div>
+                      <div style={{ display: 'flex', width: '100%', height: '42px' }}>
+                        {/* Badge Kode Otomatis dari Kategori yang Dipilih */}
+                        <div
+                          style={{
+                            minWidth: '55px',
+                            padding: '0 12px',
+                            height: '42px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: '#E2E8F0',
+                            color: '#0F172A',
+                            fontWeight: '800',
+                            fontSize: '14px',
+                            borderRadius: '8px 0 0 8px',
+                            border: '1px solid #CBD5E1',
+                            borderRight: 'none',
+                            letterSpacing: '0.04em',
+                            fontFamily: 'monospace',
+                            boxSizing: 'border-box',
+                            userSelect: 'none',
+                          }}
+                          title={`Kode otomatis dari kategori`}
+                        >
+                          {barcodePrefix}
+                        </div>
+
+                        {/* Input Nomor Barang Saja */}
+                        <input
+                          type="text"
+                          placeholder="Ketik angka nomor (cth: 001)..."
+                          value={barcodeNumber}
+                          onChange={handleBarcodeNumberChange}
+                          required
+                          style={{
+                            flex: 1,
+                            minWidth: 0,
+                            height: '42px',
+                            padding: '0 12px',
+                            fontSize: '13.5px',
+                            fontWeight: '600',
+                            borderRadius: '0 8px 8px 0',
+                            border: '1px solid #CBD5E1',
+                            boxSizing: 'border-box',
+                            boxShadow: 'none',
+                          }}
+                        />
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '11px',
+                          color: '#64748B',
+                          marginTop: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <span>SKU Jadi:</span>
+                        <strong
+                          style={{
+                            color: formData.barcode ? '#1E293B' : '#94A3B8',
+                            fontFamily: 'monospace',
+                            fontSize: '12px',
+                            background: formData.barcode ? '#EFF6FF' : '#F8FAFC',
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            border: formData.barcode ? '1px solid #DBEAFE' : '1px solid #E2E8F0',
+                          }}
+                        >
+                          {formData.barcode || '-'}
+                        </strong>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        name="barcode"
+                        placeholder={
+                          formData.kategori_id
+                            ? "Kategori ini belum ada kode di Master Data, ketik barcode manual..."
+                            : "Pilih kategori di sebelah kiri untuk kode otomatis atau ketik manual..."
+                        }
+                        value={formData.barcode}
+                        onChange={handleChange}
+                        required
+                        style={{
+                          height: '42px',
+                          padding: '0 12px',
+                          fontSize: '13px',
+                          borderRadius: '8px',
+                          border: '1px solid #CBD5E1',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          boxShadow: 'none',
+                        }}
+                      />
+                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+                        {isManualBarcode
+                          ? 'Mode ketik manual / barcode scanner.'
+                          : 'Pilih kategori yang memiliki kode untuk kode otomatis.'}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Harga Modal & Jual */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div className="form-group">
-                  <label>Harga Modal (Rp)</label>
+              {/* 3. Harga Modal & Jual */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
+                    Harga Modal (Rp)
+                  </label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '15px', top: '14px', color: '#94A3B8', fontSize: '14px' }}>Rp</span>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '13px', fontWeight: '600', pointerEvents: 'none' }}>
+                      Rp
+                    </span>
                     <input
                       type="text"
                       value={displayHargaModal}
                       onChange={(e) => handleCurrencyChange(e, 'harga_modal')}
-                      style={{ paddingLeft: '45px', boxShadow: 'none' }}
+                      style={{ height: '42px', paddingLeft: '38px', paddingRight: '12px', fontSize: '13.5px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
                       required
                     />
                   </div>
                 </div>
-                <div className="form-group">
-                  <label>Harga Jual (Rp)</label>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
+                    Harga Jual (Rp)
+                  </label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '15px', top: '14px', color: '#94A3B8', fontSize: '14px' }}>Rp</span>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '13px', fontWeight: '600', pointerEvents: 'none' }}>
+                      Rp
+                    </span>
                     <input
                       type="text"
                       value={displayHargaJual}
                       onChange={(e) => handleCurrencyChange(e, 'harga_jual')}
-                      style={{ paddingLeft: '45px', boxShadow: 'none' }}
+                      style={{ height: '42px', paddingLeft: '38px', paddingRight: '12px', fontSize: '13.5px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
                       required
                     />
                   </div>
                 </div>
-              </div>
-
-              {/* Kategori */}
-              <div className="form-group">
-                <label>Kategori Produk</label>
-                <select name="kategori_id" value={formData.kategori_id || ''} onChange={handleChange} style={{ width: '100%', boxShadow: 'none' }}>
-                  <option value="">-- Tanpa Kategori --</option>
-                  {kategoriList.map((k) => (
-                    <option key={k.id} value={k.id}>
-                      {k.nama_kategori}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* Stok & Satuan (DAPAT DIEDIT LANGSUNG) */}
