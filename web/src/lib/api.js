@@ -81,7 +81,8 @@ export async function fetchPublicCategories() {
     const res = await fetch(apiUrl('/api/public/kategori'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
-    return json.data && json.data.length > 0 ? json.data : FALLBACK_CATEGORIES;
+    // Return actual data from API (even if empty)
+    return json.data || [];
   } catch (err) {
     console.warn('[API] Menggunakan data fallback kategori:', err.message);
     return FALLBACK_CATEGORIES;
@@ -93,7 +94,8 @@ export async function fetchPublicProducts() {
     const res = await fetch(apiUrl('/api/public/barang'));
     if (!res.ok) throw new Error('Failed to fetch');
     const json = await res.json();
-    return json.data && json.data.length > 0 ? json.data : FALLBACK_PRODUCTS;
+    // Return actual data from API (even if empty)
+    return json.data || [];
   } catch (err) {
     console.warn('[API] Menggunakan data fallback produk:', err.message);
     return FALLBACK_PRODUCTS;
