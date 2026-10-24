@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 14;
+const LATEST_VERSION = 15;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -104,6 +104,7 @@ async function createPengaturanTable(db) {
       alamat_toko TEXT DEFAULT 'Alamat Toko Belum Diatur',
       pesan_struk TEXT DEFAULT 'Terima kasih sudah berbelanja!',
       telepon VARCHAR(30) DEFAULT '',
+      url_website TEXT DEFAULT 'https://pos-ertiga-yl9x.vercel.app/',
       printer_name TEXT DEFAULT '',
       lebar_struk INTEGER NOT NULL DEFAULT 80,
       auto_print INTEGER NOT NULL DEFAULT 0
@@ -1124,6 +1125,18 @@ const migrations = [
     name: 'tambah kolom kode di tabel kategori produk',
     async up(db) {
       await addColumnIfMissing(db, 'kategori', 'kode', 'VARCHAR(20)');
+    },
+  },
+  {
+    version: 15,
+    name: 'tambah url website toko di tabel pengaturan',
+    async up(db) {
+      await addColumnIfMissing(
+        db,
+        'pengaturan',
+        'url_website',
+        "TEXT DEFAULT 'https://pos-ertiga-yl9x.vercel.app/'"
+      );
     },
   },
 ];

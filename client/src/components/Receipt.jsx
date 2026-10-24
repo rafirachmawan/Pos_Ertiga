@@ -1,7 +1,46 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import QRCode from 'qrcode';
 import { createPortal } from 'react-dom';
 import { formatDateTime } from '../lib/date';
 import { formatRupiah } from '../lib/format';
+
+export function QRCodeSvg({ value, size = 110 }) {
+  const pathData = useMemo(() => {
+    if (!value) return null;
+    try {
+      const qr = QRCode.create(value, { errorCorrectionLevel: 'M' });
+      const count = qr.modules.size;
+      const margin = 1;
+      let d = '';
+      for (let r = 0; r < count; r++) {
+        for (let c = 0; c < count; c++) {
+          if (qr.modules.get(r, c)) {
+            d += `M${c + margin},${r + margin}h1v1h-1z `;
+          }
+        }
+      }
+      return { d, total: count + margin * 2 };
+    } catch (err) {
+      console.warn('[QR] Gagal membuat barcode QR:', err);
+      return null;
+    }
+  }, [value]);
+
+  if (!pathData) return null;
+
+  return (
+    <svg
+      viewBox={`0 0 ${pathData.total} ${pathData.total}`}
+      width={size}
+      height={size}
+      style={{ display: 'block', margin: '4px auto', background: '#FFFFFF' }}
+      shapeRendering="crispEdges"
+    >
+      <rect width="100%" height="100%" fill="#FFFFFF" />
+      <path d={pathData.d} fill="#000000" />
+    </svg>
+  );
+}
 
 function normalizeItems(data) {
   return (data?.items || []).map((item, index) => {
@@ -32,6 +71,11 @@ export function Receipt({ data, pengaturan = {}, preview = false, lebar = 80 }) 
   const bayar = Number(data.bayar ?? data.total_bayar ?? 0);
   const kembali = Number(data.kembalian ?? data.total_kembalian ?? 0);
   const tanggal = data.tanggal || formatDateTime(data.tanggal_transaksi);
+  const websiteUrl = (
+    pengaturan.url_website ||
+    'https://pos-ertiga-yl9x.vercel.app/'
+  ).trim();
+  const qrSize = Number(lebar) === 58 ? 95 : 115;
 
   return (
     <div
@@ -104,6 +148,19 @@ export function Receipt({ data, pengaturan = {}, preview = false, lebar = 80 }) 
       </div>
 
       <div className="receipt-divider" />
+
+      {/* Website Link & Scannable Barcode / QR Section */}
+      {websiteUrl && (
+        <div className="receipt-web-section">
+          <div className="receipt-web-title">KUNJUNGI TOKO ONLINE KAMI:</div>
+          <div className="receipt-web-link">{websiteUrl}</div>
+          <div className="receipt-barcode-box">
+            <QRCodeSvg value={websiteUrl} size={qrSize} />
+          </div>
+          <div className="receipt-web-sub">Scan Barcode untuk Belanja Online</div>
+          <div className="receipt-divider" style={{ marginTop: '8px' }} />
+        </div>
+      )}
 
       <div className="receipt-footer">{pengaturan.pesan_struk || 'Terima kasih telah berbelanja!'}</div>
       <div className="receipt-footer receipt-small">

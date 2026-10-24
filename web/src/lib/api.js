@@ -8,6 +8,58 @@ export function apiUrl(path) {
   return `${API_BASE}${path}`;
 }
 
+let activeRequests = 0;
+const listeners = new Set();
+let currentLoadingMessage = 'Memuat Data...';
+
+export function onLoadingChange(callback) {
+  listeners.add(callback);
+  try {
+    callback(activeRequests > 0, activeRequests, currentLoadingMessage);
+  } catch (_) {}
+  return () => listeners.delete(callback);
+}
+
+export function getActiveRequests() {
+  return activeRequests;
+}
+
+function notifyLoading() {
+  const count = activeRequests;
+  const isLoading = count > 0;
+  listeners.forEach((cb) => {
+    try {
+      cb(isLoading, count, currentLoadingMessage);
+    } catch (e) {
+      console.error(e);
+    }
+  });
+}
+
+export function startLoading(message = 'Memuat Data...') {
+  if (message) currentLoadingMessage = message;
+  activeRequests++;
+  notifyLoading();
+}
+
+export function stopLoading() {
+  activeRequests = Math.max(0, activeRequests - 1);
+  notifyLoading();
+}
+
+export function resetLoading() {
+  activeRequests = 0;
+  currentLoadingMessage = 'Memuat Data...';
+  notifyLoading();
+}
+
+export function triggerLoadingTransition(duration = 320, message = 'Memuat...') {
+  startLoading(message);
+  setTimeout(() => {
+    stopLoading();
+  }, duration);
+}
+
 // Fallback mock data in case POS backend is offline or starting up
 const FALLBACK_TOKO = {
   nama_toko: 'POS ERTIGA STORE',
@@ -65,6 +117,7 @@ const FALLBACK_PRODUCTS = [
 ];
 
 export async function fetchTokoInfo() {
+  startLoading('Memuat Toko...');
   try {
     const res = await fetch(apiUrl('/api/public/toko'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -73,10 +126,13 @@ export async function fetchTokoInfo() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback toko:', err.message);
     return FALLBACK_TOKO;
+  } finally {
+    stopLoading();
   }
 }
 
 export async function fetchPublicCategories() {
+  startLoading('Memuat Kategori...');
   try {
     const res = await fetch(apiUrl('/api/public/kategori'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -86,10 +142,13 @@ export async function fetchPublicCategories() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback kategori:', err.message);
     return FALLBACK_CATEGORIES;
+  } finally {
+    stopLoading();
   }
 }
 
 export async function fetchPublicProducts() {
+  startLoading('Memuat Katalog Produk...');
   try {
     const res = await fetch(apiUrl('/api/public/barang'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -99,6 +158,8 @@ export async function fetchPublicProducts() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback produk:', err.message);
     return FALLBACK_PRODUCTS;
+  } finally {
+    stopLoading();
   }
 }
 
@@ -141,6 +202,7 @@ export const FALLBACK_LOGAM_MULIA = [
 ];
 
 export async function fetchPublicLogamMulia() {
+  startLoading('Memuat Logam Mulia 24K...');
   try {
     const res = await fetch(apiUrl('/api/public/logam-mulia'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -149,6 +211,8 @@ export async function fetchPublicLogamMulia() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback logam mulia:', err.message);
     return FALLBACK_LOGAM_MULIA;
+  } finally {
+    stopLoading();
   }
 }
 
@@ -213,6 +277,7 @@ export const FALLBACK_SMM = [
 ];
 
 export async function fetchPublicSmm() {
+  startLoading('Memuat Layanan Booster Sosmed...');
   try {
     const res = await fetch(apiUrl('/api/public/smm'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -221,6 +286,8 @@ export async function fetchPublicSmm() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback booster sosmed:', err.message);
     return FALLBACK_SMM;
+  } finally {
+    stopLoading();
   }
 }
 
@@ -286,6 +353,7 @@ export const FALLBACK_FLASH_SALE = {
 };
 
 export async function fetchPublicFlashSale() {
+  startLoading('Memuat Flash Sale...');
   try {
     const res = await fetch(apiUrl('/api/public/flash-sale'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -294,10 +362,13 @@ export async function fetchPublicFlashSale() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback flash sale:', err.message);
     return FALLBACK_FLASH_SALE;
+  } finally {
+    stopLoading();
   }
 }
 
 export async function fetchPublicPpob() {
+  startLoading('Memuat Layanan Digital...');
   try {
     const res = await fetch(apiUrl('/api/public/ppob'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -306,10 +377,13 @@ export async function fetchPublicPpob() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback PPOB:', err.message);
     return null;
+  } finally {
+    stopLoading();
   }
 }
 
 export async function fetchPublicBanners() {
+  startLoading('Memuat Banner Promo...');
   try {
     const res = await fetch(apiUrl('/api/public/banners'));
     if (!res.ok) throw new Error('Failed to fetch');
@@ -318,6 +392,8 @@ export async function fetchPublicBanners() {
   } catch (err) {
     console.warn('[API] Menggunakan data fallback banner:', err.message);
     return [];
+  } finally {
+    stopLoading();
   }
 }
 

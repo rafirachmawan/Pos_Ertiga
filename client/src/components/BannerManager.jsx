@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
+import { showConfirm, showToast } from '../lib/dialog';
 
 const PRESET_GRADIENTS = [
   { label: 'Hijau Toko', value: 'linear-gradient(135deg, #0A4D2E 0%, #03AC0E 100%)' },
@@ -87,9 +88,20 @@ export default function BannerManager() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Hapus banner ini?')) return;
-    try { await api(`/api/banners/${id}`, { method: 'DELETE' }); fetchBanners(); }
-    catch (err) { setError(err.message); }
+    const ok = await showConfirm({
+      title: 'Hapus Banner',
+      message: 'Apakah Anda yakin ingin menghapus banner promosi ini?',
+      confirmText: 'Ya, Hapus Banner',
+      type: 'danger',
+    });
+    if (!ok) return;
+    try {
+      await api(`/api/banners/${id}`, { method: 'DELETE' });
+      showToast('Banner berhasil dihapus', 'success');
+      fetchBanners();
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   const handleToggleActive = async (banner) => {

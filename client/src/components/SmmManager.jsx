@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
+import { showConfirm } from '../lib/dialog';
 
 const formatRupiah = (val) => {
   return Number(val || 0).toLocaleString('id-ID');
@@ -126,19 +127,26 @@ export default function SmmManager() {
   };
 
   const handleDeletePlatform = async (p) => {
-    if (window.confirm(`Yakin ingin menghapus platform "${p.nama_platform}" beserta seluruh layanan dan paketnya?`)) {
-      try {
-        setSaving(true);
-        await api(`/api/smm/platform/${p.id}`, { method: 'DELETE' });
-        if (selectedPlatformId === p.id) {
-          setSelectedPlatformId('all');
-        }
-        fetchData();
-      } catch (err) {
-        alert(err.message);
-      } finally {
-        setSaving(false);
+    const ok = await showConfirm({
+      title: 'Hapus Platform SMM',
+      message: `Yakin ingin menghapus platform "${p.nama_platform}" beserta seluruh layanan dan paketnya?`,
+      submessage: 'Seluruh layanan dan paket di bawah platform ini akan ikut dihapus.',
+      confirmText: 'Ya, Hapus Platform',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      setSaving(true);
+      await api(`/api/smm/platform/${p.id}`, { method: 'DELETE' });
+      if (selectedPlatformId === p.id) {
+        setSelectedPlatformId('all');
       }
+      fetchData();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -197,16 +205,23 @@ export default function SmmManager() {
   };
 
   const handleDeleteLayanan = async (l) => {
-    if (window.confirm(`Yakin ingin menghapus layanan "${l.nama_layanan}" beserta seluruh paketnya?`)) {
-      try {
-        setSaving(true);
-        await api(`/api/smm/layanan/${l.id}`, { method: 'DELETE' });
-        fetchData();
-      } catch (err) {
-        alert(err.message);
-      } finally {
-        setSaving(false);
-      }
+    const ok = await showConfirm({
+      title: 'Hapus Layanan SMM',
+      message: `Yakin ingin menghapus layanan "${l.nama_layanan}" beserta seluruh paketnya?`,
+      submessage: 'Seluruh paket di dalam layanan ini akan ikut terhapus.',
+      confirmText: 'Ya, Hapus Layanan',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      setSaving(true);
+      await api(`/api/smm/layanan/${l.id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -270,16 +285,22 @@ export default function SmmManager() {
   };
 
   const handleDeletePaket = async (pkg) => {
-    if (window.confirm(`Hapus paket ${Number(pkg.jumlah_order).toLocaleString('id-ID')} seharga Rp ${formatRupiah(pkg.harga_jual)}?`)) {
-      try {
-        setSaving(true);
-        await api(`/api/smm/paket/${pkg.id}`, { method: 'DELETE' });
-        fetchData();
-      } catch (err) {
-        alert(err.message);
-      } finally {
-        setSaving(false);
-      }
+    const ok = await showConfirm({
+      title: 'Hapus Paket SMM',
+      message: `Hapus paket ${Number(pkg.jumlah_order).toLocaleString('id-ID')} seharga Rp ${formatRupiah(pkg.harga_jual)}?`,
+      confirmText: 'Ya, Hapus Paket',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      setSaving(true);
+      await api(`/api/smm/paket/${pkg.id}`, { method: 'DELETE' });
+      fetchData();
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setSaving(false);
     }
   };
 

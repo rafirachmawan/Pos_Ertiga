@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../lib/api';
+import { showConfirm, showAlert, showToast } from '../lib/dialog';
 
 // Helper: Format number to "Rp X.XXX"
 const formatRupiah = (number) => {
@@ -335,14 +336,24 @@ const Inventory = () => {
     }
   };
 
-  const deleteItem = async (id) => {
-    if (!window.confirm('Yakin ingin menghapus barang ini?')) return;
+  const deleteItem = async (id, namaBarang = '') => {
+    const target = namaBarang ? ` "${namaBarang}"` : '';
+    const ok = await showConfirm({
+      title: 'Hapus Barang',
+      message: `Yakin ingin menghapus barang${target}?`,
+      submessage: 'Barang yang dihapus akan dipindahkan ke daftar nonaktif.',
+      confirmText: 'Ya, Hapus Barang',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const result = await api(`/api/barang/${id}`, { method: 'DELETE' });
-      alert(result.message || 'Barang dihapus');
+      showToast(result.message || 'Barang berhasil dihapus', 'success');
       fetchItems();
     } catch (err) {
-      alert(err.message);
+      showAlert({ title: 'Gagal Menghapus', message: err.message, type: 'danger' });
     }
   };
 
@@ -883,7 +894,7 @@ const Inventory = () => {
                             Edit
                           </button>
                           <button
-                            onClick={() => deleteItem(item.id)}
+                            onClick={() => deleteItem(item.id, item.nama_barang)}
                             style={{
                               padding: '4px 7px',
                               fontSize: '11px',

@@ -14,6 +14,7 @@ import SmmManager from './components/SmmManager'
 import FlashSaleManager from './components/FlashSaleManager'
 import PpobManager from './components/PpobManager'
 import GlobalLoader from './components/GlobalLoader'
+import GlobalDialog from './components/GlobalDialog'
 import { api } from './lib/api'
 import './index.css'
 
@@ -42,6 +43,7 @@ function App() {
   return (
     <>
       <GlobalLoader />
+      <GlobalDialog />
       {!isLoggedIn ? (
         <Login onLogin={() => setIsLoggedIn(true)} />
       ) : (

@@ -9,7 +9,7 @@ router.get(
   '/toko',
   asyncHandler(async (req, res) => {
     const toko = await get(
-      `SELECT nama_toko, alamat_toko, pesan_struk, telepon FROM pengaturan WHERE id = 1`
+      `SELECT nama_toko, alamat_toko, pesan_struk, telepon, url_website FROM pengaturan WHERE id = 1`
     );
     res.json({
       data: toko || {
@@ -17,6 +17,7 @@ router.get(
         alamat_toko: 'Point of Sale Store',
         pesan_struk: 'Terima kasih telah berbelanja!',
         telepon: '',
+        url_website: 'https://pos-ertiga-yl9x.vercel.app/',
       },
     });
   })

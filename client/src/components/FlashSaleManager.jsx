@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
+import { showConfirm } from '../lib/dialog';
 
 const formatRupiah = (val) => {
   if (val === undefined || val === null) return '0';
@@ -242,7 +243,13 @@ export default function FlashSaleManager() {
 
   // Delete Item
   const handleDeleteItem = async (id, nama) => {
-    if (!window.confirm(`Hapus item "${nama}" dari Flash Sale?`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Item Flash Sale',
+      message: `Hapus item "${nama}" dari Flash Sale?`,
+      confirmText: 'Ya, Hapus',
+      type: 'danger',
+    });
+    if (!ok) return;
     try {
       await api(`/api/flash-sale/items/${id}`, { method: 'DELETE' });
       notifySuccess('Item berhasil dihapus');

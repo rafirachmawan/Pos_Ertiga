@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
+import { showConfirm } from '../lib/dialog';
 import { Receipt, ReceiptPrintPortal } from './Receipt';
 import { printCurrentReceipt } from '../lib/print';
 
@@ -54,11 +55,12 @@ const POS = () => {
     const timer = setTimeout(() => {
       printCurrentReceipt({
         lebar: Number(pengaturan.lebar_struk) || 80,
+        deviceName: pengaturan.printer_name,
       });
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [struk, pengaturan.auto_print, pengaturan.lebar_struk]);
+  }, [struk, pengaturan.auto_print, pengaturan.lebar_struk, pengaturan.printer_name]);
 
   const fetchItems = async () => {
     try {
@@ -188,21 +190,28 @@ const POS = () => {
     setAmountTendered(0);
   };
 
-  const handleLoadHold = (holdId) => {
-    const hold = heldCarts.find(h => h.id === holdId);
+  const handleLoadHold = async (holdId) => {
+    const hold = heldCarts.find((h) => h.id === holdId);
     if (!hold) return;
 
     if (cart.length > 0) {
-      if (!window.confirm('Keranjang saat ini tidak kosong. Pindahkan keranjang aktif ke antrean hold dulu?')) return;
+      const ok = await showConfirm({
+        title: 'Pindahkan ke Antrean Hold?',
+        message: 'Keranjang saat ini tidak kosong. Pindahkan keranjang aktif ke antrean hold dulu?',
+        confirmText: 'Pindahkan ke Hold',
+        type: 'warning',
+      });
+      if (!ok) return;
+
       const currentHold = {
         id: Date.now(),
         waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
         cart: [...cart],
-        namaPelanggan: namaPelanggan.trim() || 'Pelanggan ' + (heldCarts.length + 1)
+        namaPelanggan: namaPelanggan.trim() || 'Pelanggan ' + (heldCarts.length + 1),
       };
-      setHeldCarts(prev => [...prev.filter(h => h.id !== holdId), currentHold]);
+      setHeldCarts((prev) => [...prev.filter((h) => h.id !== holdId), currentHold]);
     } else {
-      setHeldCarts(prev => prev.filter(h => h.id !== holdId));
+      setHeldCarts((prev) => prev.filter((h) => h.id !== holdId));
     }
 
     setCart(hold.cart);
@@ -211,9 +220,15 @@ const POS = () => {
     setAmountTendered(0);
   };
 
-  const handleDeleteHold = (holdId, nama) => {
-    if (window.confirm(`Hapus transaksi tersimpan untuk "${nama}"?`)) {
-      setHeldCarts(prev => prev.filter(h => h.id !== holdId));
+  const handleDeleteHold = async (holdId, nama) => {
+    const ok = await showConfirm({
+      title: 'Hapus Transaksi Hold',
+      message: `Hapus transaksi tersimpan untuk "${nama}"?`,
+      confirmText: 'Ya, Hapus',
+      type: 'danger',
+    });
+    if (ok) {
+      setHeldCarts((prev) => prev.filter((h) => h.id !== holdId));
     }
   };
 
@@ -284,7 +299,10 @@ const POS = () => {
   };
 
   const handlePrint = () =>
-    printCurrentReceipt({ lebar: Number(pengaturan.lebar_struk) || 80 });
+    printCurrentReceipt({
+      lebar: Number(pengaturan.lebar_struk) || 80,
+      deviceName: pengaturan.printer_name,
+    });
 
   return (
     <div className="pos-layout">

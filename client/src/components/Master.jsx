@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../lib/api';
+import { showConfirm } from '../lib/dialog';
 
 const Master = () => {
   const [kategoriList, setKategoriList] = useState([]);
@@ -96,12 +97,20 @@ const Master = () => {
   };
 
   const deleteKategori = async (id, nama, totalProduk) => {
-    const warning =
-      totalProduk > 0
-        ? `Kategori "${nama}" saat ini digunakan oleh ${totalProduk} produk.\nJika dihapus, produk tersebut akan menjadi "Tanpa Kategori". Yakin ingin melanjutkan?`
-        : `Hapus kategori "${nama}"?`;
+    const hasProducts = totalProduk > 0;
+    const ok = await showConfirm({
+      title: 'Hapus Kategori',
+      message: hasProducts
+        ? `Kategori "${nama}" saat ini digunakan oleh ${totalProduk} produk.`
+        : `Hapus kategori "${nama}"?`,
+      submessage: hasProducts
+        ? 'Jika dihapus, produk tersebut akan otomatis dialihkan menjadi "Tanpa Kategori".'
+        : 'Kategori ini akan dihapus dari daftar.',
+      confirmText: 'Ya, Hapus Kategori',
+      type: 'danger',
+    });
 
-    if (!window.confirm(warning)) return;
+    if (!ok) return;
 
     try {
       await api(`/api/kategori/${id}`, { method: 'DELETE' });

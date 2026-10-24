@@ -13,7 +13,9 @@ import DigitalServicesSection from './components/DigitalServicesSection';
 import LogamMuliaSection from './components/LogamMuliaSection';
 import SmmSection from './components/SmmSection';
 import WebDevSection from './components/WebDevSection';
-import { fetchTokoInfo, fetchPublicCategories, fetchPublicProducts } from './lib/api';
+import GlobalLoader from './components/GlobalLoader';
+import GlobalDialog from './components/GlobalDialog';
+import { fetchTokoInfo, fetchPublicCategories, fetchPublicProducts, triggerLoadingTransition } from './lib/api';
 import { formatRupiah } from './lib/format';
 
 // Stable shuffle using Fisher-Yates with a seed
@@ -53,26 +55,58 @@ export default function App() {
     }
   };
 
+  // Navigation & Tab helpers with smooth loading feedback
+  const handleSelectSpecialTab = (tabId) => {
+    if (activeSpecialTab === tabId) return;
+    const tabNames = {
+      gold: 'Logam Mulia Emas 24K',
+      smm: 'Booster Sosmed',
+      ppob: 'Top Up & Tagihan Digital',
+      webdev: 'Jasa Pembuatan Web & POS',
+    };
+    const tabName = tabId ? (tabNames[tabId] || 'Halaman') : 'Katalog Pakaian';
+    triggerLoadingTransition(320, `Membuka ${tabName}...`);
+    setActiveSpecialTab(tabId);
+    setSelectedCategory(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToHome = () => {
+    if (activeSpecialTab !== null) {
+      triggerLoadingTransition(300, 'Kembali ke Beranda...');
+      setActiveSpecialTab(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleSelectCategory = (catId) => {
+    if (selectedCategory !== catId || activeSpecialTab !== null) {
+      const cat = categories.find((c) => c.id === catId);
+      const catName = cat ? cat.nama_kategori : 'Semua Produk';
+      triggerLoadingTransition(280, `Memuat ${catName}...`);
+      setSelectedCategory(catId);
+    }
+    if (activeSpecialTab !== null) {
+      setActiveSpecialTab(null);
+    }
+    scrollToProducts();
+  };
+
   // Helper for quick icon / subnav linking to special tabs
   const handleOpenDigitalModal = (serviceId) => {
     if (serviceId === 'rasxmedia' || serviceId === 'smm') {
-      setActiveSpecialTab('smm');
-      setSelectedCategory(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      handleSelectSpecialTab('smm');
       return;
     }
     if (serviceId === 'emas') {
-      setActiveSpecialTab('gold');
-      setSelectedCategory(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      handleSelectSpecialTab('gold');
       return;
     }
     if (serviceId === 'appdev' || serviceId === 'web' || serviceId === 'it') {
-      setActiveSpecialTab('webdev');
-      setSelectedCategory(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      handleSelectSpecialTab('webdev');
       return;
     }
+    triggerLoadingTransition(280, 'Membuka Layanan...');
     setActiveDigitalModal(serviceId);
   };
 
@@ -215,6 +249,10 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F5F6F8' }}>
       
+      {/* Global POS-style Loader */}
+      <GlobalLoader />
+      <GlobalDialog />
+
       {/* Toast Notification */}
       {toastMessage && (
         <div
@@ -252,18 +290,13 @@ export default function App() {
         onSearchChange={setSearchQuery}
         activeTab="products"
         activeSpecialTab={activeSpecialTab}
-        onTabChange={() => scrollToProducts()}
-        onSelectCategory={(catId) => {
-          setSelectedCategory(catId);
-          setActiveSpecialTab(null);
+        onTabChange={() => {
+          handleBackToHome();
           scrollToProducts();
         }}
+        onSelectCategory={handleSelectCategory}
         onOpenDigitalModal={handleOpenDigitalModal}
-        onSelectSpecialTab={(tabId) => {
-          setActiveSpecialTab(tabId);
-          setSelectedCategory(null);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onSelectSpecialTab={handleSelectSpecialTab}
       />
 
       {/* === SPECIAL TAB FULL PAGE VIEW === */}
@@ -281,10 +314,7 @@ export default function App() {
             boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
           }}>
             <button
-              onClick={() => {
-                setActiveSpecialTab(null);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
+              onClick={handleBackToHome}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -310,10 +340,7 @@ export default function App() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6B7280' }}>
               <span
                 style={{ cursor: 'pointer', color: '#03AC0E', fontWeight: '500' }}
-                onClick={() => {
-                  setActiveSpecialTab(null);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
+                onClick={handleBackToHome}
               >
                 Beranda
               </span>
@@ -464,12 +491,15 @@ export default function App() {
               <CategoryFilter
                 categories={categories}
                 selectedCategory={selectedCategory}
-                onSelectCategory={setSelectedCategory}
+                onSelectCategory={handleSelectCategory}
                 totalProductsCount={filteredProducts.length}
                 sortBy={sortBy}
-                onSortChange={setSortBy}
+                onSortChange={(val) => {
+                  triggerLoadingTransition(250, 'Mengurutkan Produk...');
+                  setSortBy(val);
+                }}
                 activeSpecialTab={activeSpecialTab}
-                onSelectSpecialTab={setActiveSpecialTab}
+                onSelectSpecialTab={handleSelectSpecialTab}
               />
 
               {/* Products Grid */}

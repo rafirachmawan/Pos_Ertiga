@@ -10,11 +10,26 @@ const {
 const router = express.Router();
 
 async function ensureRow() {
-  await run(
-    `INSERT OR IGNORE INTO pengaturan
-     (id, nama_toko, alamat_toko, pesan_struk, telepon, printer_name, lebar_struk, auto_print)
-     VALUES (1, 'POS ERTIGA', 'Point of Sale', 'Terima kasih telah berbelanja!', '', '', 80, 0)`
-  );
+  try {
+    await run(
+      `INSERT OR IGNORE INTO pengaturan
+       (id, nama_toko, alamat_toko, pesan_struk, telepon, url_website, printer_name, lebar_struk, auto_print)
+       VALUES (1, 'POS ERTIGA', 'Point of Sale', 'Terima kasih telah berbelanja!', '', 'https://pos-ertiga-yl9x.vercel.app/', '', 80, 0)`
+    );
+  } catch (err) {
+    if (err.message && err.message.includes('url_website')) {
+      try {
+        await run("ALTER TABLE pengaturan ADD COLUMN url_website TEXT DEFAULT 'https://pos-ertiga-yl9x.vercel.app/'");
+        await run(
+          `INSERT OR IGNORE INTO pengaturan
+           (id, nama_toko, alamat_toko, pesan_struk, telepon, url_website, printer_name, lebar_struk, auto_print)
+           VALUES (1, 'POS ERTIGA', 'Point of Sale', 'Terima kasih telah berbelanja!', '', 'https://pos-ertiga-yl9x.vercel.app/', '', 80, 0)`
+        );
+      } catch (_) {}
+    } else {
+      throw err;
+    }
+  }
   return get('SELECT * FROM pengaturan WHERE id = 1');
 }
 
@@ -40,6 +55,9 @@ router.put(
     const alamat = String(req.body.alamat_toko ?? current.alamat_toko ?? '');
     const pesan = String(req.body.pesan_struk ?? current.pesan_struk ?? '');
     const telepon = String(req.body.telepon ?? current.telepon ?? '').trim().slice(0, 30);
+    const urlWebsite = String(
+      req.body.url_website ?? current.url_website ?? 'https://pos-ertiga-yl9x.vercel.app/'
+    ).trim();
     const printerName = String(
       req.body.printer_name ?? current.printer_name ?? ''
     ).slice(0, 200);
@@ -56,13 +74,28 @@ router.put(
       req.body.auto_print ?? current.auto_print ?? 0
     );
 
-    await run(
-      `UPDATE pengaturan
-       SET nama_toko = ?, alamat_toko = ?, pesan_struk = ?, telepon = ?,
-           printer_name = ?, lebar_struk = ?, auto_print = ?
-       WHERE id = 1`,
-      [namaToko, alamat, pesan, telepon, printerName, lebarStruk, autoPrint]
-    );
+    try {
+      await run(
+        `UPDATE pengaturan
+         SET nama_toko = ?, alamat_toko = ?, pesan_struk = ?, telepon = ?, url_website = ?,
+             printer_name = ?, lebar_struk = ?, auto_print = ?
+         WHERE id = 1`,
+        [namaToko, alamat, pesan, telepon, urlWebsite, printerName, lebarStruk, autoPrint]
+      );
+    } catch (err) {
+      if (err.message && err.message.includes('url_website')) {
+        await run("ALTER TABLE pengaturan ADD COLUMN url_website TEXT DEFAULT 'https://pos-ertiga-yl9x.vercel.app/'");
+        await run(
+          `UPDATE pengaturan
+           SET nama_toko = ?, alamat_toko = ?, pesan_struk = ?, telepon = ?, url_website = ?,
+               printer_name = ?, lebar_struk = ?, auto_print = ?
+           WHERE id = 1`,
+          [namaToko, alamat, pesan, telepon, urlWebsite, printerName, lebarStruk, autoPrint]
+        );
+      } else {
+        throw err;
+      }
+    }
 
     res.json({ message: 'Pengaturan berhasil disimpan' });
   })

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../lib/api';
 import { formatRupiah } from '../lib/format';
+import { showConfirm } from '../lib/dialog';
 
 const emptyItem = {
   kategori_kode: 'pulsa',
@@ -114,7 +115,13 @@ export default function PpobManager() {
   };
 
   const handleDelete = async (id, nama) => {
-    if (!window.confirm(`Hapus layanan "${nama}" dari daftar PPOB?`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Layanan PPOB',
+      message: `Hapus layanan "${nama}" dari daftar PPOB?`,
+      confirmText: 'Ya, Hapus',
+      type: 'danger',
+    });
+    if (!ok) return;
     try {
       await api(`/api/ppob/item/${id}`, { method: 'DELETE' });
       fetchPpobData();

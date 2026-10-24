@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api, apiUrl } from '../lib/api';
-import { ReceiptPrintPortal } from './Receipt';
+import { ReceiptPrintPortal, QRCodeSvg } from './Receipt';
 import { printCurrentReceipt } from '../lib/print';
 
 const DEFAULT_FORM = {
@@ -8,6 +8,7 @@ const DEFAULT_FORM = {
   alamat_toko: '',
   pesan_struk: '',
   telepon: '',
+  url_website: 'https://pos-ertiga-yl9x.vercel.app/',
   printer_name: '',
   lebar_struk: 80,
   auto_print: 0,
@@ -37,6 +38,7 @@ const Pengaturan = () => {
           alamat_toko: setting.data.alamat_toko || '',
           pesan_struk: setting.data.pesan_struk || '',
           telepon: setting.data.telepon || '',
+          url_website: setting.data.url_website || 'https://pos-ertiga-yl9x.vercel.app/',
           printer_name: setting.data.printer_name || '',
           lebar_struk: Number(setting.data.lebar_struk) || 80,
           auto_print: Number(setting.data.auto_print) || 0,
@@ -66,7 +68,10 @@ const Pengaturan = () => {
 
     const timer = setTimeout(async () => {
       try {
-        await printCurrentReceipt({ lebar: Number(form.lebar_struk) || 80 });
+        await printCurrentReceipt({
+          lebar: Number(form.lebar_struk) || 80,
+          deviceName: form.printer_name,
+        });
       } finally {
         setTestStruk(null);
       }
@@ -88,6 +93,7 @@ const Pengaturan = () => {
         method: 'PUT',
         body: {
           ...form,
+          url_website: (form.url_website || 'https://pos-ertiga-yl9x.vercel.app/').trim(),
           lebar_struk: Number(form.lebar_struk),
           auto_print: Number(form.auto_print) || 0,
         },
@@ -334,6 +340,22 @@ const Pengaturan = () => {
               </div>
 
               <div>
+                <label style={labelStyle}>
+                  Link Website Toko Online (Barcode Struk Kasir)
+                </label>
+                <input
+                  type="text"
+                  value={form.url_website}
+                  onChange={(e) => setForm({ ...form, url_website: e.target.value })}
+                  placeholder="https://pos-ertiga-yl9x.vercel.app/"
+                  style={inputStyle}
+                />
+                <small style={{ fontSize: '11px', color: '#64748B', marginTop: '4px', display: 'block' }}>
+                  Link ini akan dicetak di atas barcode struk kasir. Saat barcode di-scan menggunakan kamera HP pelanggan, otomatis akan diarahkan ke alamat website ini.
+                </small>
+              </div>
+
+              <div>
                 <label style={labelStyle}>Catatan / Pesan Kaki Struk</label>
                 <textarea
                   rows={2}
@@ -566,6 +588,28 @@ const Pengaturan = () => {
                 </div>
 
                 <div style={{ borderBottom: '1px dashed #CBD5E1', margin: '8px 0' }} />
+
+                {/* Website Link & Scannable Barcode */}
+                {(form.url_website || 'https://pos-ertiga-yl9x.vercel.app/').trim() ? (
+                  <div style={{ textAlign: 'center', margin: '6px 0 2px' }}>
+                    <div style={{ fontSize: '8px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#0F172A' }}>
+                      KUNJUNGI TOKO ONLINE KAMI:
+                    </div>
+                    <div style={{ fontSize: '8px', fontWeight: '600', color: '#2563EB', wordBreak: 'break-all', marginTop: '1px', lineHeight: '1.2' }}>
+                      {(form.url_website || 'https://pos-ertiga-yl9x.vercel.app/').trim()}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', margin: '4px auto' }}>
+                      <QRCodeSvg
+                        value={(form.url_website || 'https://pos-ertiga-yl9x.vercel.app/').trim()}
+                        size={Number(form.lebar_struk) === 58 ? 85 : 100}
+                      />
+                    </div>
+                    <div style={{ fontSize: '7.5px', fontStyle: 'italic', color: '#64748B' }}>
+                      Scan Barcode untuk Belanja Online
+                    </div>
+                    <div style={{ borderBottom: '1px dashed #CBD5E1', margin: '8px 0' }} />
+                  </div>
+                ) : null}
 
                 {/* Footer Message */}
                 <div style={{ textAlign: 'center', fontSize: '10px', color: '#64748B', whiteSpace: 'pre-line' }}>

@@ -173,9 +173,11 @@ export default function Navbar({
             <span
               className={`mp-subnav-pill ${activeSpecialTab === null ? 'active' : ''}`}
               onClick={() => {
-                if (onTabChange) onTabChange('products');
-                if (onSelectCategory) onSelectCategory(null);
-                if (onSelectSpecialTab) onSelectSpecialTab(null);
+                if (activeSpecialTab !== null && onSelectSpecialTab) {
+                  onSelectSpecialTab(null);
+                } else if (onSelectCategory) {
+                  onSelectCategory(null);
+                }
                 scrollToSection('unified-feed');
               }}
             >

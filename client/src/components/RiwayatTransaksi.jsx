@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import { formatDateTime, localDateKey, parseDbDate } from '../lib/date';
 import { formatRupiah } from '../lib/format';
 import { printCurrentReceipt } from '../lib/print';
+import { showConfirm, showToast } from '../lib/dialog';
 import { Receipt, ReceiptPrintPortal } from './Receipt';
 
 const RiwayatTransaksi = () => {
@@ -35,17 +36,18 @@ const RiwayatTransaksi = () => {
   }, []);
 
   const handleVoid = async (id, nota) => {
-    if (
-      !window.confirm(
-        `Yakin ingin membatalkan transaksi ${nota}?\nStok barang akan dikembalikan dan ini tidak bisa diurungkan.`
-      )
-    ) {
-      return;
-    }
+    const ok = await showConfirm({
+      title: 'Batalkan Transaksi',
+      message: `Yakin ingin membatalkan transaksi ${nota}?`,
+      submessage: 'Stok barang akan otomatis dikembalikan dan tindakan ini tidak dapat diurungkan.',
+      confirmText: 'Ya, Batalkan Transaksi',
+      type: 'danger',
+    });
+    if (!ok) return;
 
     try {
       await api(`/api/transaksi/${id}/void`, { method: 'PUT' });
-      alert('Transaksi berhasil dibatalkan');
+      showToast('Transaksi berhasil dibatalkan', 'success');
       fetchTransaksi();
     } catch (err) {
       alert(err.message);
@@ -81,7 +83,10 @@ const RiwayatTransaksi = () => {
   };
 
   const doPrint = () =>
-    printCurrentReceipt({ lebar: Number(pengaturan.lebar_struk) || 80 });
+    printCurrentReceipt({
+      lebar: Number(pengaturan.lebar_struk) || 80,
+      deviceName: pengaturan.printer_name,
+    });
 
   const filtered = transaksi.filter((t) => {
     const matchSearch =

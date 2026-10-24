@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
+import { showConfirm } from '../lib/dialog';
 
 const formatRupiah = (val) => {
   return Number(val || 0).toLocaleString('id-ID');
@@ -112,7 +113,14 @@ export default function GoldManager() {
   };
 
   const handleDeleteMerk = async (m) => {
-    if (!confirm(`Hapus merk "${m.nama_merk}" beserta semua varian gramatur di dalamnya?`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Merk Logam Mulia',
+      message: `Hapus merk "${m.nama_merk}" beserta semua varian gramatur di dalamnya?`,
+      submessage: 'Semua varian di bawah merk ini akan dihapus dari katalog.',
+      confirmText: 'Ya, Hapus Merk',
+      type: 'danger',
+    });
+    if (!ok) return;
     try {
       await api(`/api/logam-mulia/kategori/${m.id}`, { method: 'DELETE' });
       if (selectedMerkFilter === String(m.id)) setSelectedMerkFilter('all');
@@ -184,7 +192,13 @@ export default function GoldManager() {
   };
 
   const handleDeleteItem = async (it) => {
-    if (!confirm(`Hapus varian "${it.nama_merk} ${it.gramatur}"?`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Varian Emas',
+      message: `Hapus varian "${it.nama_merk} ${it.gramatur}"?`,
+      confirmText: 'Ya, Hapus Varian',
+      type: 'danger',
+    });
+    if (!ok) return;
     try {
       await api(`/api/logam-mulia/item/${it.id}`, { method: 'DELETE' });
       fetchData();
