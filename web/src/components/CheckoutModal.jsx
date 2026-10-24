@@ -47,23 +47,14 @@ export default function CheckoutModal({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          maxWidth: '540px',
-          width: '100%',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          border: '1px solid #E2E8F0',
-        }}
+        className="mp-checkout-modal-card"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Modal Header */}
         <div
           style={{
-            padding: '18px 24px',
+            padding: '16px 20px',
             borderBottom: '1px solid #E2E8F0',
             display: 'flex',
             alignItems: 'center',
@@ -71,10 +62,10 @@ export default function CheckoutModal({
           }}
         >
           <div>
-            <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
+            <h3 style={{ fontSize: '15.5px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
               Form Pemesanan via WhatsApp
             </h3>
-            <span style={{ fontSize: '12px', color: '#64748B' }}>
+            <span style={{ fontSize: '11.5px', color: '#64748B' }}>
               Isi data pengiriman untuk terhubung langsung ke CS Toko
             </span>
           </div>
@@ -97,7 +88,7 @@ export default function CheckoutModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+        <form onSubmit={handleSubmit} className="mp-checkout-form">
           
           {/* Order Summary Box */}
           <div

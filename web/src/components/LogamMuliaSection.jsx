@@ -109,20 +109,9 @@ export default function LogamMuliaSection({ storeInfo, embedded = false }) {
       </p>
 
       {/* Controls: Merk Tabs & Mode Selector */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          flexWrap: 'wrap',
-          marginBottom: '16px',
-          paddingBottom: '14px',
-          borderBottom: '1px solid #F1F5F9',
-        }}
-      >
+      <div className="mp-gold-controls">
         {/* Merk Tabs */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }}>
+        <div className="mp-gold-brand-tabs">
           {merks.map((m) => {
             const isSelected = selectedMerkId === m.id;
             return (
@@ -130,24 +119,10 @@ export default function LogamMuliaSection({ storeInfo, embedded = false }) {
                 key={m.id}
                 type="button"
                 onClick={() => setSelectedMerkId(m.id)}
-                style={{
-                  padding: '7px 16px',
-                  borderRadius: '8px',
-                  border: isSelected ? '1px solid #03AC0E' : '1px solid #E2E8F0',
-                  background: isSelected ? '#E8F8EE' : '#FFFFFF',
-                  color: isSelected ? '#03AC0E' : '#475569',
-                  fontWeight: isSelected ? '700' : '500',
-                  fontSize: '12.5px',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s ease',
-                }}
+                className={`mp-gold-brand-btn ${isSelected ? 'active' : ''}`}
               >
                 <span>{m.nama_merk}</span>
-                <span style={{ fontSize: '11px', opacity: 0.75 }}>
+                <span className="mp-gold-brand-count">
                   ({m.items?.length || 0})
                 </span>
               </button>
@@ -156,46 +131,18 @@ export default function LogamMuliaSection({ storeInfo, embedded = false }) {
         </div>
 
         {/* Mode Switcher */}
-        <div
-          style={{
-            display: 'inline-flex',
-            background: '#F1F5F9',
-            padding: '3px',
-            borderRadius: '8px',
-            border: '1px solid #E2E8F0',
-          }}
-        >
+        <div className="mp-gold-mode-switch">
           <button
             type="button"
             onClick={() => setMode('buy')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '6px',
-              border: 'none',
-              fontSize: '12px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              background: mode === 'buy' ? '#03AC0E' : 'transparent',
-              color: mode === 'buy' ? '#FFFFFF' : '#64748B',
-            }}
+            className={`mp-gold-mode-btn ${mode === 'buy' ? 'active-buy' : ''}`}
           >
             Beli Emas Baru
           </button>
           <button
             type="button"
             onClick={() => setMode('buyback')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '6px',
-              border: 'none',
-              fontSize: '12px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              background: mode === 'buyback' ? '#0F172A' : 'transparent',
-              color: mode === 'buyback' ? '#FFFFFF' : '#64748B',
-            }}
+            className={`mp-gold-mode-btn ${mode === 'buyback' ? 'active-buyback' : ''}`}
           >
             Jual Emas (Buyback)
           </button>
@@ -254,7 +201,7 @@ export default function LogamMuliaSection({ storeInfo, embedded = false }) {
                         border: `1px solid ${item.stok > 0 ? '#A7F3D0' : '#FECACA'}`,
                         padding: '2px 7px',
                         borderRadius: '4px',
-                        fontSize: '10.5px',
+                        fontSize: '10px',
                         fontWeight: '600',
                       }}
                     >
@@ -266,21 +213,21 @@ export default function LogamMuliaSection({ storeInfo, embedded = false }) {
                 {/* Card Body */}
                 <div className="mp-gold-body">
                   <div>
-                    <h3 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#0F172A', lineHeight: '1.3' }}>
+                    <h3 className="mp-gold-item-title">
                       {activeMerk.nama_merk} {item.gramatur}
                     </h3>
-                    <p style={{ margin: 0, fontSize: '11.5px', color: '#64748B', lineHeight: '1.4', height: '32px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                    <p className="mp-gold-item-desc">
                       {item.deskripsi || 'Emas batangan murni 24 Karat bersertifikat resmi.'}
                     </p>
                   </div>
 
                   {/* Price & Action */}
-                  <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #F1F5F9' }}>
-                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '500' }}>
+                  <div className="mp-gold-footer">
+                    <div className="mp-gold-price-box">
+                      <span className="mp-gold-price-label">
                         {mode === 'buy' ? 'Harga Beli:' : 'Harga Buyback:'}
                       </span>
-                      <span style={{ fontSize: '15.5px', fontWeight: '800', color: '#0F172A' }}>
+                      <span className="mp-gold-price-val">
                         Rp {formatRupiah(itemPrice)}
                       </span>
                     </div>
@@ -288,29 +235,12 @@ export default function LogamMuliaSection({ storeInfo, embedded = false }) {
                     <button
                       type="button"
                       onClick={() => handleOpenOrder(item)}
-                      style={{
-                        width: '100%',
-                        height: '36px',
-                        background: mode === 'buy' ? '#03AC0E' : '#0F172A',
-                        color: '#FFFFFF',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        fontSize: '12px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'background 0.15s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = mode === 'buy' ? '#028A0B' : '#1E293B';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = mode === 'buy' ? '#03AC0E' : '#0F172A';
-                      }}
+                      className={`mp-gold-order-btn ${mode === 'buy' ? 'btn-buy' : 'btn-buyback'}`}
                     >
-                      {mode === 'buy' ? 'Beli via WhatsApp' : 'Jual via WhatsApp'}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                      </svg>
+                      <span>{mode === 'buy' ? 'Beli via WA' : 'Jual via WA'}</span>
                     </button>
                   </div>
                 </div>

@@ -30,18 +30,7 @@ export default function CartDrawer({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        style={{
-          background: '#FFFFFF',
-          borderRadius: '14px',
-          width: '100%',
-          maxWidth: '520px',
-          maxHeight: '85vh',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.16)',
-          border: '1px solid #E2E8F0',
-          overflow: 'hidden',
-        }}
+        className="mp-cart-modal-card"
         onClick={(e) => e.stopPropagation()}
       >
         

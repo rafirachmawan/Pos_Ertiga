@@ -232,19 +232,6 @@ export default function App() {
   const totalCartCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const totalCartPrice = cart.reduce((sum, item) => sum + item.harga_jual * item.qty, 0);
 
-  // Determine section title for all patent tabs
-  const getSectionTitle = () => {
-    if (searchQuery) return `Hasil Pencarian "${searchQuery}"`;
-    if (activeSpecialTab === 'gold') return 'Logam Mulia Emas 24K';
-    if (activeSpecialTab === 'smm') return 'Booster Sosial Media (SMM Panel)';
-    if (activeSpecialTab === 'ppob') return 'Top Up & Tagihan Digital (PPOB)';
-    if (activeSpecialTab === 'webdev') return 'Jasa Pembuatan Website & Aplikasi';
-    if (selectedCategory !== null) {
-      const cat = categories.find((c) => c.id === selectedCategory);
-      return cat ? `Pakaian - ${cat.nama_kategori}` : 'Koleksi Pakaian';
-    }
-    return 'Koleksi Pakaian';
-  };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F5F6F8' }}>
@@ -301,43 +288,19 @@ export default function App() {
 
       {/* === SPECIAL TAB FULL PAGE VIEW === */}
       {activeSpecialTab ? (
-        <main className="marketplace-container" style={{ flex: 1, paddingBottom: '30px', paddingTop: '20px' }}>
+        <main className="marketplace-container mp-special-tab-main" style={{ flex: 1 }}>
           {/* Breadcrumb / Back Navigation */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '20px',
-            padding: '14px 20px',
-            background: '#FFFFFF',
-            borderRadius: '12px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-          }}>
+          <div className="mp-breadcrumb-card">
             <button
               onClick={handleBackToHome}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'none',
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-                padding: '8px 14px',
-                cursor: 'pointer',
-                fontSize: '13px',
-                fontWeight: '600',
-                color: '#03AC0E',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => { e.target.style.background = '#F0FFF4'; e.target.style.borderColor = '#03AC0E'; }}
-              onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.borderColor = '#E5E7EB'; }}
+              className="mp-breadcrumb-back-btn"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
-              Kembali
+              <span>Kembali</span>
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6B7280' }}>
+            <div className="mp-breadcrumb-trail">
               <span
                 style={{ cursor: 'pointer', color: '#03AC0E', fontWeight: '500' }}
                 onClick={handleBackToHome}
@@ -355,13 +318,7 @@ export default function App() {
           </div>
 
           {/* Special Section Content */}
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: '12px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-            padding: '24px',
-            minHeight: '400px',
-          }}>
+          <div className="mp-special-content-card">
             {activeSpecialTab === 'gold' && (
               <LogamMuliaSection storeInfo={storeInfo} embedded />
             )}
@@ -392,32 +349,13 @@ export default function App() {
 
           {/* ── Section Divider: Flash Sale ── */}
           <div className="marketplace-container">
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              margin: '28px 0 18px',
-            }}>
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, #E5E7EB, #D1D5DB)' }} />
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 18px',
-                background: '#FFF7ED',
-                border: '1px solid #FED7AA',
-                borderRadius: '20px',
-                fontSize: '12px',
-                fontWeight: '700',
-                color: '#EA580C',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}>
+            <div className="mp-section-divider">
+              <div className="mp-section-divider-line" />
+              <div className="mp-section-divider-badge mp-divider-flash">
                 <span style={{ fontSize: '14px' }}>⚡</span>
-                Promo & Flash Sale
+                <span>Promo & Flash Sale</span>
               </div>
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to left, transparent, #E5E7EB, #D1D5DB)' }} />
+              <div className="mp-section-divider-line" />
             </div>
           </div>
 
@@ -431,32 +369,13 @@ export default function App() {
 
           {/* ── Section Divider: Koleksi Pakaian ── */}
           <div className="marketplace-container">
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              margin: '28px 0 18px',
-            }}>
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, #E5E7EB, #D1D5DB)' }} />
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 18px',
-                background: '#F0FDF4',
-                border: '1px solid #BBF7D0',
-                borderRadius: '20px',
-                fontSize: '12px',
-                fontWeight: '700',
-                color: '#16A34A',
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}>
+            <div className="mp-section-divider">
+              <div className="mp-section-divider-line" />
+              <div className="mp-section-divider-badge mp-divider-catalog">
                 <span style={{ fontSize: '14px' }}>👕</span>
-                Katalog Produk
+                <span>Katalog Produk</span>
               </div>
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to left, transparent, #E5E7EB, #D1D5DB)' }} />
+              <div className="mp-section-divider-line" />
             </div>
           </div>
 
@@ -464,13 +383,13 @@ export default function App() {
           <main className="marketplace-container" ref={productsSectionRef} style={{ flex: 1, paddingBottom: '30px' }}>
             
             <div id="unified-feed" className="mp-section-card">
-              {/* Section Header */}
-              <div className="mp-section-header" style={{ borderBottom: 'none', paddingBottom: '8px', marginBottom: '4px' }}>
-                <h2 className="mp-section-title">
-                  <span>{getSectionTitle() || ''}</span>
-                </h2>
+              {/* Search Result Header (only shown during active search) */}
+              {searchQuery && (
+                <div className="mp-section-header" style={{ borderBottom: 'none', paddingBottom: '8px', marginBottom: '8px' }}>
+                  <h2 className="mp-section-title">
+                    <span>Hasil Pencarian "{searchQuery}"</span>
+                  </h2>
 
-                {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
                     style={{
@@ -484,8 +403,8 @@ export default function App() {
                   >
                     Reset Pencarian ✕
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Tokopedia-style tab bar (For You + Categories) */}
               <CategoryFilter

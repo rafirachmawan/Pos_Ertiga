@@ -85,7 +85,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
         </button>
 
         {/* Scrollable Content Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+        <div className="mp-detail-body" style={{ flex: 1, overflowY: 'auto' }}>
           <div
             style={{
               display: 'grid',
@@ -300,17 +300,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart }) {
         </div>
 
         {/* Action Footer */}
-        <div
-          style={{
-            padding: '14px 24px',
-            borderTop: '1px solid #E2E8F0',
-            background: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-          }}
-        >
+        <div className="mp-detail-footer">
           {!isOutOfStock ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

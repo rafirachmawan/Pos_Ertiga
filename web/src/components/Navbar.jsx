@@ -98,10 +98,11 @@ export default function Navbar({
               <div className="mp-search-input-box">
                 <input
                   type="text"
-                  placeholder="Cari produk pakaian, hijab, pulsa, atau layanan digital..."
+                  placeholder="Cari pakaian, hijab, emas, pulsa..."
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   className="mp-search-input"
+                  aria-label="Cari produk dan layanan"
                 />
                 {searchQuery && (
                   <button
