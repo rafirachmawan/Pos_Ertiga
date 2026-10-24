@@ -47,6 +47,23 @@ function normalizeBarang(body) {
   const deskripsi = String(body.deskripsi ?? '').trim();
   const kondisi = String(body.kondisi || 'Baru').trim().slice(0, 50);
 
+  let galeriGambar = '[]';
+  if (Array.isArray(body.galeri_gambar)) {
+    galeriGambar = JSON.stringify(body.galeri_gambar.filter(Boolean));
+  } else if (typeof body.galeri_gambar === 'string') {
+    const trimmed = body.galeri_gambar.trim();
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          galeriGambar = JSON.stringify(parsed.filter(Boolean));
+        }
+      } catch {}
+    } else if (trimmed) {
+      galeriGambar = JSON.stringify([trimmed]);
+    }
+  }
+
   return {
     barcode,
     nama_barang: namaBarang,
@@ -54,6 +71,7 @@ function normalizeBarang(body) {
     harga_jual: hargaJual,
     stok,
     gambar,
+    galeri_gambar: galeriGambar,
     satuan: String(body.satuan || 'pcs').slice(0, 20),
     kategori_id: kategoriId,
     berat_gram: beratGram,
@@ -116,8 +134,8 @@ router.post(
     try {
       const result = await run(
         `INSERT INTO barang
-         (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, satuan, kategori_id, berat_gram, tampil_online, deskripsi, kondisi)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         (barcode, nama_barang, harga_modal, harga_jual, stok, gambar, galeri_gambar, satuan, kategori_id, berat_gram, tampil_online, deskripsi, kondisi)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.barcode,
           data.nama_barang,
@@ -125,6 +143,7 @@ router.post(
           data.harga_jual,
           data.stok,
           data.gambar,
+          data.galeri_gambar,
           data.satuan,
           data.kategori_id,
           data.berat_gram,
@@ -169,7 +188,7 @@ router.put(
       const result = await run(
         `UPDATE barang
          SET barcode = ?, nama_barang = ?, harga_modal = ?, harga_jual = ?,
-             stok = ?, gambar = ?, satuan = ?, kategori_id = ?, berat_gram = ?, tampil_online = ?, deskripsi = ?, kondisi = ?
+             stok = ?, gambar = ?, galeri_gambar = ?, satuan = ?, kategori_id = ?, berat_gram = ?, tampil_online = ?, deskripsi = ?, kondisi = ?
          WHERE id = ?`,
         [
           data.barcode,
@@ -178,6 +197,7 @@ router.put(
           data.harga_jual,
           data.stok,
           data.gambar,
+          data.galeri_gambar,
           data.satuan,
           data.kategori_id,
           data.berat_gram,

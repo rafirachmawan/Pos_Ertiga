@@ -22,6 +22,7 @@ const DEFAULT_FORM_DATA = {
   stok: 0,
   satuan: 'pcs',
   gambar: '',
+  galeri_gambar: [],
   kategori_id: '',
   berat_gram: 200,
   tampil_online: 1,
@@ -173,6 +174,34 @@ const Inventory = () => {
     }
   };
 
+  const handleGalleryFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const currentGallery = [...(formData.galeri_gambar || [])];
+    const maxGalleryImages = 8;
+    const remainingSlots = maxGalleryImages - currentGallery.length;
+    if (remainingSlots <= 0) {
+      alert(`Maksimal ${maxGalleryImages} foto galeri sudah tercapai.`);
+      e.target.value = '';
+      return;
+    }
+
+    const filesToUpload = files.slice(0, remainingSlots);
+    try {
+      const compressedList = await Promise.all(
+        filesToUpload.map((f) => compressImage(f, 900, 0.82))
+      );
+      setFormData((prev) => ({
+        ...prev,
+        galeri_gambar: [...(prev.galeri_gambar || []), ...compressedList],
+      }));
+    } catch (err) {
+      alert('Gagal memproses gambar: ' + (err.message || 'Error'));
+    }
+    e.target.value = '';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const url = formData.id ? `/api/barang/${formData.id}` : '/api/barang';
@@ -199,12 +228,24 @@ const Inventory = () => {
   };
 
   const editItem = (item) => {
+    // Parse galeri_gambar from JSON string to array
+    let parsedGaleri = [];
+    try {
+      if (typeof item.galeri_gambar === 'string' && item.galeri_gambar.trim()) {
+        parsedGaleri = JSON.parse(item.galeri_gambar);
+        if (!Array.isArray(parsedGaleri)) parsedGaleri = [];
+      } else if (Array.isArray(item.galeri_gambar)) {
+        parsedGaleri = item.galeri_gambar;
+      }
+    } catch { parsedGaleri = []; }
+
     setFormData({
       ...item,
       berat_gram: item.berat_gram ?? 200,
       tampil_online: item.tampil_online !== undefined ? item.tampil_online : 1,
       deskripsi: item.deskripsi || '',
       kondisi: item.kondisi || 'Baru',
+      galeri_gambar: parsedGaleri,
     });
     setDisplayHargaModal(formatRupiah(item.harga_modal));
     setDisplayHargaJual(formatRupiah(item.harga_jual));
@@ -1136,6 +1177,109 @@ const Inventory = () => {
                       onChange={(e) => setImageUrlInput(e.target.value)}
                       style={{ padding: '9px 12px', width: '100%', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12.5px', boxSizing: 'border-box' }}
                     />
+                  </div>
+                )}
+              </div>
+
+              {/* Galeri Foto Tambahan (Multi Image untuk Detail Produk Web) */}
+              <div className="form-group" style={{ background: '#F0FDF4', padding: '16px', borderRadius: '10px', border: '1px solid #BBF7D0', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ margin: 0, fontWeight: '700', fontSize: '13px', color: '#166534' }}>
+                    📸 Galeri Foto Tambahan (Maks. 8 Foto)
+                  </label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#15803D' }}>
+                    {(formData.galeri_gambar || []).length} / 8 Foto
+                  </span>
+                </div>
+                <small style={{ color: '#4B5563', display: 'block', marginBottom: '12px', fontSize: '11px', lineHeight: '1.4' }}>
+                  Foto tambahan akan ditampilkan di thumbnail halaman detail produk storefront web. Anda bisa mengupload foto langsung dari galeri/perangkat atau memasukkan URL foto.
+                </small>
+
+                {/* List existing gallery images */}
+                {(formData.galeri_gambar || []).length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+                    {(formData.galeri_gambar || []).map((url, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', padding: '6px 10px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', width: '20px' }}>
+                          #{idx + 1}
+                        </span>
+                        <img
+                          src={url}
+                          alt={`Galeri ${idx + 1}`}
+                          style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #CBD5E1', flexShrink: 0, background: '#F8FAFC' }}
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                        <input
+                          type="text"
+                          value={url.startsWith('data:image') ? '[Foto Upload File]' : url}
+                          readOnly={url.startsWith('data:image')}
+                          onChange={(e) => {
+                            if (url.startsWith('data:image')) return;
+                            const updated = [...formData.galeri_gambar];
+                            updated[idx] = e.target.value;
+                            setFormData({ ...formData, galeri_gambar: updated });
+                          }}
+                          style={{ flex: 1, padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid #CBD5E1', boxSizing: 'border-box', background: url.startsWith('data:image') ? '#F1F5F9' : '#FFFFFF' }}
+                          placeholder="https://..."
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = formData.galeri_gambar.filter((_, i) => i !== idx);
+                            setFormData({ ...formData, galeri_gambar: updated });
+                          }}
+                          style={{
+                            width: '28px', height: '28px', borderRadius: '6px', background: '#FEE2E2', color: '#DC2626',
+                            border: '1px solid #FECACA', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '13px', fontWeight: '700', cursor: 'pointer', flexShrink: 0,
+                          }}
+                          title="Hapus foto ini"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Upload & Add buttons */}
+                {(formData.galeri_gambar || []).length < 8 && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <label
+                      style={{
+                        padding: '8px 14px', fontSize: '12px', fontWeight: '700', borderRadius: '6px',
+                        background: '#03AC0E', color: '#FFFFFF', cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                      📁 Upload Foto dari Perangkat
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleGalleryFileUpload}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({ ...formData, galeri_gambar: [...(formData.galeri_gambar || []), ''] });
+                      }}
+                      style={{
+                        padding: '8px 14px', fontSize: '12px', fontWeight: '600', borderRadius: '6px',
+                        background: '#DCFCE7', color: '#166534', border: '1px solid #BBF7D0', cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      }}
+                    >
+                      + Tambah URL Gambar
+                    </button>
                   </div>
                 )}
               </div>

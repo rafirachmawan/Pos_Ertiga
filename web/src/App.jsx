@@ -5,7 +5,7 @@ import MarketplaceQuickIcons from './components/MarketplaceQuickIcons';
 import FlashSaleSection from './components/FlashSaleSection';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
-import ProductDetailModal from './components/ProductDetailModal';
+import ProductDetailPage from './components/ProductDetailPage';
 import CartDrawer from './components/CartDrawer';
 import CheckoutModal from './components/CheckoutModal';
 import Footer from './components/Footer';
@@ -56,7 +56,42 @@ export default function App() {
   };
 
   // Navigation & Tab helpers with smooth loading feedback
+  const handleSelectProduct = (product) => {
+    if (!product) return;
+    triggerLoadingTransition(240, `Membuka ${product.nama_barang || 'Produk'}...`);
+    setSelectedProduct(product);
+    try {
+      const newUrl = `${window.location.pathname}?produk=${product.id}`;
+      window.history.pushState({ productId: product.id }, '', newUrl);
+    } catch (e) {
+      console.warn(e);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackFromProductDetail = () => {
+    triggerLoadingTransition(200, 'Kembali ke Katalog...');
+    setSelectedProduct(null);
+    try {
+      window.history.pushState({}, '', window.location.pathname);
+    } catch (e) {
+      console.warn(e);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBuyNow = (product, qty = 1) => {
+    handleAddToCart(product, qty);
+    setIsCheckoutOpen(true);
+  };
+
   const handleSelectSpecialTab = (tabId) => {
+    if (selectedProduct !== null) {
+      setSelectedProduct(null);
+      try {
+        window.history.pushState({}, '', window.location.pathname);
+      } catch (e) {}
+    }
     if (activeSpecialTab === tabId) return;
     const tabNames = {
       gold: 'Logam Mulia Emas 24K',
@@ -72,6 +107,10 @@ export default function App() {
   };
 
   const handleBackToHome = () => {
+    if (selectedProduct !== null) {
+      handleBackFromProductDetail();
+      return;
+    }
     if (activeSpecialTab !== null) {
       triggerLoadingTransition(300, 'Kembali ke Beranda...');
       setActiveSpecialTab(null);
@@ -80,6 +119,12 @@ export default function App() {
   };
 
   const handleSelectCategory = (catId) => {
+    if (selectedProduct !== null) {
+      setSelectedProduct(null);
+      try {
+        window.history.pushState({}, '', window.location.pathname);
+      } catch (e) {}
+    }
     if (selectedCategory !== catId || activeSpecialTab !== null) {
       const cat = categories.find((c) => c.id === catId);
       const catName = cat ? cat.nama_kategori : 'Semua Produk';
@@ -156,6 +201,37 @@ export default function App() {
     }
     init();
   }, []);
+
+  // Handle direct URL deep-linking (?produk=123) and browser Back/Forward buttons
+  useEffect(() => {
+    if (products.length === 0) return;
+
+    const checkUrlProduct = () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const prodId = urlParams.get('produk') || urlParams.get('p');
+        if (prodId) {
+          const found = products.find((p) => String(p.id) === String(prodId));
+          if (found) {
+            setSelectedProduct(found);
+            return;
+          }
+        }
+        setSelectedProduct(null);
+      } catch (e) {
+        console.warn(e);
+      }
+    };
+
+    checkUrlProduct();
+
+    const handlePopState = () => {
+      checkUrlProduct();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [products]);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -286,8 +362,20 @@ export default function App() {
         onSelectSpecialTab={handleSelectSpecialTab}
       />
 
-      {/* === SPECIAL TAB FULL PAGE VIEW === */}
-      {activeSpecialTab ? (
+      {/* === 1. PRODUCT DETAIL PAGE VIEW (Shopee & Tokopedia Style) === */}
+      {selectedProduct ? (
+        <ProductDetailPage
+          product={selectedProduct}
+          allProducts={products}
+          storeInfo={storeInfo}
+          onBack={handleBackFromProductDetail}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+          onSelectProduct={handleSelectProduct}
+          totalCartCount={totalCartCount}
+          onOpenCart={() => setIsCartOpen(true)}
+        />
+      ) : activeSpecialTab ? (
         <main className="marketplace-container mp-special-tab-main" style={{ flex: 1 }}>
           {/* Breadcrumb / Back Navigation */}
           <div className="mp-breadcrumb-card">
@@ -362,7 +450,7 @@ export default function App() {
           {/* 4. Flash Sale */}
           <FlashSaleSection
             products={products}
-            onSelectProduct={setSelectedProduct}
+            onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             onOpenDigitalModal={handleOpenDigitalModal}
           />
@@ -450,7 +538,7 @@ export default function App() {
                       key={product.id}
                       product={product}
                       onAddToCart={handleAddToCart}
-                      onSelectProduct={setSelectedProduct}
+                      onSelectProduct={handleSelectProduct}
                     />
                   ))}
                 </div>
@@ -461,8 +549,8 @@ export default function App() {
         </>
       )}
 
-      {/* Floating Cart Button */}
-      {totalCartCount > 0 && (
+      {/* Floating Cart Button (only on desktop when cart has items) */}
+      {totalCartCount > 0 && !selectedProduct && (
         <button
           className="floating-cart-btn"
           onClick={() => setIsCartOpen(true)}
@@ -477,14 +565,6 @@ export default function App() {
       )}
 
       {/* Modals & Drawers */}
-      {selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          onAddToCart={handleAddToCart}
-        />
-      )}
-
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}

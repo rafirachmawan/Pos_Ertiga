@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 15;
+const LATEST_VERSION = 16;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -1137,6 +1137,13 @@ const migrations = [
         'url_website',
         "TEXT DEFAULT 'https://pos-ertiga-yl9x.vercel.app/'"
       );
+    },
+  },
+  {
+    version: 16,
+    name: 'tambah galeri_gambar di tabel barang untuk multiple product images',
+    async up(db) {
+      await addColumnIfMissing(db, 'barang', 'galeri_gambar', "TEXT DEFAULT '[]'");
     },
   },
 ];
