@@ -1008,6 +1008,7 @@ const POS = () => {
               borderRadius: '14px',
               maxWidth: '640px',
               width: '100%',
+              height: '500px',
               maxHeight: '90vh',
               display: 'flex',
               flexDirection: 'column',
@@ -1055,14 +1056,15 @@ const POS = () => {
                 onClick={() => setDigitalTab('quick')}
                 style={{
                   flex: 1,
-                  padding: '10px',
+                  padding: '11px',
                   background: digitalTab === 'quick' ? '#FFFFFF' : 'transparent',
                   border: 'none',
                   borderBottom: digitalTab === 'quick' ? '2px solid #0F172A' : 'none',
-                  fontWeight: '600',
-                  fontSize: '12.5px',
+                  fontWeight: '700',
+                  fontSize: '13px',
                   color: digitalTab === 'quick' ? '#0F172A' : '#64748B',
                   cursor: 'pointer',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 Pilih Cepat PPOB / Pulsa / Listrik
@@ -1072,14 +1074,15 @@ const POS = () => {
                 onClick={() => setDigitalTab('manual')}
                 style={{
                   flex: 1,
-                  padding: '10px',
+                  padding: '11px',
                   background: digitalTab === 'manual' ? '#FFFFFF' : 'transparent',
                   border: 'none',
                   borderBottom: digitalTab === 'manual' ? '2px solid #0F172A' : 'none',
-                  fontWeight: '600',
-                  fontSize: '12.5px',
+                  fontWeight: '700',
+                  fontSize: '13px',
                   color: digitalTab === 'manual' ? '#0F172A' : '#64748B',
                   cursor: 'pointer',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 Input Manual / Bebas
@@ -1087,9 +1090,9 @@ const POS = () => {
             </div>
 
             {/* Modal Content */}
-            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
               {digitalTab === 'quick' ? (
-                <div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   {/* Category Filter Chips */}
                   <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', overflowX: 'auto', paddingBottom: '2px' }}>
                     {[
@@ -1122,11 +1125,11 @@ const POS = () => {
 
                   {/* Grid of PPOB items */}
                   {ppobItems.length === 0 ? (
-                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748B', fontSize: '13px' }}>
+                    <div style={{ padding: '40px', textAlign: 'center', color: '#64748B', fontSize: '13px' }}>
                       Memuat daftar produk PPOB...
                     </div>
                   ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(185px, 1fr))', gap: '10px' }}>
                       {ppobItems
                         .filter((p) => ppobFilter === 'all' || p.kategori_kode === ppobFilter)
                         .map((p) => (
@@ -1144,20 +1147,22 @@ const POS = () => {
                               background: '#FFFFFF',
                               border: '1px solid #E2E8F0',
                               borderRadius: '8px',
-                              padding: '10px 12px',
+                              padding: '11px 13px',
                               display: 'flex',
                               flexDirection: 'column',
                               justifyContent: 'space-between',
                               cursor: 'pointer',
-                              transition: 'border-color 0.15s ease, background 0.15s ease',
+                              transition: 'all 0.15s ease',
                             }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.borderColor = '#0F172A';
                               e.currentTarget.style.background = '#F8FAFC';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.borderColor = '#E2E8F0';
                               e.currentTarget.style.background = '#FFFFFF';
+                              e.currentTarget.style.transform = 'none';
                             }}
                           >
                             <div>
@@ -1189,80 +1194,192 @@ const POS = () => {
                     if (Number(manualForm.harga_jual) <= 0) return alert('Harga jual harus lebih dari 0');
                     addCustomToCart(manualForm);
                   }}
-                  style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                  style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}
                 >
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                      Nama Item / Layanan (misal: Pulsa Telkomsel 50rb, Token PLN 100rb, Jasa Print, dll.) *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="mis. Pulsa Telkomsel 50.000"
-                      value={manualForm.nama_barang}
-                      onChange={(e) => setManualForm({ ...manualForm, nama_barang: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    
+                    {/* Nama Item / Layanan Input */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                        Harga Jual *
+                      <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: '#1E293B', marginBottom: '6px' }}>
+                        Nama Item / Layanan <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
                         type="text"
                         required
-                        placeholder="Rp 0"
-                        value={manualForm.harga_jual ? `Rp ${Number(manualForm.harga_jual).toLocaleString('id-ID')}` : ''}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          setManualForm({ ...manualForm, harga_jual: val ? Number(val) : '' });
+                        placeholder="Contoh: Pulsa Telkomsel 50.000 / Token PLN 100.000 / Jasa Print"
+                        value={manualForm.nama_barang}
+                        onChange={(e) => setManualForm({ ...manualForm, nama_barang: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          border: '1px solid #CBD5E1',
+                          fontSize: '13.5px',
+                          boxSizing: 'border-box',
+                          outline: 'none',
+                          color: '#0F172A',
                         }}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: '700', boxSizing: 'border-box' }}
                       />
                     </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                        Harga Modal (opsional untuk laba)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Rp 0"
-                        value={manualForm.harga_modal ? `Rp ${Number(manualForm.harga_modal).toLocaleString('id-ID')}` : ''}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          setManualForm({ ...manualForm, harga_modal: val ? Number(val) : '' });
-                        }}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                      />
+
+                    {/* Grid: Harga Jual & Harga Modal */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: '#1E293B', marginBottom: '6px' }}>
+                          Harga Jual <span style={{ color: '#EF4444' }}>*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Rp 0"
+                          value={manualForm.harga_jual ? `Rp ${Number(manualForm.harga_jual).toLocaleString('id-ID')}` : ''}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            setManualForm({ ...manualForm, harga_jual: val ? Number(val) : '' });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: '1px solid #CBD5E1',
+                            fontSize: '14px',
+                            fontWeight: '700',
+                            boxSizing: 'border-box',
+                            color: '#0F172A',
+                            outline: 'none',
+                          }}
+                        />
+
+                        {/* Nominal Cepat Minimalis */}
+                        <div style={{ display: 'flex', gap: '5px', marginTop: '7px', flexWrap: 'wrap' }}>
+                          {[10000, 20000, 25000, 50000, 100000].map((nom) => (
+                            <button
+                              key={nom}
+                              type="button"
+                              onClick={() => setManualForm((prev) => ({ ...prev, harga_jual: nom }))}
+                              style={{
+                                padding: '3px 8px',
+                                borderRadius: '4px',
+                                border: '1px solid #E2E8F0',
+                                background: '#F8FAFC',
+                                color: '#475569',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {(nom / 1000)}rb
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: '#1E293B', marginBottom: '6px' }}>
+                          Harga Modal <span style={{ fontSize: '11px', fontWeight: '400', color: '#64748B' }}>(opsional)</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Rp 0"
+                          value={manualForm.harga_modal ? `Rp ${Number(manualForm.harga_modal).toLocaleString('id-ID')}` : ''}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            setManualForm({ ...manualForm, harga_modal: val ? Number(val) : '' });
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            borderRadius: '8px',
+                            border: '1px solid #CBD5E1',
+                            fontSize: '14px',
+                            boxSizing: 'border-box',
+                            color: '#475569',
+                            outline: 'none',
+                          }}
+                        />
+                        <span style={{ display: 'block', fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+                          Digunakan untuk menghitung laba bersih
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Baris Jumlah & Ringkasan Transaksi */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0', marginTop: '2px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '700', color: '#1E293B' }}>
+                          Jumlah (Qty):
+                        </span>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#FFFFFF', borderRadius: '8px', border: '1.5px solid #CBD5E1', overflow: 'hidden', height: '38px' }}>
+                          <button
+                            type="button"
+                            onClick={() => setManualForm((prev) => ({ ...prev, qty: Math.max(1, (Number(prev.qty) || 1) - 1) }))}
+                            style={{ width: '38px', height: '38px', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: '18px', fontWeight: '700', color: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', userSelect: 'none' }}
+                          >
+                            −
+                          </button>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={manualForm.qty}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              setManualForm({ ...manualForm, qty: val ? Math.max(1, Number(val)) : 1 });
+                            }}
+                            style={{
+                              width: '56px',
+                              height: '38px',
+                              lineHeight: '38px',
+                              padding: 0,
+                              margin: 0,
+                              border: 'none',
+                              borderLeft: '1px solid #E2E8F0',
+                              borderRight: '1px solid #E2E8F0',
+                              textAlign: 'center',
+                              fontSize: '16px',
+                              fontWeight: '800',
+                              color: '#0F172A',
+                              outline: 'none',
+                              background: '#FFFFFF',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setManualForm((prev) => ({ ...prev, qty: (Number(prev.qty) || 1) + 1 }))}
+                            style={{ width: '38px', height: '38px', border: 'none', background: '#F1F5F9', cursor: 'pointer', fontSize: '18px', fontWeight: '700', color: '#334155', display: 'flex', alignItems: 'center', justifyContent: 'center', userSelect: 'none' }}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '11.5px', color: '#64748B', fontWeight: '500' }}>Total Transaksi:</div>
+                        <div style={{ fontSize: '17px', fontWeight: '800', color: '#0F172A', marginTop: '1px' }}>
+                          Rp {((Number(manualForm.harga_jual) || 0) * (Number(manualForm.qty) || 1)).toLocaleString('id-ID')}
+                        </div>
+                        {Number(manualForm.harga_modal) > 0 && (
+                          <div style={{ fontSize: '11.5px', color: '#16A34A', fontWeight: '600', marginTop: '1px' }}>
+                            Est. Laba: +Rp {(((Number(manualForm.harga_jual) || 0) - (Number(manualForm.harga_modal) || 0)) * (Number(manualForm.qty) || 1)).toLocaleString('id-ID')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                   </div>
 
-                  <div style={{ width: '120px' }}>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
-                      Jumlah (Qty)
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={manualForm.qty}
-                      onChange={(e) => setManualForm({ ...manualForm, qty: Math.max(1, Number(e.target.value)) })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '16px', borderTop: '1px solid #F1F5F9' }}>
                     <button
                       type="button"
                       onClick={() => setShowDigitalModal(false)}
-                      style={{ padding: '8px 16px', background: '#F1F5F9', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: '#475569' }}
+                      style={{ padding: '9px 18px', background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: '7px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: '#475569' }}
                     >
                       Batal
                     </button>
                     <button
                       type="submit"
-                      style={{ padding: '8px 20px', background: '#0F172A', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', color: '#FFFFFF' }}
+                      style={{ padding: '9px 24px', background: '#0F172A', border: 'none', borderRadius: '7px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', color: '#FFFFFF', boxShadow: '0 4px 12px rgba(15, 23, 42, 0.2)' }}
                     >
                       + Masukkan ke Keranjang Kasir
                     </button>

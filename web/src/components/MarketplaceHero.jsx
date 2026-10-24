@@ -179,18 +179,7 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
     setIsPaused(false);
   };
 
-  const handleActionClick = (e, slide) => {
-    if (didDragRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    if (slide.link) {
-      window.open(slide.link, '_blank');
-    } else {
-      onExploreProducts && onExploreProducts();
-    }
-  };
+
 
   return (
     <section className="mp-hero-section">
@@ -285,14 +274,13 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
                           {slide.subjudul}
                         </p>
                       )}
-                      <button
-                        type="button"
-                        onClick={(e) => handleActionClick(e, slide)}
+                      <span
                         className="mp-carousel-btn"
+                        style={{ cursor: 'default', pointerEvents: 'none' }}
                       >
                         <span>Lihat Selengkapnya</span>
                         <span className="mp-carousel-btn-arrow">→</span>
-                      </button>
+                      </span>
                     </div>
 
                     {/* Right Showcase: Image OR Decorative Floating Card */}

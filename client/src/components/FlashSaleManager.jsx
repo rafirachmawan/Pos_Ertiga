@@ -278,37 +278,63 @@ export default function FlashSaleManager() {
         </div>
 
         {/* Global Active Badge Toggle & Add Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            type="button"
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Interactive Toggle Switch */}
+          <div
             onClick={handleToggleGlobalActive}
-            title="Klik untuk menyalakan/mematikan seluruh banner Flash Sale di website toko"
+            title="Klik untuk mengaktifkan atau menonaktifkan Flash Sale di website"
             style={{
-              padding: '8px 14px',
-              borderRadius: '8px',
-              border: settings.aktif ? '1px solid #A7F3D0' : '1px solid #FECACA',
-              fontWeight: '700',
-              fontSize: '12.5px',
-              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              background: settings.aktif ? '#ECFDF5' : '#FEF2F2',
-              color: settings.aktif ? '#059669' : '#DC2626',
-              transition: 'all 0.15s ease',
+              gap: '10px',
+              padding: '6px 14px',
+              borderRadius: '9999px',
+              background: settings.aktif ? '#ECFDF5' : '#F1F5F9',
+              border: `1px solid ${settings.aktif ? '#A7F3D0' : '#E2E8F0'}`,
+              cursor: 'pointer',
+              userSelect: 'none',
+              transition: 'all 0.2s ease',
             }}
           >
+            {/* Toggle Switch Track & Knob */}
+            <div
+              style={{
+                width: '38px',
+                height: '22px',
+                borderRadius: '9999px',
+                background: settings.aktif ? '#10B981' : '#CBD5E1',
+                position: 'relative',
+                transition: 'background 0.2s ease',
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  background: '#FFFFFF',
+                  position: 'absolute',
+                  top: '2px',
+                  left: settings.aktif ? '18px' : '2px',
+                  transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+                }}
+              />
+            </div>
+
+            {/* Status Label */}
             <span
               style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: settings.aktif ? '#10B981' : '#EF4444',
-                boxShadow: settings.aktif ? '0 0 0 2px rgba(16, 185, 129, 0.2)' : 'none',
+                fontSize: '12.5px',
+                fontWeight: '700',
+                color: settings.aktif ? '#047857' : '#64748B',
+                whiteSpace: 'nowrap',
               }}
-            />
-            <span>{settings.aktif ? 'Flash Sale: Aktif di Web' : 'Flash Sale: Disembunyikan'}</span>
-          </button>
+            >
+              {settings.aktif ? 'Flash Sale: Aktif di Web' : 'Flash Sale: Nonaktif'}
+            </span>
+          </div>
 
           <button
             onClick={openCreateItem}
@@ -592,30 +618,6 @@ export default function FlashSaleManager() {
               <option value="product">Produk Fisik</option>
               <option value="digital">Layanan / Digital</option>
             </select>
-
-            {/* Add Button on Table Header */}
-            <button
-              onClick={openCreateItem}
-              style={{
-                height: '34px',
-                padding: '0 14px',
-                background: '#03AC0E',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = '#028A0B')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = '#03AC0E')}
-            >
-              <span>+</span>
-              <span>Tambah Item</span>
-            </button>
           </div>
         </div>
 
