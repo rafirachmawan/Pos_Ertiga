@@ -4,8 +4,6 @@ import { generateWhatsAppGoldUrl } from '../../lib/whatsapp';
 import { fetchPublicLogamMulia, FALLBACK_LOGAM_MULIA } from '../../lib/api';
 
 export default function GoldServiceModal({ isOpen, onClose, storeInfo }) {
-  if (!isOpen) return null;
-
   const [merks, setMerks] = useState(FALLBACK_LOGAM_MULIA);
   const [selectedMerkId, setSelectedMerkId] = useState(FALLBACK_LOGAM_MULIA[0]?.id || 1);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -60,6 +58,8 @@ export default function GoldServiceModal({ isOpen, onClose, storeInfo }) {
       setSelectedItem(null);
     }
   }, [selectedMerkId, availableItems]);
+
+  if (!isOpen) return null;
 
   const unitPrice = selectedItem
     ? Number(mode === 'buy' ? selectedItem.harga_jual : (selectedItem.harga_beli || selectedItem.harga_jual * 0.9))

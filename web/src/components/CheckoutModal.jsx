@@ -9,14 +9,14 @@ export default function CheckoutModal({
   storeInfo,
   onOrderSuccess,
 }) {
-  if (!isOpen) return null;
-
   const [customer, setCustomer] = useState({
     nama: '',
     telepon: '',
     alamat: '',
     catatan: '',
   });
+
+  if (!isOpen) return null;
 
   const totalWeight = cartItems.reduce((sum, item) => sum + (item.berat_gram || 0) * item.qty, 0);
   const subtotal = cartItems.reduce((sum, item) => sum + (item.harga_jual || 0) * item.qty, 0);

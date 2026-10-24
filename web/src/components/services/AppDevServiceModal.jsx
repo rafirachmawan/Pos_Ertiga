@@ -3,8 +3,6 @@ import { APP_DEV_DATA } from '../../data/digitalServices';
 import { generateWhatsAppAppDevUrl } from '../../lib/whatsapp';
 
 export default function AppDevServiceModal({ isOpen, onClose, storeInfo }) {
-  if (!isOpen) return null;
-
   const [selectedPackage, setSelectedPackage] = useState(APP_DEV_DATA.packages[1]); // Default E-Commerce
   const [projectBrief, setProjectBrief] = useState('');
   const [budgetRange, setBudgetRange] = useState('Rp 1.000.000 - Rp 3.000.000');
@@ -13,6 +11,8 @@ export default function AppDevServiceModal({ isOpen, onClose, storeInfo }) {
     telepon: '',
     email: '',
   });
+
+  if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -4,8 +4,6 @@ import { formatRupiah } from '../../lib/format';
 import { generateWhatsAppSmmUrl } from '../../lib/whatsapp';
 
 export default function RasxmediaServiceModal({ isOpen, onClose, storeInfo }) {
-  if (!isOpen) return null;
-
   const [activePlatform, setActivePlatform] = useState(RASXMEDIA_DATA.platforms[0]);
   const [selectedService, setSelectedService] = useState(RASXMEDIA_DATA.platforms[0].services[0]);
   const [selectedTier, setSelectedTier] = useState(RASXMEDIA_DATA.platforms[0].services[0].tiers[2]); // Default popular tier
@@ -14,6 +12,8 @@ export default function RasxmediaServiceModal({ isOpen, onClose, storeInfo }) {
     nama: '',
     telepon: '',
   });
+
+  if (!isOpen) return null;
 
   const handlePlatformChange = (p) => {
     setActivePlatform(p);

@@ -56,6 +56,19 @@ export default function FlashSaleSection({ products = [], onSelectProduct, onAdd
     return () => clearInterval(timer);
   }, []);
 
+  const gridRef = React.useRef(null);
+
+  const scrollGrid = (direction) => {
+    if (!gridRef.current) return;
+    const container = gridRef.current;
+    // Exactly 1 slide (the full width of 4 cards)
+    const scrollAmount = container.clientWidth;
+    container.scrollBy({
+      left: direction === 'next' ? scrollAmount : -scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
   // Settings & Items
   const settings = flashData?.settings || {
     judul: 'FLASH SALE',
@@ -73,19 +86,6 @@ export default function FlashSaleSection({ products = [], onSelectProduct, onAdd
   if (items.length === 0 && !loading) {
     return null;
   }
-
-  const gridRef = React.useRef(null);
-
-  const scrollGrid = (direction) => {
-    if (!gridRef.current) return;
-    const container = gridRef.current;
-    // Exactly 1 slide (the full width of 4 cards)
-    const scrollAmount = container.clientWidth;
-    container.scrollBy({
-      left: direction === 'next' ? scrollAmount : -scrollAmount,
-      behavior: 'smooth',
-    });
-  };
 
   return (
     <section id="flash-sale-section" style={{ marginBottom: '24px' }}>
