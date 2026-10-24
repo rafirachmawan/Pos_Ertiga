@@ -886,19 +886,34 @@ export default function FlashSaleManager() {
         )}
       </div>
 
-      {/* 4. Modal Tambah / Edit Item Flash Sale */}
+      {/* 4. Modal Pop Up Tambah / Edit Item Flash Sale */}
       {showItemModal && (
-        <div className="modal-backdrop" onClick={() => setShowItemModal(false)}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            backdropFilter: 'blur(3px)',
+            padding: '16px',
+            animation: 'fadeIn 0.15s ease-out',
+          }}
+          onClick={() => setShowItemModal(false)}
+        >
           <div
             style={{
               background: '#FFFFFF',
-              borderRadius: '12px',
-              maxWidth: '560px',
+              borderRadius: '16px',
+              maxWidth: '620px',
               width: '100%',
               maxHeight: '90vh',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #E2E8F0',
               overflow: 'hidden',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -906,109 +921,197 @@ export default function FlashSaleManager() {
             {/* Modal Header */}
             <div
               style={{
-                padding: '16px 20px',
+                padding: '18px 24px',
                 borderBottom: '1px solid #E5E7EB',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                background: '#FAFAFA',
               }}
             >
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>
-                {editId ? 'Edit Item Flash Sale' : 'Tambah Item Flash Sale'}
-              </h3>
+              <div>
+                <h3 style={{ fontSize: '17px', fontWeight: '800', color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#EA580C', fontSize: '18px' }}>⚡</span>
+                  {editId ? 'Edit Item Flash Sale' : 'Tambah Item Flash Sale'}
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748B' }}>
+                  Atur produk promosi berjangka, harga diskon, dan status tayang di toko online.
+                </p>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowItemModal(false)}
-                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#9CA3AF' }}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  border: '1px solid #E2E8F0',
+                  background: '#FFFFFF',
+                  fontSize: '15px',
+                  cursor: 'pointer',
+                  color: '#64748B',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#F1F5F9';
+                  e.currentTarget.style.color = '#0F172A';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#FFFFFF';
+                  e.currentTarget.style.color = '#64748B';
+                }}
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleSaveItem} style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
-              {/* Quick Select from Inventory */}
-              <div style={{ marginBottom: '16px', background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
-                  Pilih Cepat dari Inventori Toko (Opsional)
-                </label>
+            <form onSubmit={handleSaveItem} style={{ flex: 1, overflowY: 'auto', padding: '22px 24px' }}>
+              
+              {/* Ambil Cepat dari Inventori Toko */}
+              <div style={{ marginBottom: '18px', background: '#F8FAFC', padding: '14px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>📦</span>
+                    <span>Pilih Cepat dari Inventori Toko (Opsional)</span>
+                  </label>
+                  {form.barang_id && (
+                    <button
+                      type="button"
+                      onClick={() => setForm((prev) => ({ ...prev, barang_id: '' }))}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '11px',
+                        color: '#EF4444',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      ✕ Lepas Hubungan Barang
+                    </button>
+                  )}
+                </div>
+
                 <select
                   value={form.barang_id || ''}
                   onChange={handleSelectBarang}
                   style={{
                     width: '100%',
-                    padding: '8px 10px',
-                    borderRadius: '6px',
+                    padding: '9px 12px',
+                    borderRadius: '8px',
                     border: '1px solid #CBD5E1',
                     fontSize: '13px',
                     background: '#FFFFFF',
+                    color: '#0F172A',
+                    outline: 'none',
                   }}
                 >
-                  <option value="">-- Pilih Barang Toko atau Input Manual --</option>
+                  <option value="">-- Pilih Barang dari Inventori Toko --</option>
                   {barangList.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.nama_barang} (Harga: Rp {formatRupiah(b.harga_jual)} | Stok: {b.stok})
+                      {b.nama_barang} ({b.barcode}) — Harga Toko: Rp {formatRupiah(b.harga_jual)} | Stok: {b.stok}
                     </option>
                   ))}
                 </select>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                  Jika memilih barang, nama, harga normal, dan foto akan otomatis terisi.
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '6px' }}>
+                  💡 Jika dipilih, nama barang, foto, dan harga asli akan otomatis terisi serta terhubung dengan stok produk fisik toko.
                 </div>
               </div>
 
-              {/* Nama Item */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                  Nama Item Flash Sale <span style={{ color: '#EF4444' }}>*</span>
+              {/* Tipe Promo: Modern Segmented Cards */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '8px' }}>
+                  Tipe Promo <span style={{ color: '#EF4444' }}>*</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={form.nama_item}
-                  onChange={(e) => setForm({ ...form, nama_item: e.target.value })}
-                  placeholder="mis. Kaos Hitam Polos Premium"
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
-                />
-              </div>
-
-              {/* Tipe Promo */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                  Tipe Promo
-                </label>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div
+                    onClick={() => setForm({ ...form, tipe: 'product' })}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: form.tipe === 'product' ? '2px solid #03AC0E' : '1px solid #CBD5E1',
+                      background: form.tipe === 'product' ? '#F0FDF4' : '#FFFFFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
                     <input
                       type="radio"
-                      name="tipe"
+                      name="tipe_promo"
                       value="product"
                       checked={form.tipe === 'product'}
-                      onChange={(e) => setForm({ ...form, tipe: e.target.value })}
+                      onChange={() => setForm({ ...form, tipe: 'product' })}
+                      style={{ accentColor: '#03AC0E' }}
                     />
-                    Produk Fisik (Dapat ditambahkan ke keranjang)
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer' }}>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'product' ? '#065F46' : '#1E293B' }}>
+                        🛍️ Produk Fisik
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                        Bisa dipesan ke keranjang belanja
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setForm({ ...form, tipe: 'digital' })}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: form.tipe === 'digital' ? '2px solid #3B82F6' : '1px solid #CBD5E1',
+                      background: form.tipe === 'digital' ? '#EFF6FF' : '#FFFFFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
                     <input
                       type="radio"
-                      name="tipe"
+                      name="tipe_promo"
                       value="digital"
                       checked={form.tipe === 'digital'}
-                      onChange={(e) => setForm({ ...form, tipe: e.target.value })}
+                      onChange={() => setForm({ ...form, tipe: 'digital' })}
+                      style={{ accentColor: '#3B82F6' }}
                     />
-                    Layanan / Promo Digital
-                  </label>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'digital' ? '#1D4ED8' : '#1E293B' }}>
+                        ⚡ Promo Digital / Jasa
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                        Arahkan ke pulsa, emas, atau SMM
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Target Link jika tipe digital */}
+              {/* Target Aksi (Hanya Muncul jika Tipe Digital) */}
               {form.tipe === 'digital' && (
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                    Target Aksi / Link
+                <div style={{ marginBottom: '18px', background: '#F0F9FF', padding: '12px 14px', borderRadius: '8px', border: '1px solid #BAE6FD' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#0369A1', marginBottom: '6px' }}>
+                    Target Aksi / Link Ketika Tombol Diklik
                   </label>
                   <select
                     value={form.target_link}
                     onChange={(e) => setForm({ ...form, target_link: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #7DD3FC',
+                      fontSize: '13px',
+                      background: '#FFFFFF',
+                    }}
                   >
                     <option value="deal-emas">Scroll ke Bagian Logam Mulia Emas 24K</option>
                     <option value="ppob">Buka Modal Top Up & Tagihan PPOB</option>
@@ -1018,25 +1121,91 @@ export default function FlashSaleManager() {
                 </div>
               )}
 
-              {/* URL Gambar */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                  URL Gambar Produk
+              {/* Nama Item Flash Sale */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                  Nama Item Flash Sale <span style={{ color: '#EF4444' }}>*</span>
                 </label>
                 <input
                   type="text"
-                  value={form.gambar}
-                  onChange={(e) => setForm({ ...form, gambar: e.target.value })}
-                  placeholder="https://... atau data:image/..."
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
+                  required
+                  value={form.nama_item}
+                  onChange={(e) => setForm({ ...form, nama_item: e.target.value })}
+                  placeholder="Contoh: Kaos Polos Pria Premium / Hijab Bella Square"
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                  }}
                 />
               </div>
 
-              {/* Harga Asli & Harga Flash Sale */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+              {/* URL Gambar Produk dengan Live Preview */}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                  URL Gambar Produk (Opsional)
+                </label>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={form.gambar}
+                    onChange={(e) => setForm({ ...form, gambar: e.target.value })}
+                    placeholder="https://... atau data:image/..."
+                    style={{
+                      flex: 1,
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
+                  />
+                  {form.gambar ? (
+                    <img
+                      src={form.gambar}
+                      alt="Preview"
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '6px',
+                        objectFit: 'cover',
+                        border: '1px solid #E2E8F0',
+                        flexShrink: 0,
+                      }}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '6px',
+                        background: '#F1F5F9',
+                        border: '1px dashed #CBD5E1',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        color: '#94A3B8',
+                        flexShrink: 0,
+                      }}
+                    >
+                      🖼️
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Harga Asli / Coret & Harga Flash Sale */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                    Harga Asli / Coret <span style={{ color: '#EF4444' }}>*</span>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                    Harga Normal / Coret <span style={{ color: '#EF4444' }}>*</span>
                   </label>
                   <input
                     type="text"
@@ -1047,13 +1216,21 @@ export default function FlashSaleManager() {
                       handlePriceChange('harga_asli', val ? Number(val) : '');
                     }}
                     placeholder="Rp 0"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                    Harga Flash Sale <span style={{ color: '#EF4444' }}>*</span>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#EF4444', marginBottom: '6px' }}>
+                    Harga Flash Sale (Promo) <span style={{ color: '#EF4444' }}>*</span>
                   </label>
                   <input
                     type="text"
@@ -1064,29 +1241,48 @@ export default function FlashSaleManager() {
                       handlePriceChange('harga_diskon', val ? Number(val) : '');
                     }}
                     placeholder="Rp 0"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', fontWeight: '700' }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1.5px solid #EF4444',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      color: '#EF4444',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                      background: '#FFF5F5',
+                    }}
                   />
                 </div>
               </div>
 
               {/* Diskon Badge & Progress Terjual */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                    Badge Diskon
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                    Label / Badge Diskon
                   </label>
                   <input
                     type="text"
                     value={form.diskon_persen}
                     onChange={(e) => setForm({ ...form, diskon_persen: e.target.value })}
-                    placeholder="mis. -20%"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
+                    placeholder="Contoh: -20%"
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
-                    Estimasi Terjual (%)
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                    Estimasi Terjual: <b>{form.terjual_pct || 0}%</b>
                   </label>
                   <input
                     type="number"
@@ -1095,48 +1291,90 @@ export default function FlashSaleManager() {
                     value={form.terjual_pct}
                     onChange={(e) => setForm({ ...form, terjual_pct: e.target.value })}
                     placeholder="75"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
                   />
+                  <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '4px', overflow: 'hidden', marginTop: '6px' }}>
+                    <div
+                      style={{
+                        width: `${Math.min(100, Math.max(0, Number(form.terjual_pct) || 0))}%`,
+                        height: '100%',
+                        background: '#EF4444',
+                        borderRadius: '4px',
+                        transition: 'width 0.2s ease',
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Urutan & Status Aktif */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
                     Urutan Tampil
                   </label>
                   <input
                     type="number"
                     value={form.urutan}
                     onChange={(e) => setForm({ ...form, urutan: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px' }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #CBD5E1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
                   />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
+                <div style={{ display: 'flex', alignItems: 'center', paddingTop: '22px' }}>
+                  <label
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      fontWeight: '700',
+                      color: form.aktif ? '#065F46' : '#64748B',
+                      background: form.aktif ? '#ECFDF5' : '#F1F5F9',
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      border: form.aktif ? '1px solid #A7F3D0' : '1px solid #CBD5E1',
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={Boolean(form.aktif)}
                       onChange={(e) => setForm({ ...form, aktif: e.target.checked ? 1 : 0 })}
+                      style={{ accentColor: '#03AC0E' }}
                     />
-                    Tampilkan di Website
+                    <span>{form.aktif ? '✓ Tampilkan di Toko' : '✕ Disembunyikan'}</span>
                   </label>
                 </div>
               </div>
 
               {/* Modal Footer Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '14px', borderTop: '1px solid #E5E7EB' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '18px', borderTop: '1px solid #E5E7EB', marginTop: '12px' }}>
                 <button
                   type="button"
                   onClick={() => setShowItemModal(false)}
                   style={{
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: '1px solid #D1D5DB',
+                    padding: '9px 18px',
+                    borderRadius: '8px',
+                    border: '1px solid #CBD5E1',
                     background: '#FFFFFF',
-                    color: '#374151',
+                    color: '#475569',
                     fontSize: '13px',
                     fontWeight: '600',
                     cursor: 'pointer',
@@ -1148,19 +1386,25 @@ export default function FlashSaleManager() {
                   type="submit"
                   disabled={savingItem}
                   style={{
-                    padding: '8px 20px',
-                    borderRadius: '6px',
+                    padding: '9px 22px',
+                    borderRadius: '8px',
                     border: 'none',
                     background: '#03AC0E',
                     color: '#FFFFFF',
                     fontSize: '13px',
-                    fontWeight: '600',
+                    fontWeight: '700',
                     cursor: savingItem ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 2px 6px rgba(3, 172, 14, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                 >
-                  {savingItem ? 'Menyimpan...' : 'Simpan Item'}
+                  <span>✓</span>
+                  <span>{savingItem ? 'Menyimpan...' : 'Simpan Item Flash Sale'}</span>
                 </button>
               </div>
+
             </form>
           </div>
         </div>

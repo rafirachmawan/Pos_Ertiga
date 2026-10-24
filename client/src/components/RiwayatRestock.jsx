@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { api } from '../lib/api';
 import { formatDateTime, parseDbDate, localDateKey } from '../lib/date';
 
@@ -17,6 +17,22 @@ const RiwayatRestock = () => {
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
   const [restockForm, setRestockForm] = useState({ barang_id: '', qty: 1, keterangan: '' });
   const [submittingRestock, setSubmittingRestock] = useState(false);
+  const [barangSearch, setBarangSearch] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const fetchStokMasuk = async () => {
     try {
@@ -68,6 +84,23 @@ const RiwayatRestock = () => {
     setCurrentPage(1);
   }, [searchQuery, startDate, endDate]);
 
+  // Selected Barang & Filtered Barang for Restock Modal
+  const selectedBarang = useMemo(() => {
+    return barangList.find((b) => String(b.id) === String(restockForm.barang_id)) || null;
+  }, [barangList, restockForm.barang_id]);
+
+  const filteredBarangList = useMemo(() => {
+    if (!barangSearch.trim()) return barangList;
+    const q = barangSearch.toLowerCase().trim();
+    return barangList.filter((b) => {
+      return (
+        (b.nama_barang || '').toLowerCase().includes(q) ||
+        (b.barcode || '').toLowerCase().includes(q) ||
+        (b.kategori_nama || b.nama_kategori || '').toLowerCase().includes(q)
+      );
+    });
+  }, [barangList, barangSearch]);
+
   // Statistics
   const totalUnitMasuk = useMemo(() => {
     return filtered.reduce((acc, curr) => acc + (Number(curr.qty) || 0), 0);
@@ -110,6 +143,8 @@ const RiwayatRestock = () => {
       alert('Stok barang berhasil ditambahkan!');
       setIsRestockModalOpen(false);
       setRestockForm({ barang_id: '', qty: 1, keterangan: '' });
+      setBarangSearch('');
+      setIsDropdownOpen(false);
       fetchStokMasuk();
       fetchBarang();
     } catch (err) {
@@ -303,6 +338,8 @@ const RiwayatRestock = () => {
           <button
             onClick={() => {
               setRestockForm({ barang_id: '', qty: 1, keterangan: '' });
+              setBarangSearch('');
+              setIsDropdownOpen(false);
               setIsRestockModalOpen(true);
             }}
             style={{
@@ -605,14 +642,18 @@ const RiwayatRestock = () => {
             zIndex: 1000,
             backdropFilter: 'blur(2px)',
           }}
-          onClick={() => setIsRestockModalOpen(false)}
+          onClick={() => {
+            setIsRestockModalOpen(false);
+            setIsDropdownOpen(false);
+            setBarangSearch('');
+          }}
         >
           <div
             style={{
               background: '#FFFFFF',
               borderRadius: '12px',
               width: '100%',
-              maxWidth: '460px',
+              maxWidth: '480px',
               padding: '24px',
               boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
               border: '1px solid #E2E8F0',
@@ -624,7 +665,12 @@ const RiwayatRestock = () => {
                 Tambah Stok Barang Masuk
               </h3>
               <button
-                onClick={() => setIsRestockModalOpen(false)}
+                type="button"
+                onClick={() => {
+                  setIsRestockModalOpen(false);
+                  setIsDropdownOpen(false);
+                  setBarangSearch('');
+                }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', fontSize: '18px', padding: 0 }}
               >
                 ✕
@@ -632,40 +678,228 @@ const RiwayatRestock = () => {
             </div>
 
             <form onSubmit={handleRestockSubmit}>
-              {/* Pilih Barang */}
-              <div style={{ marginBottom: '14px' }}>
+              {/* Pilih Barang Searchable Picker */}
+              <div ref={dropdownRef} style={{ marginBottom: '16px', position: 'relative' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>
                   Pilih Barang <span style={{ color: '#EF4444' }}>*</span>
                 </label>
-                <select
-                  required
-                  value={restockForm.barang_id}
-                  onChange={(e) => {
-                    const selected = barangList.find((b) => String(b.id) === e.target.value);
-                    setRestockForm({
-                      ...restockForm,
-                      barang_id: e.target.value,
-                      keterangan: selected ? `Restock ${selected.nama_barang}` : restockForm.keterangan,
-                    });
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #CBD5E1',
-                    fontSize: '13px',
-                    color: '#0F172A',
-                    background: '#FFFFFF',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">-- Pilih Barang --</option>
-                  {barangList.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.nama_barang} ({b.barcode}) — Stok saat ini: {b.stok} {b.satuan || 'pcs'}
-                    </option>
-                  ))}
-                </select>
+
+                {selectedBarang ? (
+                  /* Tampilan Barang yang Dipilih */
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 14px',
+                      background: '#F0FDF4',
+                      border: '1.5px solid #03AC0E',
+                      borderRadius: '8px',
+                      gap: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                      {selectedBarang.gambar ? (
+                        <img
+                          src={selectedBarang.gambar}
+                          alt=""
+                          style={{ width: '38px', height: '38px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #DCFCE7' }}
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '38px',
+                            height: '38px',
+                            borderRadius: '6px',
+                            background: '#DCFCE7',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '18px',
+                            color: '#16A34A',
+                          }}
+                        >
+                          📦
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {selectedBarang.nama_barang}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
+                          <span style={{ background: '#E2E8F0', padding: '1px 6px', borderRadius: '4px', fontWeight: '600', color: '#334155' }}>
+                            {selectedBarang.barcode}
+                          </span>
+                          <span>Stok saat ini: <b>{selectedBarang.stok} {selectedBarang.satuan || 'pcs'}</b></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRestockForm({ ...restockForm, barang_id: '' });
+                        setBarangSearch('');
+                        setIsDropdownOpen(true);
+                      }}
+                      style={{
+                        padding: '6px 14px',
+                        background: '#FFFFFF',
+                        border: '1px solid #CBD5E1',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: '#0F172A',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                      }}
+                    >
+                      Ganti
+                    </button>
+                  </div>
+                ) : (
+                  /* Form Input Pencarian Barang */
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        placeholder="Cari nama barang atau barcode..."
+                        value={barangSearch}
+                        onChange={(e) => {
+                          setBarangSearch(e.target.value);
+                          setIsDropdownOpen(true);
+                        }}
+                        onFocus={() => setIsDropdownOpen(true)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px 10px 36px',
+                          borderRadius: '8px',
+                          border: isDropdownOpen ? '1.5px solid #03AC0E' : '1px solid #CBD5E1',
+                          fontSize: '13px',
+                          color: '#0F172A',
+                          boxSizing: 'border-box',
+                          outline: 'none',
+                        }}
+                      />
+                      <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px', opacity: 0.6 }}>
+                        🔍
+                      </span>
+                      {barangSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setBarangSearch('')}
+                          style={{
+                            position: 'absolute',
+                            right: '12px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#94A3B8',
+                            fontSize: '13px',
+                            padding: 0,
+                          }}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Dropdown Hasil Pencarian */}
+                    {isDropdownOpen && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 4px)',
+                          left: 0,
+                          right: 0,
+                          maxHeight: '230px',
+                          overflowY: 'auto',
+                          background: '#FFFFFF',
+                          border: '1px solid #CBD5E1',
+                          borderRadius: '8px',
+                          boxShadow: '0 12px 24px -4px rgba(0,0,0,0.15)',
+                          zIndex: 60,
+                        }}
+                      >
+                        {filteredBarangList.length === 0 ? (
+                          <div style={{ padding: '18px 12px', textAlign: 'center', color: '#94A3B8', fontSize: '12.5px' }}>
+                            Tidak ada barang yang cocok dengan "{barangSearch}"
+                          </div>
+                        ) : (
+                          filteredBarangList.map((b) => (
+                            <div
+                              key={b.id}
+                              onClick={() => {
+                                setRestockForm({
+                                  ...restockForm,
+                                  barang_id: b.id,
+                                  keterangan: `Restock ${b.nama_barang}`,
+                                });
+                                setIsDropdownOpen(false);
+                                setBarangSearch('');
+                              }}
+                              style={{
+                                padding: '10px 14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '10px',
+                                cursor: 'pointer',
+                                borderBottom: '1px solid #F1F5F9',
+                                transition: 'background 0.15s ease',
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+                                {b.gambar ? (
+                                  <img
+                                    src={b.gambar}
+                                    alt=""
+                                    style={{ width: '32px', height: '32px', borderRadius: '5px', objectFit: 'cover', border: '1px solid #E2E8F0' }}
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: '18px' }}>📦</span>
+                                )}
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {b.nama_barang}
+                                  </div>
+                                  <div style={{ fontSize: '11px', color: '#64748B', display: 'flex', gap: '6px', marginTop: '2px' }}>
+                                    <span style={{ background: '#F1F5F9', padding: '1px 5px', borderRadius: '3px', fontWeight: '600', color: '#475569' }}>
+                                      {b.barcode}
+                                    </span>
+                                    {b.kategori_nama && <span>• {b.kategori_nama}</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                <span
+                                  style={{
+                                    display: 'inline-block',
+                                    padding: '2px 8px',
+                                    borderRadius: '12px',
+                                    fontSize: '11px',
+                                    fontWeight: '700',
+                                    background: Number(b.stok) <= 2 ? '#FEE2E2' : '#DCFCE7',
+                                    color: Number(b.stok) <= 2 ? '#DC2626' : '#166534',
+                                  }}
+                                >
+                                  Stok: {b.stok} {b.satuan || 'pcs'}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Jumlah Tambahan */}
