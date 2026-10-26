@@ -9,6 +9,8 @@ const DEFAULT_FORM = {
   pesan_struk: '',
   telepon: '',
   url_website: 'https://pos-ertiga-yl9x.vercel.app/',
+  logo_url: '',
+  logo_text: 'E',
   printer_name: '',
   lebar_struk: 80,
   auto_print: 0,
@@ -39,6 +41,8 @@ const Pengaturan = () => {
           pesan_struk: setting.data.pesan_struk || '',
           telepon: setting.data.telepon || '',
           url_website: setting.data.url_website || 'https://pos-ertiga-yl9x.vercel.app/',
+          logo_url: setting.data.logo_url || '',
+          logo_text: setting.data.logo_text || 'E',
           printer_name: setting.data.printer_name || '',
           lebar_struk: Number(setting.data.lebar_struk) || 80,
           auto_print: Number(setting.data.auto_print) || 0,
@@ -85,6 +89,31 @@ const Pengaturan = () => {
     setTimeout(() => setMessage(''), 4000);
   };
 
+  const compressLogoImage = (file, maxSize = 300, quality = 0.85) =>
+    new Promise((resolve, reject) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      image.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(objectUrl);
+        resolve(canvas.toDataURL('image/png'));
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Gambar tidak dapat dibaca'));
+      };
+
+      image.src = objectUrl;
+    });
+
   const savePengaturan = async (e) => {
     e.preventDefault();
     try {
@@ -93,6 +122,8 @@ const Pengaturan = () => {
         method: 'PUT',
         body: {
           ...form,
+          logo_url: (form.logo_url || '').trim(),
+          logo_text: (form.logo_text || 'E').trim().slice(0, 10),
           url_website: (form.url_website || 'https://pos-ertiga-yl9x.vercel.app/').trim(),
           lebar_struk: Number(form.lebar_struk),
           auto_print: Number(form.auto_print) || 0,
@@ -310,6 +341,258 @@ const Pengaturan = () => {
                   placeholder="Contoh: POS ERTIGA"
                   style={inputStyle}
                 />
+              </div>
+
+              {/* Pengaturan Logo Toko & Website (Icon Kotak 'E') */}
+              <div
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '10px',
+                  padding: '16px',
+                  marginTop: '4px',
+                }}
+              >
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '13.5px', fontWeight: '700', color: '#0F172A' }}>
+                      Logo Toko (Icon Kotak Hijau 'E')
+                    </span>
+                    <span
+                      style={{
+                        background: '#DCFCE7',
+                        color: '#166534',
+                        fontSize: '10.5px',
+                        fontWeight: '700',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      Website & POS
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#64748B', margin: '3px 0 0' }}>
+                    Atur logo icon kotak hijau di navbar toko online dan aplikasi POS. Bisa menggunakan inisial huruf (default 'E') atau upload gambar logo toko Anda.
+                  </p>
+                </div>
+
+                {/* Live Preview Box */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    background: '#FFFFFF',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    marginBottom: '14px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '8px',
+                      background: form.logo_url
+                        ? '#FFFFFF'
+                        : 'linear-gradient(135deg, #03AC0E 0%, #008709 100%)',
+                      border: form.logo_url ? '1px solid #E2E8F0' : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFFFFF',
+                      fontWeight: '800',
+                      fontSize: '20px',
+                      boxShadow: '0 2px 6px rgba(3, 172, 14, 0.25)',
+                      overflow: 'hidden',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {form.logo_url ? (
+                      <img
+                        src={form.logo_url}
+                        alt="Logo Toko"
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <span>
+                        {form.logo_text ||
+                          (form.nama_toko
+                            ? form.nama_toko.charAt(0).toUpperCase()
+                            : 'E')}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '15px',
+                        fontWeight: '800',
+                        color: '#03AC0E',
+                        lineHeight: '1.2',
+                      }}
+                    >
+                      {form.nama_toko || 'POS ERTIGA'}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: '9.5px',
+                        fontWeight: '700',
+                        color: '#FFFFFF',
+                        background: '#EE4D2D',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        letterSpacing: '0.04em',
+                        display: 'inline-block',
+                        marginTop: '2px',
+                      }}
+                    >
+                      OFFICIAL STORE
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      marginLeft: 'auto',
+                      fontSize: '11px',
+                      color: '#94A3B8',
+                      fontWeight: '600',
+                      background: '#F1F5F9',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    Preview Navbar
+                  </div>
+                </div>
+
+                {/* Form Inputs for Logo */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1.6fr',
+                    gap: '12px',
+                    marginBottom: '12px',
+                  }}
+                >
+                  <div>
+                    <label style={labelStyle}>Inisial Huruf (Icon Kotak)</label>
+                    <input
+                      type="text"
+                      maxLength={4}
+                      value={form.logo_text}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          logo_text: e.target.value.toUpperCase(),
+                        })
+                      }
+                      placeholder="E"
+                      style={inputStyle}
+                    />
+                    <small
+                      style={{
+                        fontSize: '11px',
+                        color: '#64748B',
+                        marginTop: '3px',
+                        display: 'block',
+                      }}
+                    >
+                      Tampil jika tidak menggunakan gambar
+                    </small>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>File Gambar Logo Toko</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
+                      <label
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 14px',
+                          background: '#0F172A',
+                          color: '#FFFFFF',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span>📁 Pilih Gambar Logo</span>
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                          style={{ display: 'none' }}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              const compressed = await compressLogoImage(file);
+                              setForm((prev) => ({
+                                ...prev,
+                                logo_url: compressed,
+                              }));
+                            } catch (err) {
+                              alert('Gagal memproses gambar: ' + err.message);
+                            }
+                          }}
+                        />
+                      </label>
+
+                      {form.logo_url && (
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, logo_url: '' })}
+                          style={{
+                            padding: '8px 12px',
+                            background: '#FEE2E2',
+                            color: '#991B1B',
+                            border: '1px solid #FECACA',
+                            borderRadius: '6px',
+                            fontSize: '11.5px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Hapus Gambar (Gunakan Huruf '{form.logo_text || 'E'}')
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={labelStyle}>
+                    Atau Masukkan Link / URL Gambar Logo (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    value={
+                      form.logo_url && !form.logo_url.startsWith('data:')
+                        ? form.logo_url
+                        : ''
+                    }
+                    onChange={(e) =>
+                      setForm({ ...form, logo_url: e.target.value })
+                    }
+                    placeholder="https://contoh.com/logo-toko.png"
+                    style={inputStyle}
+                  />
+                  <small
+                    style={{
+                      fontSize: '11px',
+                      color: '#64748B',
+                      marginTop: '3px',
+                      display: 'block',
+                    }}
+                  >
+                    Bisa berupa URL gambar online atau upload file gambar langsung di atas.
+                  </small>
+                </div>
               </div>
 
               <div>

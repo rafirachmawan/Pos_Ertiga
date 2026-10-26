@@ -29,12 +29,12 @@ router.get(
 router.post(
   '/',
   asyncHandler(async (req, res) => {
-    const { judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif } = req.body;
+    const { judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif, tipe } = req.body;
 
     const result = await withWriteLock(() =>
       run(
-        `INSERT INTO banners (judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO banners (judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif, tipe)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           String(judul || '').trim(),
           String(subjudul || '').trim(),
@@ -45,6 +45,7 @@ router.post(
           String(link || '').trim(),
           toInt(urutan, 0),
           aktif === false || aktif === 0 || aktif === '0' ? 0 : 1,
+          String(tipe || 'side').trim(),
         ]
       )
     );
@@ -58,14 +59,14 @@ router.post(
 router.put(
   '/:id',
   asyncHandler(async (req, res) => {
-    const { judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif } = req.body;
+    const { judul, subjudul, badge, gambar, warna_bg, warna_accent, link, urutan, aktif, tipe } = req.body;
 
     const existing = await get(`SELECT * FROM banners WHERE id = ?`, [req.params.id]);
     if (!existing) throw httpError(404, 'Banner tidak ditemukan');
 
     await withWriteLock(() =>
       run(
-        `UPDATE banners SET judul=?, subjudul=?, badge=?, gambar=?, warna_bg=?, warna_accent=?, link=?, urutan=?, aktif=?
+        `UPDATE banners SET judul=?, subjudul=?, badge=?, gambar=?, warna_bg=?, warna_accent=?, link=?, urutan=?, aktif=?, tipe=?
          WHERE id=?`,
         [
           String(judul ?? existing.judul).trim(),
@@ -77,7 +78,8 @@ router.put(
           String(link ?? existing.link).trim(),
           toInt(urutan ?? existing.urutan, 0),
           aktif === false || aktif === 0 || aktif === '0' ? 0 : 1,
-        req.params.id,
+          String(tipe ?? existing.tipe ?? 'side').trim(),
+          req.params.id,
         ]
       )
     );

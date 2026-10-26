@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import Navbar from './components/Navbar';
+import Navbar, { getMatchedDigitalService } from './components/Navbar';
 import MarketplaceHero from './components/MarketplaceHero';
 import MarketplaceQuickIcons from './components/MarketplaceQuickIcons';
 import FlashSaleSection from './components/FlashSaleSection';
@@ -275,21 +275,47 @@ export default function App() {
     setCart((prev) => prev.filter((item) => item.id !== productId));
   };
 
+  // Search submit handler to clear views and scroll to catalog
+  const handleSearchSubmit = (queryToSearch) => {
+    const q = queryToSearch !== undefined ? queryToSearch : searchQuery;
+    if (selectedProduct !== null) {
+      setSelectedProduct(null);
+      try {
+        window.history.pushState({}, '', window.location.pathname);
+      } catch (e) {}
+    }
+    if (activeSpecialTab !== null) {
+      setActiveSpecialTab(null);
+    }
+    setSelectedCategory(null);
+    if (queryToSearch !== undefined && queryToSearch !== searchQuery) {
+      setSearchQuery(queryToSearch);
+    }
+    setTimeout(() => {
+      scrollToSection('unified-feed');
+    }, 60);
+  };
+
+  const searchMatchedService = useMemo(() => {
+    return getMatchedDigitalService(searchQuery);
+  }, [searchQuery]);
+
   // Filtered & Sorted Products (For You = shuffled, Category = filtered)
   const filteredProducts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
     let list = products.filter((p) => {
       const matchCategory =
-        selectedCategory === null || p.kategori_id === selectedCategory;
-      const q = searchQuery.toLowerCase().trim();
+        !q ? (selectedCategory === null || p.kategori_id === selectedCategory) : true;
       const matchSearch =
         !q ||
         (p.nama_barang || '').toLowerCase().includes(q) ||
-        (p.nama_kategori || '').toLowerCase().includes(q);
+        (p.nama_kategori || '').toLowerCase().includes(q) ||
+        (p.deskripsi || '').toLowerCase().includes(q);
       return matchCategory && matchSearch;
     });
 
     // When "For You" (no category selected, no special tab), shuffle
-    if (selectedCategory === null && activeSpecialTab === null && !searchQuery.trim()) {
+    if (selectedCategory === null && activeSpecialTab === null && !q) {
       list = shuffleArray(list);
     }
 
@@ -347,10 +373,15 @@ export default function App() {
         storeName={storeInfo?.nama_toko || 'POS ERTIGA STORE'}
         storeAddress={storeInfo?.alamat_toko || 'Sumberjo Kulon, Ngunut'}
         storePhone={storeInfo?.telepon || '6281234567890'}
+        storeLogo={storeInfo?.logo_url}
+        storeLogoText={storeInfo?.logo_text || 'E'}
         cartCount={totalCartCount}
         onOpenCart={() => setIsCartOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onSearchSubmit={handleSearchSubmit}
+        products={products}
+        onSelectProduct={handleSelectProduct}
         activeTab="products"
         activeSpecialTab={activeSpecialTab}
         onTabChange={() => {
@@ -473,24 +504,82 @@ export default function App() {
             <div id="unified-feed" className="mp-section-card">
               {/* Search Result Header (only shown during active search) */}
               {searchQuery && (
-                <div className="mp-section-header" style={{ borderBottom: 'none', paddingBottom: '8px', marginBottom: '8px' }}>
-                  <h2 className="mp-section-title">
-                    <span>Hasil Pencarian "{searchQuery}"</span>
-                  </h2>
-
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    style={{
-                      fontSize: '12px',
-                      color: '#03AC0E',
-                      fontWeight: '600',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                    }}
+                <div style={{ marginBottom: '16px' }}>
+                  <div
+                    className="mp-section-header"
+                    style={{ borderBottom: 'none', paddingBottom: '8px', marginBottom: '8px' }}
                   >
-                    Reset Pencarian ✕
-                  </button>
+                    <h2 className="mp-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span>Hasil Pencarian "{searchQuery}"</span>
+                      <span style={{ fontSize: '12.5px', color: '#6B7280', fontWeight: '500' }}>
+                        ({filteredProducts.length} produk ditemukan)
+                      </span>
+                    </h2>
+
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        scrollToSection('unified-feed');
+                      }}
+                      style={{
+                        fontSize: '12px',
+                        color: '#03AC0E',
+                        fontWeight: '600',
+                        background: '#DCFCE7',
+                        border: '1px solid #BBF7D0',
+                        padding: '4px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Reset Pencarian ✕
+                    </button>
+                  </div>
+
+                  {/* Matching Digital Services Highlight Banner */}
+                  {searchMatchedService && (
+                    <div
+                      onClick={() => handleSelectSpecialTab(searchMatchedService.tab)}
+                      style={{
+                        background: '#F0FDF4',
+                        border: '1px solid #BBF7D0',
+                        borderRadius: '10px',
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(3, 172, 14, 0.08)',
+                        marginBottom: '10px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '24px' }}>{searchMatchedService.icon}</span>
+                        <div>
+                          <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#166534' }}>
+                            {searchMatchedService.title}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#4B5563', marginTop: '2px' }}>
+                            {searchMatchedService.desc}
+                          </div>
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          color: '#03AC0E',
+                          background: '#FFFFFF',
+                          border: '1px solid #03AC0E',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Buka Layanan →
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -590,7 +679,19 @@ export default function App() {
       />
 
       {/* Footer */}
-      <Footer storeInfo={storeInfo} />
+      <Footer
+        storeInfo={storeInfo}
+        onSelectSpecialTab={handleSelectSpecialTab}
+        onScrollToCatalog={() => {
+          handleBackToHome();
+          scrollToProducts();
+        }}
+        onScrollToFlashSale={() => {
+          handleBackToHome();
+          scrollToSection('flash-sale-section');
+        }}
+        onOpenCart={() => setIsCartOpen(true)}
+      />
 
     </div>
   );

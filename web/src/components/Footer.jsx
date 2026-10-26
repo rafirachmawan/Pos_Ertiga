@@ -1,8 +1,24 @@
 import React from 'react';
 
-export default function Footer({ storeInfo }) {
-  const paymentMethods = ['QRIS', 'BCA', 'Mandiri', 'BRI', 'BNI', 'GoPay', 'OVO', 'ShopeePay', 'DANA', 'COD'];
-  const couriers = ['JNE Express', 'J&T Express', 'SiCepat', 'GoSend', 'GrabExpress', 'Ambil di Toko'];
+export default function Footer({
+  storeInfo,
+  onSelectSpecialTab,
+  onScrollToCatalog,
+  onScrollToFlashSale,
+  onOpenCart,
+}) {
+  const storeName = storeInfo?.nama_toko || 'Ertiga Store';
+  const cleanPhone = String(storeInfo?.telepon || '085196221716').replace(/[^0-9]/g, '');
+  const formattedPhone = cleanPhone.startsWith('0')
+    ? '62' + cleanPhone.slice(1)
+    : cleanPhone.startsWith('62')
+    ? cleanPhone
+    : '62' + cleanPhone;
+
+  const displayPhone = storeInfo?.telepon || '0851-9622-1716';
+  const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(
+    'Halo ' + storeName + ', saya ingin bertanya mengenai pemesanan produk dan layanan toko.'
+  )}`;
 
   return (
     <footer className="mp-footer">
@@ -10,105 +26,154 @@ export default function Footer({ storeInfo }) {
         <div className="mp-footer-main">
           <div className="mp-footer-grid">
             
-            {/* Col 1: Store Profile & Address */}
+            {/* Kolom 1: Profil Toko & Kontak WhatsApp */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    background: '#03AC0E',
-                    color: '#FFFFFF',
-                    fontWeight: '800',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '14px',
-                  }}
-                >
-                  E
+              <div className="mp-footer-brand-header">
+                <div className="mp-footer-logo-box">
+                  {storeInfo?.logo_url ? (
+                    <img
+                      src={storeInfo.logo_url}
+                      alt={storeName}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span>{storeInfo?.logo_text || (storeName ? storeName.charAt(0).toUpperCase() : 'E')}</span>
+                  )}
                 </div>
-                <span style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A' }}>
-                  {storeInfo?.nama_toko || 'POS ERTIGA STORE'}
-                </span>
+                <div>
+                  <div className="mp-footer-brand-name">{storeName}</div>
+                  <span className="mp-footer-brand-badge">OFFICIAL STORE</span>
+                </div>
               </div>
-              <p style={{ fontSize: '12px', lineHeight: '1.6', color: '#64748B', marginBottom: '12px' }}>
+
+              <p className="mp-footer-desc">
                 {storeInfo?.alamat_toko || 'Desa Sumberjo Kulon, Kec. Ngunut, Kab. Tulungagung'}
               </p>
-              <div style={{ fontSize: '12px', color: '#64748B', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div>
-                  <span style={{ color: '#0F172A', fontWeight: '600' }}>Jam Operasional:</span> 08:00 - 21:00 WIB
-                </div>
-                <div>
-                  <span style={{ color: '#0F172A', fontWeight: '600' }}>Hari Buka:</span> Setiap Hari (Senin - Minggu)
-                </div>
-                <div>
-                  <span style={{ color: '#0F172A', fontWeight: '600' }}>Layanan CS:</span> WhatsApp Fast Response
-                </div>
+
+              <div className="mp-footer-info-row">
+                <strong>Jam Operasional:</strong> 08:00 - 21:00 WIB
+              </div>
+              <div className="mp-footer-info-row">
+                <strong>Hari Buka:</strong> Setiap Hari (Senin - Minggu)
+              </div>
+
+              <div className="mp-footer-wa-action">
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mp-footer-wa-clean-btn"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                  </svg>
+                  <span>Chat WhatsApp ({displayPhone})</span>
+                </a>
               </div>
             </div>
 
-            {/* Col 2: Panduan Belanja */}
+            {/* Kolom 2: Katalog & Produk */}
             <div>
-              <h4 className="mp-footer-col-title">Panduan Belanja</h4>
-              <ul className="mp-footer-links">
-                <li><a href="#katalog-produk">Katalog Produk</a></li>
-                <li><a href="#flash-sale-section">Promo Flash Sale</a></li>
-                <li><a href="#katalog-produk">Cara Pesan via WhatsApp</a></li>
-                <li><a href="#katalog-produk">Garansi Produk Fisik</a></li>
-                <li><a href="#katalog-produk">Syarat & Ketentuan</a></li>
+              <h4 className="mp-footer-title">Katalog & Produk</h4>
+              <ul className="mp-footer-link-list">
+                <li>
+                  <button onClick={onScrollToCatalog}>
+                    Katalog Pakaian
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onScrollToFlashSale}>
+                    Promo Flash Sale
+                  </button>
+                </li>
+                <li>
+                  <button onClick={onOpenCart}>
+                    Keranjang Belanja
+                  </button>
+                </li>
+                <li>
+                  <a href={waUrl} target="_blank" rel="noreferrer">
+                    Cara Pesan via WhatsApp
+                  </a>
+                </li>
               </ul>
             </div>
 
-            {/* Col 3: Layanan Digital & Jasa */}
+            {/* Kolom 3: Layanan Digital & Jasa */}
             <div>
-              <h4 className="mp-footer-col-title">Layanan & Jasa</h4>
-              <ul className="mp-footer-links">
-                <li><a href="#ppob-section">Top-Up Pulsa & Paket Data</a></li>
-                <li><a href="#ppob-section">Token Listrik PLN 24 Jam</a></li>
-                <li><a href="#logam-mulia-section">Investasi Emas Logam Mulia</a></li>
-                <li><a href="#booster-sosmed-section">Booster Sosmed SMM</a></li>
-                <li><a href="#jasa-web-section">Jasa Web & Sistem Kasir</a></li>
+              <h4 className="mp-footer-title">Layanan Digital & Jasa</h4>
+              <ul className="mp-footer-link-list">
+                <li>
+                  <button onClick={() => onSelectSpecialTab && onSelectSpecialTab('gold')}>
+                    Logam Mulia Emas 24K
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => onSelectSpecialTab && onSelectSpecialTab('ppob')}>
+                    Top Up Pulsa & Kuota
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => onSelectSpecialTab && onSelectSpecialTab('ppob')}>
+                    Token Listrik PLN
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => onSelectSpecialTab && onSelectSpecialTab('smm')}>
+                    Booster Sosmed SMM
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => onSelectSpecialTab && onSelectSpecialTab('webdev')}>
+                    Jasa Web & Kasir POS
+                  </button>
+                </li>
               </ul>
             </div>
 
-            {/* Col 4: Mitra Pembayaran & Ekspedisi */}
+            {/* Kolom 4: Pemesanan & Pengiriman */}
             <div>
-              <h4 className="mp-footer-col-title">Metode Pembayaran</h4>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
-                {paymentMethods.map((pm, idx) => (
-                  <span key={idx} className="mp-badge-partner">
-                    {pm}
-                  </span>
-                ))}
+              <h4 className="mp-footer-title">Pemesanan & Pembayaran</h4>
+              <p className="mp-footer-order-text">
+                Pilih barang di web, konfirmasi pesanan dan pembayaran diproses langsung melalui WhatsApp resmi toko.
+              </p>
+
+              <div className="mp-footer-subgroup">
+                <span className="mp-footer-sublabel">Metode Pembayaran (via WhatsApp)</span>
+                <div className="mp-footer-tags">
+                  <span>Transfer Bank</span>
+                  <span>QRIS</span>
+                  <span>Bayar di Toko / COD</span>
+                </div>
               </div>
 
-              <h4 className="mp-footer-col-title">Mitra Pengiriman</h4>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {couriers.map((cr, idx) => (
-                  <span key={idx} className="mp-badge-partner">
-                    {cr}
-                  </span>
-                ))}
+              <div className="mp-footer-subgroup">
+                <span className="mp-footer-sublabel">Pengiriman & Ambil Sendiri</span>
+                <div className="mp-footer-tags">
+                  <span>J&T Express</span>
+                  <span>JNE</span>
+                  <span>SiCepat</span>
+                  <span>Ambil di Toko Fisik</span>
+                </div>
               </div>
             </div>
 
           </div>
         </div>
 
-        {/* Footer Bottom */}
+        {/* Bottom Bar */}
         <div className="mp-footer-bottom">
           <div>
-            &copy; {new Date().getFullYear()} {storeInfo?.nama_toko || 'POS Ertiga'}. Hak Cipta Dilindungi.
+            &copy; {new Date().getFullYear()} {storeName}. Hak Cipta Dilindungi.
           </div>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <span>Keamanan Terjamin</span>
+          <div className="mp-footer-bottom-meta">
+            <span>Transaksi via WhatsApp Resmi</span>
             <span>·</span>
-            <span>Integrasi Sistem Kasir POS</span>
+            <span>Terintegrasi Kasir POS Ertiga</span>
           </div>
         </div>
-
       </div>
     </footer>
   );

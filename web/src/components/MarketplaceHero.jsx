@@ -241,12 +241,53 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
             >
               {slides.map((slide, index) => {
                 const highlight = getSlideHighlight(slide);
+                const isFullBanner = slide.tipe === 'full' && Boolean(slide.gambar);
+
+                const handleSlideClick = () => {
+                  if (didDragRef.current) return;
+                  if (slide.link) {
+                    if (slide.link.startsWith('http://') || slide.link.startsWith('https://')) {
+                      window.open(slide.link, '_blank', 'noopener,noreferrer');
+                    } else {
+                      window.location.href = slide.link;
+                    }
+                  } else if (onExploreProducts) {
+                    onExploreProducts();
+                  }
+                };
+
+                if (isFullBanner) {
+                  return (
+                    <div
+                      key={slide.id || index}
+                      className="mp-carousel-slide mp-carousel-slide-full"
+                      style={{
+                        background: slide.warna_bg || '#111827',
+                        cursor: slide.link ? 'pointer' : 'default',
+                      }}
+                      onClick={handleSlideClick}
+                      role={slide.link ? 'button' : undefined}
+                      tabIndex={slide.link ? 0 : undefined}
+                    >
+                      <img
+                        src={slide.gambar}
+                        alt={slide.judul || 'Banner Promo Toko'}
+                        className="mp-carousel-full-img"
+                        draggable={false}
+                      />
+                    </div>
+                  );
+                }
 
                 return (
                   <div
                     key={slide.id || index}
                     className="mp-carousel-slide"
-                    style={{ background: slide.warna_bg || 'linear-gradient(135deg, #0A4D2E 0%, #03AC0E 100%)' }}
+                    style={{
+                      background: slide.warna_bg || 'linear-gradient(135deg, #0A4D2E 0%, #03AC0E 100%)',
+                      cursor: slide.link ? 'pointer' : 'default',
+                    }}
+                    onClick={slide.link ? handleSlideClick : undefined}
                   >
                     {/* Decorative Background Orbs for depth & premium feel */}
                     <div className="mp-carousel-orb-1" />
@@ -276,7 +317,8 @@ export default function MarketplaceHero({ onExploreProducts, onOpenDigitalModal 
                       )}
                       <span
                         className="mp-carousel-btn"
-                        style={{ cursor: 'default', pointerEvents: 'none' }}
+                        style={{ cursor: slide.link ? 'pointer' : 'default' }}
+                        onClick={handleSlideClick}
                       >
                         <span>Lihat Selengkapnya</span>
                         <span className="mp-carousel-btn-arrow">→</span>

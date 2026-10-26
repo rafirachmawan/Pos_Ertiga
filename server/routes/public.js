@@ -8,9 +8,16 @@ const router = express.Router();
 router.get(
   '/toko',
   asyncHandler(async (req, res) => {
-    const toko = await get(
-      `SELECT nama_toko, alamat_toko, pesan_struk, telepon, url_website FROM pengaturan WHERE id = 1`
-    );
+    let toko = null;
+    try {
+      toko = await get(
+        `SELECT nama_toko, alamat_toko, pesan_struk, telepon, url_website, logo_url, logo_text FROM pengaturan WHERE id = 1`
+      );
+    } catch (_) {
+      toko = await get(
+        `SELECT nama_toko, alamat_toko, pesan_struk, telepon, url_website FROM pengaturan WHERE id = 1`
+      );
+    }
     res.json({
       data: toko || {
         nama_toko: 'POS ERTIGA',
@@ -18,6 +25,8 @@ router.get(
         pesan_struk: 'Terima kasih telah berbelanja!',
         telepon: '',
         url_website: 'https://pos-ertiga-yl9x.vercel.app/',
+        logo_url: '',
+        logo_text: 'E',
       },
     });
   })
@@ -57,7 +66,7 @@ router.get(
   '/banners',
   asyncHandler(async (req, res) => {
     const rows = await all(
-      `SELECT id, judul, subjudul, badge, gambar, warna_bg, warna_accent, link
+      `SELECT id, judul, subjudul, badge, gambar, warna_bg, warna_accent, link, tipe
        FROM banners
        WHERE aktif = 1
        ORDER BY urutan ASC, id ASC`

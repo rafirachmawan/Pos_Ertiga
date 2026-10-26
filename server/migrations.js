@@ -3,7 +3,7 @@ const path = require('path');
 const { run, get, all, exec } = require('./dbUtils');
 
 // Naikkan angka ini setiap kali ada migration baru.
-const LATEST_VERSION = 16;
+const LATEST_VERSION = 18;
 
 async function tableExists(db, table) {
   const row = await get(
@@ -105,6 +105,8 @@ async function createPengaturanTable(db) {
       pesan_struk TEXT DEFAULT 'Terima kasih sudah berbelanja!',
       telepon VARCHAR(30) DEFAULT '',
       url_website TEXT DEFAULT 'https://pos-ertiga-yl9x.vercel.app/',
+      logo_url TEXT DEFAULT '',
+      logo_text TEXT DEFAULT 'E',
       printer_name TEXT DEFAULT '',
       lebar_struk INTEGER NOT NULL DEFAULT 80,
       auto_print INTEGER NOT NULL DEFAULT 0
@@ -1144,6 +1146,21 @@ const migrations = [
     name: 'tambah galeri_gambar di tabel barang untuk multiple product images',
     async up(db) {
       await addColumnIfMissing(db, 'barang', 'galeri_gambar', "TEXT DEFAULT '[]'");
+    },
+  },
+  {
+    version: 17,
+    name: 'tambah logo_url dan logo_text di tabel pengaturan',
+    async up(db) {
+      await addColumnIfMissing(db, 'pengaturan', 'logo_url', "TEXT DEFAULT ''");
+      await addColumnIfMissing(db, 'pengaturan', 'logo_text', "TEXT DEFAULT 'E'");
+    },
+  },
+  {
+    version: 18,
+    name: 'tambah tipe di tabel banners',
+    async up(db) {
+      await addColumnIfMissing(db, 'banners', 'tipe', "VARCHAR(20) DEFAULT 'side'");
     },
   },
 ];

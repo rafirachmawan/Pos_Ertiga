@@ -22,6 +22,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [lowStockCount, setLowStockCount] = useState(0);
+  const [tokoInfo, setTokoInfo] = useState(null);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -35,9 +36,17 @@ function App() {
         })
         .catch(console.error);
     };
+
+    const fetchToko = () => {
+      api('/api/pengaturan', { silent: true })
+        .then(res => {
+          if (res.data) setTokoInfo(res.data);
+        })
+        .catch(console.error);
+    };
     
     fetchStock(); // Fetch on mount/login
-    // Also fetch every time tab changes to keep it updated
+    fetchToko();
   }, [isLoggedIn, activeTab]);
 
   return (
@@ -52,8 +61,36 @@ function App() {
 
         {/* Logo */}
         <div className="sidebar-logo">
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              background: tokoInfo?.logo_url ? '#FFFFFF' : 'linear-gradient(135deg, #03AC0E 0%, #008709 100%)',
+              border: tokoInfo?.logo_url ? '1px solid rgba(255,255,255,0.2)' : 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              fontWeight: '800',
+              fontSize: '17px',
+              overflow: 'hidden',
+              flexShrink: 0,
+            }}
+          >
+            {tokoInfo?.logo_url ? (
+              <img
+                src={tokoInfo.logo_url}
+                alt="Logo"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            ) : (
+              <span>{tokoInfo?.logo_text || (tokoInfo?.nama_toko ? tokoInfo.nama_toko.charAt(0).toUpperCase() : 'E')}</span>
+            )}
+          </div>
           <div>
-            <div className="sidebar-logo-title">POS ERTIGA</div>
+            <div className="sidebar-logo-title">{tokoInfo?.nama_toko || 'POS ERTIGA'}</div>
             <div className="sidebar-logo-sub">Point of Sale</div>
           </div>
         </div>

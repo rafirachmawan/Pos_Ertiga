@@ -66,6 +66,8 @@ const FALLBACK_TOKO = {
   alamat_toko: 'Jl. Pemuda No. 88, Jakarta Pusat\nWhatsApp: 0812-3456-7890',
   pesan_struk: 'Toko Online Fashion & Retail Resmi POS ERTIGA',
   telepon: '081234567890',
+  logo_url: '',
+  logo_text: 'E',
 };
 
 const FALLBACK_CATEGORIES = [

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../lib/api';
 import { showConfirm, showToast } from '../lib/dialog';
 
@@ -14,6 +14,7 @@ const PRESET_GRADIENTS = [
 ];
 
 const emptyBanner = {
+  tipe: 'full', // 'full' (Banner Gambar Penuh) atau 'side' (Template Warna + Teks)
   judul: '',
   subjudul: '',
   badge: '',
@@ -25,6 +26,48 @@ const emptyBanner = {
   aktif: 1,
 };
 
+// Helper kompresi gambar sisi klien via Canvas
+function compressBannerImage(file, isFull = true) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDimension = isFull ? 1400 : 700;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Kompresi kualitas 88%
+        let dataUrl = canvas.toDataURL('image/webp', 0.88);
+        if (!dataUrl || !dataUrl.startsWith('data:image/webp')) {
+          dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        }
+        resolve(dataUrl);
+      };
+      img.onerror = () => reject(new Error('Format file gambar tidak valid atau rusak'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Gagal membaca berkas gambar dari perangkat'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function BannerManager() {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +75,10 @@ export default function BannerManager() {
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ ...emptyBanner });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [useUrlInput, setUseUrlInput] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
   const fetchBanners = useCallback(async () => {
     try {
@@ -51,13 +97,16 @@ export default function BannerManager() {
   const openCreate = () => {
     setEditId(null);
     setForm({ ...emptyBanner, urutan: banners.length });
+    setUseUrlInput(false);
     setShowForm(true);
     setError('');
   };
 
   const openEdit = (banner) => {
     setEditId(banner.id);
+    const tipe = banner.tipe || (banner.gambar && !banner.subjudul ? 'full' : 'side');
     setForm({
+      tipe,
       judul: banner.judul || '',
       subjudul: banner.subjudul || '',
       badge: banner.badge || '',
@@ -68,23 +117,70 @@ export default function BannerManager() {
       urutan: banner.urutan ?? 0,
       aktif: banner.aktif ?? 1,
     });
+    setUseUrlInput(Boolean(banner.gambar && banner.gambar.startsWith('http')));
     setShowForm(true);
     setError('');
   };
 
-  const handleSave = async () => {
-    if (!form.judul.trim()) { setError('Judul banner wajib diisi'); return; }
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('File yang dipilih harus berupa file gambar (JPG, PNG, WebP).');
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setError('Ukuran file terlalu besar. Maksimal 8 MB sebelum kompresi.');
+      return;
+    }
+
     try {
-      setSaving(true); setError('');
+      setUploading(true);
+      setError('');
+      const compressedDataUrl = await compressBannerImage(file, form.tipe === 'full');
+      setForm((prev) => ({ ...prev, gambar: compressedDataUrl }));
+      showToast('Gambar berhasil diunggah & dioptimalkan!', 'success');
+    } catch (err) {
+      setError(err.message || 'Gagal memproses gambar');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setForm((prev) => ({ ...prev, gambar: '' }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSave = async () => {
+    if (!form.judul.trim()) {
+      setError('Nama atau judul banner wajib diisi sebagai identitas.');
+      return;
+    }
+    if (form.tipe === 'full' && !form.gambar.trim()) {
+      setError('Untuk tipe Banner Gambar Penuh, Anda wajib mengunggah file gambar banner.');
+      return;
+    }
+    try {
+      setSaving(true);
+      setError('');
       if (editId) {
         await api(`/api/banners/${editId}`, { method: 'PUT', body: form });
+        showToast('Banner berhasil diperbarui', 'success');
       } else {
         await api('/api/banners', { method: 'POST', body: form });
+        showToast('Banner berhasil ditambahkan', 'success');
       }
       setShowForm(false);
       fetchBanners();
-    } catch (err) { setError(err.message); }
-    finally { setSaving(false); }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -151,104 +247,139 @@ export default function BannerManager() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {banners.map((b, idx) => (
-            <div
-              key={b.id}
-              style={{
-                display: 'flex', alignItems: 'stretch', background: '#FFFFFF',
-                borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04)', opacity: b.aktif ? 1 : 0.6,
-              }}
-            >
-              {/* Preview Gradient */}
-              <div style={{
-                width: '280px', minHeight: '110px', background: b.warna_bg, display: 'flex',
-                alignItems: 'center', padding: '18px 20px', position: 'relative', flexShrink: 0, color: '#fff',
-              }}>
-                {b.gambar && (
-                  <img src={b.gambar} alt="" style={{
-                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                    maxHeight: '70px', maxWidth: '80px', objectFit: 'contain', opacity: 0.85,
-                  }} onError={(e) => { e.target.style.display = 'none'; }} />
-                )}
-                <div style={{ zIndex: 1, maxWidth: '180px' }}>
-                  {b.badge && (
-                    <span style={{
-                      fontSize: '9px', fontWeight: '800', background: 'rgba(0,0,0,0.3)',
-                      padding: '2px 6px', borderRadius: '3px', color: b.warna_accent || '#FFD700',
-                    }}>
-                      {b.badge}
-                    </span>
+          {banners.map((b, idx) => {
+            const isFullBanner = b.tipe === 'full' && b.gambar;
+            return (
+              <div
+                key={b.id}
+                style={{
+                  display: 'flex', alignItems: 'stretch', background: '#FFFFFF',
+                  borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)', opacity: b.aktif ? 1 : 0.6,
+                }}
+              >
+                {/* Preview Thumbnail */}
+                <div style={{
+                  width: '280px', minHeight: '110px', background: isFullBanner ? '#1F2937' : b.warna_bg,
+                  display: 'flex', alignItems: 'center', justifyContent: isFullBanner ? 'center' : 'flex-start',
+                  padding: isFullBanner ? 0 : '18px 20px', position: 'relative', flexShrink: 0, color: '#fff',
+                  overflow: 'hidden',
+                }}>
+                  {isFullBanner ? (
+                    <img
+                      src={b.gambar}
+                      alt={b.judul}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <>
+                      {b.gambar && (
+                        <img src={b.gambar} alt="" style={{
+                          position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                          maxHeight: '70px', maxWidth: '80px', objectFit: 'contain', opacity: 0.9,
+                        }} onError={(e) => { e.target.style.display = 'none'; }} />
+                      )}
+                      <div style={{ zIndex: 1, maxWidth: '180px' }}>
+                        {b.badge && (
+                          <span style={{
+                            fontSize: '9px', fontWeight: '800', background: 'rgba(0,0,0,0.3)',
+                            padding: '2px 6px', borderRadius: '3px', color: b.warna_accent || '#FFD700',
+                          }}>
+                            {b.badge}
+                          </span>
+                        )}
+                        <div style={{ fontSize: '13px', fontWeight: '700', marginTop: '5px', lineHeight: '1.3' }}>
+                          {b.judul}
+                        </div>
+                        {b.subjudul && (
+                          <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '3px', lineHeight: '1.3' }}>
+                            {b.subjudul.length > 55 ? b.subjudul.slice(0, 55) + '...' : b.subjudul}
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
-                  <div style={{ fontSize: '13px', fontWeight: '700', marginTop: '5px', lineHeight: '1.3' }}>
-                    {b.judul}
-                  </div>
-                  {b.subjudul && (
-                    <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '3px', lineHeight: '1.3' }}>
-                      {b.subjudul.length > 60 ? b.subjudul.slice(0, 60) + '...' : b.subjudul}
+                  {/* Badge Tipe di Sudut Kiri Bawah Thumbnail */}
+                  <span style={{
+                    position: 'absolute', bottom: '6px', left: '8px', zIndex: 2,
+                    fontSize: '9px', fontWeight: '700', background: 'rgba(0,0,0,0.65)',
+                    padding: '2px 6px', borderRadius: '4px', color: '#FFFFFF', backdropFilter: 'blur(4px)',
+                  }}>
+                    {b.tipe === 'full' ? '📸 Gambar Penuh' : '🎨 Template Warna'}
+                  </span>
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>
+                        Slide #{idx + 1}
+                      </span>
+                      <span style={{
+                        display: 'inline-block', padding: '2px 10px', borderRadius: '10px', fontSize: '10px', fontWeight: '700',
+                        background: b.aktif ? '#D1FAE5' : '#FEE2E2', color: b.aktif ? '#065F46' : '#991B1B',
+                      }}>
+                        {b.aktif ? 'Aktif' : 'Nonaktif'}
+                      </span>
+                      <span style={{
+                        display: 'inline-block', padding: '2px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: '600',
+                        background: '#F3F4F6', color: '#4B5563',
+                      }}>
+                        {b.tipe === 'full' ? 'Desain Penuh (1200×360)' : 'Template + Teks'}
+                      </span>
                     </div>
-                  )}
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>
+                      {b.judul}
+                    </div>
+                    {b.subjudul && (
+                      <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '2px' }}>
+                        {b.subjudul}
+                      </div>
+                    )}
+                    {b.link && (
+                      <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>
+                        🔗 {b.link.length > 50 ? b.link.slice(0, 50) + '...' : b.link}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <button
+                      onClick={() => openEdit(b)}
+                      style={{
+                        padding: '7px 16px', background: '#F3F4F6', color: '#374151', border: '1px solid #D1D5DB',
+                        borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleToggleActive(b)}
+                      style={{
+                        padding: '7px 16px', background: b.aktif ? '#FEF3C7' : '#D1FAE5',
+                        color: b.aktif ? '#92400E' : '#065F46', border: 'none',
+                        borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                      }}
+                    >
+                      {b.aktif ? 'Sembunyikan' : 'Tampilkan'}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(b.id)}
+                      style={{
+                        padding: '7px 16px', background: '#FEE2E2', color: '#991B1B', border: 'none',
+                        borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                      }}
+                    >
+                      Hapus
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              {/* Info */}
-              <div style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>
-                      Slide #{idx + 1}
-                    </span>
-                    <span style={{
-                      display: 'inline-block', padding: '2px 10px', borderRadius: '10px', fontSize: '10px', fontWeight: '700',
-                      background: b.aktif ? '#D1FAE5' : '#FEE2E2', color: b.aktif ? '#065F46' : '#991B1B',
-                    }}>
-                      {b.aktif ? 'Aktif' : 'Nonaktif'}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#6B7280' }}>
-                    {b.judul}
-                  </div>
-                  {b.link && (
-                    <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '3px' }}>
-                      🔗 {b.link.length > 40 ? b.link.slice(0, 40) + '...' : b.link}
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                  <button
-                    onClick={() => openEdit(b)}
-                    style={{
-                      padding: '7px 16px', background: '#F3F4F6', color: '#374151', border: '1px solid #D1D5DB',
-                      borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleToggleActive(b)}
-                    style={{
-                      padding: '7px 16px', background: b.aktif ? '#FEF3C7' : '#D1FAE5',
-                      color: b.aktif ? '#92400E' : '#065F46', border: 'none',
-                      borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-                    }}
-                  >
-                    {b.aktif ? 'Sembunyikan' : 'Tampilkan'}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(b.id)}
-                    style={{
-                      padding: '7px 16px', background: '#FEE2E2', color: '#991B1B', border: 'none',
-                      borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-                    }}
-                  >
-                    Hapus
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -257,65 +388,289 @@ export default function BannerManager() {
         <div
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', zIndex: 1000,
+            background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', zIndex: 1000, padding: '16px',
           }}
           onClick={() => setShowForm(false)}
         >
           <div
             style={{
-              background: '#FFFFFF', borderRadius: '16px', width: '540px',
-              maxHeight: '88vh', overflow: 'auto', boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
+              background: '#FFFFFF', borderRadius: '16px', width: '580px',
+              maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div style={{ padding: '22px 28px 0', borderBottom: 'none' }}>
-              <h2 style={{ fontSize: '17px', fontWeight: '700', color: '#111827', margin: 0 }}>
-                {editId ? 'Edit Banner' : 'Tambah Banner Baru'}
-              </h2>
-              <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px' }}>
-                Banner akan tampil di carousel halaman utama toko online
-              </p>
+            <div style={{ padding: '22px 28px 16px', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#111827', margin: 0 }}>
+                  {editId ? 'Edit Banner Slider' : 'Tambah Banner Slider'}
+                </h2>
+                <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px', margin: 0 }}>
+                  Atur tampilan banner yang tayang di carousel halaman utama toko online
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                style={{
+                  background: 'none', border: 'none', fontSize: '20px', color: '#9CA3AF', cursor: 'pointer', lineHeight: 1, padding: '4px',
+                }}
+              >
+                ✕
+              </button>
             </div>
 
             <div style={{ padding: '20px 28px 28px' }}>
               {error && (
-                <div style={{ padding: '8px 12px', background: '#FEF2F2', color: '#991B1B', borderRadius: '6px', fontSize: '12px', marginBottom: '16px', border: '1px solid #FECACA' }}>
-                  {error}
+                <div style={{ padding: '10px 14px', background: '#FEF2F2', color: '#991B1B', borderRadius: '8px', fontSize: '12px', marginBottom: '18px', border: '1px solid #FECACA', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>⚠️</span>
+                  <span>{error}</span>
                 </div>
               )}
 
-              {/* Live Preview */}
-              <div style={{
-                borderRadius: '10px', height: '100px', display: 'flex', alignItems: 'center',
-                padding: '18px', color: '#FFFFFF', marginBottom: '20px', position: 'relative', overflow: 'hidden',
-                background: form.warna_bg,
-              }}>
-                {form.gambar && (
-                  <img src={form.gambar} alt="" style={{
-                    position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
-                    maxHeight: '70px', maxWidth: '90px', objectFit: 'contain', opacity: 0.85,
-                  }} onError={(e) => { e.target.style.display = 'none'; }} />
-                )}
-                <div style={{ zIndex: 1 }}>
-                  {form.badge && (
-                    <span style={{ fontSize: '8px', fontWeight: '800', background: 'rgba(0,0,0,0.3)', padding: '2px 5px', borderRadius: '3px', color: form.warna_accent }}>
-                      {form.badge}
-                    </span>
-                  )}
-                  <div style={{ fontSize: '14px', fontWeight: '800', marginTop: '4px', lineHeight: '1.3' }}>
-                    {form.judul || 'Judul Banner'}
-                  </div>
-                  {(form.subjudul || !form.judul) && (
-                    <div style={{ fontSize: '10px', opacity: 0.8, marginTop: '3px' }}>
-                      {form.subjudul || 'Subjudul banner'}
+              {/* Segmented Control / Tipe Banner */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '8px' }}>
+                  PILIH TIPE TAMPILAN BANNER:
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div
+                    onClick={() => setForm({ ...form, tipe: 'full' })}
+                    style={{
+                      padding: '12px 14px', borderRadius: '10px', cursor: 'pointer',
+                      border: form.tipe === 'full' ? '2px solid #03AC0E' : '1px solid #D1D5DB',
+                      background: form.tipe === 'full' ? '#F0FDF4' : '#F9FAFB',
+                      display: 'flex', flexDirection: 'column', gap: '4px',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '16px' }}>🖼️</span>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'full' ? '#065F46' : '#374151' }}>
+                        Banner Gambar Penuh
+                      </span>
                     </div>
-                  )}
+                    <span style={{ fontSize: '11px', color: '#6B7280', lineHeight: '1.3' }}>
+                      Upload poster/grafis utuh (Canva, Photoshop). Menutup seluruh slide.
+                    </span>
+                  </div>
+
+                  <div
+                    onClick={() => setForm({ ...form, tipe: 'side' })}
+                    style={{
+                      padding: '12px 14px', borderRadius: '10px', cursor: 'pointer',
+                      border: form.tipe === 'side' ? '2px solid #03AC0E' : '1px solid #D1D5DB',
+                      background: form.tipe === 'side' ? '#F0FDF4' : '#F9FAFB',
+                      display: 'flex', flexDirection: 'column', gap: '4px',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '16px' }}>🎨</span>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'side' ? '#065F46' : '#374151' }}>
+                        Template Warna & Teks
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '11px', color: '#6B7280', lineHeight: '1.3' }}>
+                      Warna gradien, judul, tombol, plus foto produk samping opsional.
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Form Fields */}
+              {/* Box Panduan Ukuran yang Pas */}
+              <div style={{
+                background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '10px',
+                padding: '12px 16px', marginBottom: '20px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '16px' }}>📐</span>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#0369A1' }}>
+                    Panduan Ukuran Gambar yang Pas:
+                  </span>
+                </div>
+                {form.tipe === 'full' ? (
+                  <div style={{ fontSize: '12px', color: '#0C4A6E', lineHeight: '1.5' }}>
+                    • <strong>Ukuran Rekomendasi: 1200 × 360 px</strong> atau <strong>1200 × 400 px</strong> (Rasio ~3:1 / Landscape).<br />
+                    • Format disarankan <strong>JPG / PNG / WebP</strong> (Maks. 5 MB). Gambar akan otomatis dioptimalkan agar website tetap kencang dan responsif di smartphone.
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '12px', color: '#0C4A6E', lineHeight: '1.5' }}>
+                    • <strong>Ukuran Foto Samping: 400 × 400 px</strong> atau <strong>500 × 500 px</strong> (Rasio 1:1 Persegi).<br />
+                    • Disarankan menggunakan gambar dengan <strong>background transparan (PNG)</strong> atau foto produk berlatar putih agar menyatu rapi dengan warna gradien.
+                  </div>
+                )}
+              </div>
+
+              {/* Live Preview Real-time */}
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Live Preview (Tampilan Toko Online):
+                  </span>
+                  <span style={{ fontSize: '10px', color: '#9CA3AF' }}>
+                    {form.tipe === 'full' ? 'Mode Banner Penuh' : 'Mode Template Warna'}
+                  </span>
+                </div>
+
+                {form.tipe === 'full' ? (
+                  <div style={{
+                    borderRadius: '10px', width: '100%', height: '140px', background: '#111827',
+                    overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: '1px solid #E5E7EB', position: 'relative',
+                  }}>
+                    {form.gambar ? (
+                      <img
+                        src={form.gambar}
+                        alt="Preview Banner Penuh"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '20px', color: '#9CA3AF' }}>
+                        <div style={{ fontSize: '28px', marginBottom: '4px' }}>🖼️</div>
+                        <div style={{ fontSize: '12px', fontWeight: '600' }}>Belum ada gambar banner</div>
+                        <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>
+                          Silakan upload gambar berukuran 1200 × 360 px di bawah
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{
+                    borderRadius: '10px', height: '120px', display: 'flex', alignItems: 'center',
+                    padding: '18px 22px', color: '#FFFFFF', position: 'relative', overflow: 'hidden',
+                    background: form.warna_bg, border: '1px solid #E5E7EB',
+                  }}>
+                    {form.gambar && (
+                      <img src={form.gambar} alt="" style={{
+                        position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
+                        maxHeight: '85px', maxWidth: '100px', objectFit: 'contain', opacity: 0.9,
+                      }} onError={(e) => { e.target.style.display = 'none'; }} />
+                    )}
+                    <div style={{ zIndex: 1, maxWidth: '320px' }}>
+                      {form.badge && (
+                        <span style={{ fontSize: '8px', fontWeight: '800', background: 'rgba(0,0,0,0.3)', padding: '2px 6px', borderRadius: '3px', color: form.warna_accent }}>
+                          {form.badge}
+                        </span>
+                      )}
+                      <div style={{ fontSize: '14px', fontWeight: '800', marginTop: '4px', lineHeight: '1.3' }}>
+                        {form.judul || 'Judul Banner'}
+                      </div>
+                      {(form.subjudul || !form.judul) && (
+                        <div style={{ fontSize: '11px', opacity: 0.85, marginTop: '3px', lineHeight: '1.3' }}>
+                          {form.subjudul || 'Deskripsi singkat banner promosi'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Gambar Section */}
+              <div style={{
+                background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '10px',
+                padding: '16px', marginBottom: '16px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#374151', margin: 0 }}>
+                    {form.tipe === 'full' ? 'File Gambar Banner (Wajib)' : 'Foto Produk / Ilustrasi Samping (Opsional)'}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setUseUrlInput(!useUrlInput)}
+                    style={{ background: 'none', border: 'none', fontSize: '11px', color: '#2563EB', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                  >
+                    {useUrlInput ? '📁 Ganti ke Upload File' : '🔗 Gunakan Link URL'}
+                  </button>
+                </div>
+
+                {useUrlInput ? (
+                  <div>
+                    <input
+                      style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                      value={form.gambar}
+                      onChange={(e) => setForm({ ...form, gambar: e.target.value })}
+                      placeholder={form.tipe === 'full' ? 'https://example.com/banner-1200x360.jpg' : 'https://example.com/foto-produk.png'}
+                    />
+                    <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '5px' }}>
+                      Tempel URL gambar langsung (akhiran .jpg, .png, .webp).
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={handleFileUpload}
+                    />
+
+                    {form.gambar ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#FFFFFF', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <img
+                          src={form.gambar}
+                          alt="Thumbnail"
+                          style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #E5E7EB' }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '12px', fontWeight: '600', color: '#065F46' }}>
+                            ✓ Gambar Siap Digunakan
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#6B7280' }}>
+                            {form.tipe === 'full' ? 'Rasio Banner Penuh 1200×360 px' : 'Foto Samping'}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                            style={{
+                              padding: '6px 12px', background: '#F3F4F6', color: '#374151', border: '1px solid #D1D5DB',
+                              borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer',
+                            }}
+                          >
+                            {uploading ? 'Memproses...' : 'Ganti Gambar'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            style={{
+                              padding: '6px 10px', background: '#FEE2E2', color: '#991B1B', border: 'none',
+                              borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer',
+                            }}
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        style={{
+                          width: '100%', padding: '14px', background: '#FFFFFF', border: '2px dashed #D1D5DB',
+                          borderRadius: '8px', cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                          alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        }}
+                      >
+                        <span style={{ fontSize: '24px' }}>📁</span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>
+                          {uploading ? 'Sedang memproses dan mengompres...' : 'Pilih File Gambar dari Komputer / HP'}
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#9CA3AF' }}>
+                          {form.tipe === 'full' ? 'Ukuran pas: 1200 × 360 px (JPG, PNG, WebP)' : 'Ukuran pas: 400 × 400 px (PNG transparan disarankan)'}
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Form Input Fields */}
               <div style={{ marginBottom: '14px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>
                   Judul Banner <span style={{ color: '#EF4444' }}>*</span>
@@ -324,32 +679,89 @@ export default function BannerManager() {
                   style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                   value={form.judul}
                   onChange={(e) => setForm({ ...form, judul: e.target.value })}
-                  placeholder="Contoh: Diskon Spesial Fashion & Apparel"
+                  placeholder="Contoh: Diskon Spesial Koleksi Fashion & Apparel"
                 />
               </div>
 
+              {form.tipe === 'side' && (
+                <>
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Subjudul / Keterangan Singkat</label>
+                    <textarea
+                      style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', minHeight: '50px', resize: 'vertical' }}
+                      value={form.subjudul}
+                      onChange={(e) => setForm({ ...form, subjudul: e.target.value })}
+                      placeholder="Deskripsi singkat yang tampil di bawah judul banner"
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Badge / Tag Promosi</label>
+                    <input
+                      style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                      value={form.badge}
+                      onChange={(e) => setForm({ ...form, badge: e.target.value })}
+                      placeholder="Contoh: PROMO BULAN INI / HEMAT & BERKAH"
+                    />
+                  </div>
+
+                  {/* Gradient Picker */}
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Warna Background Template</label>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                      {PRESET_GRADIENTS.map((g) => (
+                        <div
+                          key={g.value}
+                          title={g.label}
+                          onClick={() => setForm({ ...form, warna_bg: g.value })}
+                          style={{
+                            width: '44px', height: '30px', borderRadius: '6px', background: g.value, cursor: 'pointer',
+                            border: form.warna_bg === g.value ? '3px solid #111827' : '2px solid #E5E7EB',
+                            boxShadow: form.warna_bg === g.value ? '0 0 0 2px #93C5FD' : 'none',
+                            transition: 'all 0.15s ease',
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Warna Accent / Badge</label>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                          type="color"
+                          value={form.warna_accent}
+                          onChange={(e) => setForm({ ...form, warna_accent: e.target.value })}
+                          style={{ width: '38px', height: '34px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }}
+                        />
+                        <input
+                          style={{ flex: 1, padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                          value={form.warna_accent}
+                          onChange={(e) => setForm({ ...form, warna_accent: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
               <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Subjudul</label>
-                <textarea
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', minHeight: '50px', resize: 'vertical' }}
-                  value={form.subjudul}
-                  onChange={(e) => setForm({ ...form, subjudul: e.target.value })}
-                  placeholder="Deskripsi singkat untuk banner"
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Link Tujuan Klik Banner (Opsional)</label>
+                <input
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                  value={form.link}
+                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  placeholder="https://wa.me/6281234567890 atau https://toko.com/katalog"
                 />
+                <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>
+                  Jika diisi, pengunjung toko yang mengeklik banner akan diarahkan ke tautan ini (WhatsApp/halaman produk).
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Badge / Label</label>
-                  <input
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
-                    value={form.badge}
-                    onChange={(e) => setForm({ ...form, badge: e.target.value })}
-                    placeholder="PROMO BULAN INI"
-                  />
-                </div>
-                <div style={{ width: '90px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Urutan</label>
+                <div style={{ width: '110px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Urutan Slide</label>
                   <input
                     style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                     type="number" min="0"
@@ -357,80 +769,15 @@ export default function BannerManager() {
                     onChange={(e) => setForm({ ...form, urutan: Number(e.target.value) })}
                   />
                 </div>
-              </div>
-
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>URL Gambar (opsional)</label>
-                <input
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
-                  value={form.gambar}
-                  onChange={(e) => setForm({ ...form, gambar: e.target.value })}
-                  placeholder="https://example.com/banner.jpg"
-                />
-              </div>
-
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Link Tujuan (opsional)</label>
-                <input
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
-                  value={form.link}
-                  onChange={(e) => setForm({ ...form, link: e.target.value })}
-                  placeholder="https://wa.me/6281234567890"
-                />
-              </div>
-
-              {/* Gradient Picker */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Warna Background</label>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                  {PRESET_GRADIENTS.map((g) => (
-                    <div
-                      key={g.value}
-                      title={g.label}
-                      onClick={() => setForm({ ...form, warna_bg: g.value })}
-                      style={{
-                        width: '44px', height: '30px', borderRadius: '6px', background: g.value, cursor: 'pointer',
-                        border: form.warna_bg === g.value ? '3px solid #111827' : '2px solid #E5E7EB',
-                        boxShadow: form.warna_bg === g.value ? '0 0 0 2px #93C5FD' : 'none',
-                        transition: 'all 0.15s ease',
-                      }}
-                    />
-                  ))}
-                </div>
-                <input
-                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '12px', outline: 'none', boxSizing: 'border-box', color: '#6B7280' }}
-                  value={form.warna_bg}
-                  onChange={(e) => setForm({ ...form, warna_bg: e.target.value })}
-                  placeholder="CSS gradient atau warna"
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', marginBottom: '14px' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Warna Accent</label>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <input
-                      type="color"
-                      value={form.warna_accent}
-                      onChange={(e) => setForm({ ...form, warna_accent: e.target.value })}
-                      style={{ width: '38px', height: '34px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }}
-                    />
-                    <input
-                      style={{ flex: 1, padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
-                      value={form.warna_accent}
-                      onChange={(e) => setForm({ ...form, warna_accent: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Status</label>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '5px' }}>Status Publikasi</label>
                   <select
                     style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', background: '#fff' }}
                     value={form.aktif}
                     onChange={(e) => setForm({ ...form, aktif: Number(e.target.value) })}
                   >
-                    <option value={1}>Aktif (Tampil)</option>
-                    <option value={0}>Nonaktif</option>
+                    <option value={1}>Aktif (Tampil di Toko Online)</option>
+                    <option value={0}>Nonaktif (Sembunyikan Sementara)</option>
                   </select>
                 </div>
               </div>
@@ -438,6 +785,7 @@ export default function BannerManager() {
               {/* Modal Actions */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #F3F4F6' }}>
                 <button
+                  type="button"
                   onClick={() => setShowForm(false)}
                   style={{
                     padding: '10px 22px', background: '#F9FAFB', color: '#374151', border: '1px solid #D1D5DB',
@@ -447,12 +795,13 @@ export default function BannerManager() {
                   Batal
                 </button>
                 <button
+                  type="button"
                   onClick={handleSave}
-                  disabled={saving}
+                  disabled={saving || uploading}
                   style={{
                     padding: '10px 22px', background: '#03AC0E', color: 'white', border: 'none',
                     borderRadius: '8px', fontWeight: '600', fontSize: '13px', cursor: 'pointer',
-                    opacity: saving ? 0.7 : 1,
+                    opacity: saving || uploading ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: '6px',
                   }}
                 >
                   {saving ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah Banner'}
