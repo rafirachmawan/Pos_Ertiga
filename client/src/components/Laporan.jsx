@@ -189,8 +189,8 @@ const Laporan = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '20px' }}>
         {[
           { label: 'Total Transaksi', value: `${summary.total_transaksi} Nota`, accent: '#0F172A' },
-          { label: 'Total Pendapatan', value: fmt(summary.total_pendapatan), accent: '#2563EB' },
-          { label: 'Laba Bersih', value: fmt(summary.laba_bersih), accent: summary.laba_bersih < 0 ? '#DC2626' : '#059669' },
+          { label: 'Total Pendapatan', value: fmt(summary.total_pendapatan), accent: '#0F172A' },
+          { label: 'Laba Bersih', value: fmt(summary.laba_bersih), accent: '#0F172A' },
         ].map(c => (
           <div key={c.label} style={{
             background: '#FFFFFF',

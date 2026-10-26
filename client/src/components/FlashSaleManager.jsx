@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { api } from '../lib/api';
 import { showConfirm } from '../lib/dialog';
 
@@ -42,6 +42,10 @@ export default function FlashSaleManager() {
   const [successMsg, setSuccessMsg] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [isBarangDropdownOpen, setIsBarangDropdownOpen] = useState(false);
+  const [barangSearch, setBarangSearch] = useState('');
+  const [visibleBarangCount, setVisibleBarangCount] = useState(10);
+  const dropdownRef = useRef(null);
 
   // Fetch settings & items
   const fetchData = useCallback(async () => {
@@ -74,6 +78,21 @@ export default function FlashSaleManager() {
     fetchData();
     fetchBarang();
   }, [fetchData, fetchBarang]);
+
+  // Outside click listener for custom barang dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsBarangDropdownOpen(false);
+      }
+    };
+    if (isBarangDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isBarangDropdownOpen]);
 
   // Show temporary success feedback
   const notifySuccess = (msg) => {
@@ -108,7 +127,9 @@ export default function FlashSaleManager() {
         method: 'PUT',
         body: { ...settings, aktif: nextState },
       });
-      notifySuccess(nextState ? 'Flash Sale diaktifkan di website' : 'Flash Sale dinonaktifkan di website');
+      notifySuccess(
+        nextState ? 'Flash Sale diaktifkan di website' : 'Flash Sale dinonaktifkan di website'
+      );
     } catch (err) {
       setError(err.message);
       setSettings((prev) => ({ ...prev, aktif: prev.aktif ? 0 : 1 }));
@@ -122,6 +143,9 @@ export default function FlashSaleManager() {
       ...emptyItem,
       urutan: items.length,
     });
+    setBarangSearch('');
+    setVisibleBarangCount(10);
+    setIsBarangDropdownOpen(false);
     setError('');
     setShowItemModal(true);
   };
@@ -142,43 +166,78 @@ export default function FlashSaleManager() {
       urutan: item.urutan ?? 0,
       aktif: item.aktif ?? 1,
     });
+    setBarangSearch('');
+    setVisibleBarangCount(10);
+    setIsBarangDropdownOpen(false);
     setError('');
     setShowItemModal(true);
   };
 
   // When user selects a barang from dropdown
-  const handleSelectBarang = (e) => {
-    const bId = e.target.value;
+  const handleSelectBarang = (bId) => {
     if (!bId) {
       setForm((prev) => ({ ...prev, barang_id: '' }));
       return;
     }
     const selected = barangList.find((b) => String(b.id) === String(bId));
     if (selected) {
-      const hJual = selected.harga_jual || 0;
-      const defaultPromo = Math.round(hJual * 0.8); // 20% discount by default
-      const diskonText = '-20%';
+      const hargaNormal = Number(selected.harga_jual) || 0;
+      const diskonPct = 20; // default 20%
+      const hargaDiskon = Math.round(hargaNormal * (1 - diskonPct / 100));
+
       setForm((prev) => ({
         ...prev,
         barang_id: selected.id,
-        nama_item: selected.nama_barang || '',
-        gambar: selected.gambar || prev.gambar,
-        harga_asli: hJual,
-        harga_diskon: defaultPromo,
-        diskon_persen: diskonText,
+        nama_item: selected.nama_barang || prev.nama_item,
+        gambar: selected.foto_url || selected.gambar || prev.gambar,
+        harga_asli: hargaNormal,
+        harga_diskon: hargaDiskon,
+        diskon_persen: `-${diskonPct}%`,
         tipe: 'product',
       }));
     }
   };
 
-  // Auto calculate discount percentage when prices change
+  // Filtered barang list for the custom dropdown
+  const filteredBarangList = useMemo(() => {
+    const q = barangSearch.toLowerCase().trim();
+    if (!q) return barangList;
+    return barangList.filter((b) => {
+      const nama = (b.nama_barang || '').toLowerCase();
+      const barcode = (b.barcode || '').toLowerCase();
+      return nama.includes(q) || barcode.includes(q);
+    });
+  }, [barangList, barangSearch]);
+
+  // Display only visibleBarangCount items (10 initially, loads more on scroll)
+  const displayedBarangList = useMemo(() => {
+    return filteredBarangList.slice(0, visibleBarangCount);
+  }, [filteredBarangList, visibleBarangCount]);
+
+  const selectedBarang = useMemo(() => {
+    return barangList.find((b) => String(b.id) === String(form.barang_id)) || null;
+  }, [barangList, form.barang_id]);
+
+  const handleDropdownScroll = (e) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    if (scrollTop + clientHeight >= scrollHeight - 20) {
+      if (visibleBarangCount < filteredBarangList.length) {
+        setVisibleBarangCount((prev) => Math.min(prev + 10, filteredBarangList.length));
+      }
+    }
+  };
+
+  // Recalculate discount percentage when price changes
   const handlePriceChange = (field, value) => {
     const updated = { ...form, [field]: value };
-    const asli = Number(field === 'harga_asli' ? value : form.harga_asli) || 0;
-    const diskon = Number(field === 'harga_diskon' ? value : form.harga_diskon) || 0;
+    const asli = Number(field === 'harga_asli' ? value : updated.harga_asli) || 0;
+    const diskon = Number(field === 'harga_diskon' ? value : updated.harga_diskon) || 0;
+
     if (asli > 0 && diskon > 0 && diskon < asli) {
       const pct = Math.round(((asli - diskon) / asli) * 100);
       updated.diskon_persen = `-${pct}%`;
+    } else if (asli > 0 && diskon >= asli) {
+      updated.diskon_persen = '0%';
     }
     setForm(updated);
   };
@@ -190,11 +249,7 @@ export default function FlashSaleManager() {
       setError('Nama item flash sale wajib diisi');
       return;
     }
-    if (!form.harga_asli || Number(form.harga_asli) <= 0) {
-      setError('Harga asli / coret wajib diisi');
-      return;
-    }
-    if (!form.harga_diskon || Number(form.harga_diskon) <= 0) {
+    if (!form.harga_diskon) {
       setError('Harga flash sale promo wajib diisi');
       return;
     }
@@ -202,51 +257,57 @@ export default function FlashSaleManager() {
     try {
       setSavingItem(true);
       setError('');
+      const payload = {
+        ...form,
+        barang_id: form.barang_id ? Number(form.barang_id) : null,
+        harga_asli: Number(form.harga_asli) || 0,
+        harga_diskon: Number(form.harga_diskon) || 0,
+        terjual_pct: Number(form.terjual_pct) || 75,
+        urutan: Number(form.urutan) || 0,
+        aktif: Number(form.aktif) ? 1 : 0,
+      };
+
       if (editId) {
         await api(`/api/flash-sale/items/${editId}`, {
           method: 'PUT',
-          body: form,
+          body: payload,
         });
-        notifySuccess('Item Flash Sale berhasil diperbarui!');
+        notifySuccess('Item flash sale berhasil diperbarui');
       } else {
         await api('/api/flash-sale/items', {
           method: 'POST',
-          body: form,
+          body: payload,
         });
-        notifySuccess('Item Flash Sale berhasil ditambahkan!');
+        notifySuccess('Item flash sale berhasil ditambahkan');
       }
       setShowItemModal(false);
       fetchData();
     } catch (err) {
-      setError(err.message || 'Gagal menyimpan item');
+      setError(err.message || 'Gagal menyimpan item flash sale');
     } finally {
       setSavingItem(false);
     }
   };
 
-  // Toggle Item Active
+  // Toggle Single Item Active
   const handleToggleItemActive = async (item) => {
     try {
-      const nextActive = item.aktif ? 0 : 1;
       await api(`/api/flash-sale/items/${item.id}`, {
         method: 'PUT',
-        body: { aktif: nextActive },
+        body: { ...item, aktif: item.aktif ? 0 : 1 },
       });
-      setItems((prev) =>
-        prev.map((it) => (it.id === item.id ? { ...it, aktif: nextActive } : it))
-      );
-      notifySuccess(nextActive ? `Item "${item.nama_item}" diaktifkan` : `Item "${item.nama_item}" dinonaktifkan`);
+      fetchData();
     } catch (err) {
       setError(err.message || 'Gagal mengubah status item');
     }
   };
 
-  // Delete Item
+  // Delete Single Item
   const handleDeleteItem = async (id, nama) => {
     const ok = await showConfirm({
       title: 'Hapus Item Flash Sale',
-      message: `Hapus item "${nama}" dari Flash Sale?`,
-      confirmText: 'Ya, Hapus',
+      message: `Apakah Anda yakin ingin menghapus "${nama}" dari daftar flash sale?`,
+      confirmText: 'Ya, Hapus Item',
       type: 'danger',
     });
     if (!ok) return;
@@ -271,16 +332,32 @@ export default function FlashSaleManager() {
   });
 
   return (
-    <div style={{ padding: '0 0 40px 0' }}>
-      
+    <div style={{ maxWidth: '1240px', margin: '0 auto', paddingBottom: '40px' }}>
       {/* 1. Header Section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '14px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '22px',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}
+      >
         <div>
-          <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#0F172A', margin: 0, letterSpacing: '-0.02em' }}>
+          <h2
+            style={{
+              fontSize: '22px',
+              fontWeight: '700',
+              color: '#0F172A',
+              margin: 0,
+              letterSpacing: '-0.02em',
+            }}
+          >
             Kelola Flash Sale Website
           </h2>
           <p style={{ fontSize: '13px', color: '#64748B', margin: '4px 0 0 0' }}>
-            Atur produk promo terbatas, hitung mundur (countdown), diskon spesial, dan status tayang di etalase toko online.
+            Atur produk promo terbatas, hitung mundur (countdown), diskon spesial, dan status tayang di etalase toko online
           </p>
         </div>
 
@@ -300,14 +377,14 @@ export default function FlashSaleManager() {
               border: `1px solid ${settings.aktif ? '#A7F3D0' : '#E2E8F0'}`,
               cursor: 'pointer',
               userSelect: 'none',
-              transition: 'all 0.2s ease',
+              transition: 'all 0.15s ease',
             }}
           >
             {/* Toggle Switch Track & Knob */}
             <div
               style={{
-                width: '38px',
-                height: '22px',
+                width: '36px',
+                height: '20px',
                 borderRadius: '9999px',
                 background: settings.aktif ? '#10B981' : '#CBD5E1',
                 position: 'relative',
@@ -317,15 +394,15 @@ export default function FlashSaleManager() {
             >
               <div
                 style={{
-                  width: '18px',
-                  height: '18px',
+                  width: '16px',
+                  height: '16px',
                   borderRadius: '50%',
                   background: '#FFFFFF',
                   position: 'absolute',
                   top: '2px',
                   left: settings.aktif ? '18px' : '2px',
                   transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
                 }}
               />
             </div>
@@ -333,7 +410,7 @@ export default function FlashSaleManager() {
             {/* Status Label */}
             <span
               style={{
-                fontSize: '12.5px',
+                fontSize: '12px',
                 fontWeight: '700',
                 color: settings.aktif ? '#047857' : '#64748B',
                 whiteSpace: 'nowrap',
@@ -344,24 +421,26 @@ export default function FlashSaleManager() {
           </div>
 
           <button
+            type="button"
             onClick={openCreateItem}
             style={{
-              padding: '9px 18px',
-              background: '#03AC0E',
+              height: '38px',
+              padding: '0 18px',
+              background: '#0F172A',
               color: '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
-              fontWeight: '700',
+              fontWeight: '600',
               fontSize: '12.5px',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 6px rgba(3, 172, 14, 0.25)',
+              gap: '8px',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
               transition: 'background 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#028A0B')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#03AC0E')}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#1E293B')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = '#0F172A')}
           >
             <span style={{ fontSize: '15px', lineHeight: 1 }}>+</span>
             <span>Tambah Item Flash Sale</span>
@@ -373,12 +452,12 @@ export default function FlashSaleManager() {
       {successMsg && (
         <div
           style={{
-            padding: '12px 16px',
+            padding: '10px 16px',
             background: '#ECFDF5',
             border: '1px solid #A7F3D0',
             borderRadius: '8px',
             color: '#065F46',
-            fontSize: '13px',
+            fontSize: '12.5px',
             fontWeight: '600',
             marginBottom: '18px',
             display: 'flex',
@@ -392,15 +471,15 @@ export default function FlashSaleManager() {
       )}
 
       {/* Error Notification */}
-      {error && (
+      {error && !showItemModal && (
         <div
           style={{
-            padding: '12px 16px',
+            padding: '10px 16px',
             background: '#FEF2F2',
             border: '1px solid #FECACA',
             borderRadius: '8px',
             color: '#991B1B',
-            fontSize: '13px',
+            fontSize: '12.5px',
             fontWeight: '600',
             marginBottom: '18px',
           }}
@@ -415,22 +494,43 @@ export default function FlashSaleManager() {
           background: '#FFFFFF',
           borderRadius: '12px',
           border: '1px solid #E2E8F0',
-          padding: '18px 22px',
-          marginBottom: '24px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          padding: '20px 22px',
+          marginBottom: '22px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '16px',
+            flexWrap: 'wrap',
+            gap: '10px',
+          }}
+        >
           <div>
-            <h3 style={{ fontSize: '14.5px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
               Pengaturan Header & Timer Flash Sale
             </h3>
-            <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0 0' }}>
+            <p style={{ fontSize: '12px', color: '#64748B', margin: '3px 0 0 0' }}>
               Atur label badge, subjudul teks promo, dan durasi hitung mundur timer di homepage
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F8FAFC', padding: '4px 10px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '11.5px', color: '#475569' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: '#F8FAFC',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              border: '1px solid #E2E8F0',
+              fontSize: '11.5px',
+              color: '#475569',
+            }}
+          >
             <span style={{ fontWeight: '700' }}>{settings.badge_text || 'FLASH SALE'}</span>
             <span>·</span>
             <span>{settings.durasi_jam || 3} Jam Countdown</span>
@@ -438,9 +538,26 @@ export default function FlashSaleManager() {
         </div>
 
         <form onSubmit={handleSaveSettings}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr)) 180px', gap: '14px', alignItems: 'flex-end' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr)) 160px',
+              gap: '14px',
+              alignItems: 'flex-end',
+            }}
+          >
             <div>
-              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '11.5px',
+                  fontWeight: '600',
+                  color: '#475569',
+                  marginBottom: '6px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                }}
+              >
                 Badge Header
               </label>
               <input
@@ -448,22 +565,22 @@ export default function FlashSaleManager() {
                 value={settings.badge_text || ''}
                 onChange={(e) => setSettings({ ...settings, badge_text: e.target.value })}
                 placeholder="mis. FLASH SALE"
-                style={{
-                  width: '100%',
-                  height: '38px',
-                  padding: '0 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #CBD5E1',
-                  fontSize: '13px',
-                  color: '#0F172A',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={settingInputStyle}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '11.5px',
+                  fontWeight: '600',
+                  color: '#475569',
+                  marginBottom: '6px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                }}
+              >
                 Teks Subjudul / Promo
               </label>
               <input
@@ -471,22 +588,22 @@ export default function FlashSaleManager() {
                 value={settings.subjudul || ''}
                 onChange={(e) => setSettings({ ...settings, subjudul: e.target.value })}
                 placeholder="mis. Promo Terbatas Hari Ini"
-                style={{
-                  width: '100%',
-                  height: '38px',
-                  padding: '0 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #CBD5E1',
-                  fontSize: '13px',
-                  color: '#0F172A',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={settingInputStyle}
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '11.5px',
+                  fontWeight: '600',
+                  color: '#475569',
+                  marginBottom: '6px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.03em',
+                }}
+              >
                 Durasi Hitung Mundur (Jam)
               </label>
               <input
@@ -495,17 +612,7 @@ export default function FlashSaleManager() {
                 max="24"
                 value={settings.durasi_jam || 3}
                 onChange={(e) => setSettings({ ...settings, durasi_jam: e.target.value })}
-                style={{
-                  width: '100%',
-                  height: '38px',
-                  padding: '0 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #CBD5E1',
-                  fontSize: '13px',
-                  color: '#0F172A',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={settingInputStyle}
               />
             </div>
 
@@ -521,13 +628,13 @@ export default function FlashSaleManager() {
                   borderRadius: '8px',
                   border: 'none',
                   fontSize: '12.5px',
-                  fontWeight: '700',
+                  fontWeight: '600',
                   cursor: savingSettings ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
-                  boxShadow: '0 2px 4px rgba(15, 23, 42, 0.15)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                   transition: 'background 0.15s ease',
                 }}
                 onMouseEnter={(e) => !savingSettings && (e.currentTarget.style.background = '#1E293B')}
@@ -547,10 +654,10 @@ export default function FlashSaleManager() {
           borderRadius: '12px',
           border: '1px solid #E2E8F0',
           overflow: 'hidden',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
         }}
       >
-        {/* Table Card Header with Search, Filter & Add Button */}
+        {/* Table Card Header with Search & Filter */}
         <div
           style={{
             padding: '16px 20px',
@@ -563,7 +670,7 @@ export default function FlashSaleManager() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
               Daftar Item Flash Sale
             </h3>
             <span
@@ -584,7 +691,6 @@ export default function FlashSaleManager() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {/* Search Input */}
             <div style={{ position: 'relative', width: '220px' }}>
-              <svg style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input
                 type="text"
                 placeholder="Cari item promo..."
@@ -592,9 +698,8 @@ export default function FlashSaleManager() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  height: '34px',
-                  paddingLeft: '30px',
-                  paddingRight: '10px',
+                  height: '36px',
+                  padding: '0 12px',
                   border: '1px solid #CBD5E1',
                   borderRadius: '6px',
                   fontSize: '12.5px',
@@ -610,7 +715,7 @@ export default function FlashSaleManager() {
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               style={{
-                height: '34px',
+                height: '36px',
                 padding: '0 10px',
                 border: '1px solid #CBD5E1',
                 borderRadius: '6px',
@@ -629,31 +734,32 @@ export default function FlashSaleManager() {
         </div>
 
         {loading ? (
-          <div style={{ padding: '48px', textAlign: 'center', color: '#64748B', fontSize: '14px' }}>
+          <div style={{ padding: '48px', textAlign: 'center', color: '#64748B', fontSize: '13px' }}>
             Memuat data flash sale...
           </div>
         ) : filteredItems.length === 0 ? (
           <div style={{ padding: '56px 20px', textAlign: 'center' }}>
-            <div style={{ fontSize: '14px', color: '#94A3B8', marginBottom: '8px' }}>—</div>
             <h4 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: '0 0 4px 0' }}>
               {items.length === 0 ? 'Belum Ada Item Flash Sale' : 'Item Tidak Ditemukan'}
             </h4>
-            <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 16px 0' }}>
+            <p style={{ fontSize: '12.5px', color: '#64748B', margin: '0 0 16px 0' }}>
               {items.length === 0
                 ? 'Tambahkan produk dari inventori barang untuk dijadikan promo flash sale hari ini.'
                 : 'Coba ubah kata kunci pencarian atau filter tipe.'}
             </p>
             {items.length === 0 && (
               <button
+                type="button"
                 onClick={openCreateItem}
                 style={{
-                  padding: '9px 18px',
-                  background: '#03AC0E',
+                  height: '36px',
+                  padding: '0 18px',
+                  background: '#0F172A',
                   color: '#FFFFFF',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   border: 'none',
-                  fontSize: '13px',
-                  fontWeight: '700',
+                  fontSize: '12.5px',
+                  fontWeight: '600',
                   cursor: 'pointer',
                 }}
               >
@@ -665,17 +771,17 @@ export default function FlashSaleManager() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '50px', textAlign: 'center', whiteSpace: 'nowrap' }}>No</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '60px', textAlign: 'center', whiteSpace: 'nowrap' }}>Foto</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: '220px', whiteSpace: 'nowrap' }}>Nama Item Promo</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', whiteSpace: 'nowrap' }}>Tipe</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '120px', textAlign: 'right', whiteSpace: 'nowrap' }}>Harga Asli</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '140px', textAlign: 'right', whiteSpace: 'nowrap' }}>Harga Flash Sale</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '80px', textAlign: 'center', whiteSpace: 'nowrap' }}>Diskon</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '130px', whiteSpace: 'nowrap' }}>Progres Terjual</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '110px', textAlign: 'center', whiteSpace: 'nowrap' }}>Status</th>
-                  <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '90px', textAlign: 'center', whiteSpace: 'nowrap' }}>Aksi</th>
+                <tr style={{ background: '#F8FAFC' }}>
+                  <th style={thStyle({ width: '50px', textAlign: 'center' })}>No</th>
+                  <th style={thStyle({ width: '60px', textAlign: 'center' })}>Foto</th>
+                  <th style={thStyle({ minWidth: '220px' })}>Nama Item Promo</th>
+                  <th style={thStyle({ width: '130px' })}>Tipe</th>
+                  <th style={thStyle({ width: '120px', textAlign: 'right' })}>Harga Asli</th>
+                  <th style={thStyle({ width: '140px', textAlign: 'right' })}>Harga Flash Sale</th>
+                  <th style={thStyle({ width: '80px', textAlign: 'center' })}>Diskon</th>
+                  <th style={thStyle({ width: '130px' })}>Progres Terjual</th>
+                  <th style={thStyle({ width: '110px', textAlign: 'center' })}>Status</th>
+                  <th style={thStyle({ width: '90px', textAlign: 'center' }, true)}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -695,17 +801,17 @@ export default function FlashSaleManager() {
                       if (item.aktif) e.currentTarget.style.background = '#FFFFFF';
                     }}
                   >
-                    {/* Urutan (1-based, not #0!) */}
-                    <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: '700', color: '#64748B', fontSize: '12px' }}>
+                    {/* Urutan */}
+                    <td style={tdStyle({ textAlign: 'center', fontWeight: '700', color: '#64748B', fontSize: '12px' })}>
                       #{idx + 1}
                     </td>
 
                     {/* Foto Thumbnail */}
-                    <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                    <td style={tdStyle({ textAlign: 'center' })}>
                       <div
                         style={{
-                          width: '46px',
-                          height: '46px',
+                          width: '44px',
+                          height: '44px',
                           borderRadius: '8px',
                           background: '#F1F5F9',
                           overflow: 'hidden',
@@ -725,13 +831,13 @@ export default function FlashSaleManager() {
                             }}
                           />
                         ) : (
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                          <span style={{ fontSize: '10px', color: '#94A3B8' }}>No Img</span>
                         )}
                       </div>
                     </td>
 
                     {/* Nama Item & Sub-detail */}
-                    <td style={{ padding: '12px 14px' }}>
+                    <td style={tdStyle()}>
                       <div style={{ fontWeight: '700', color: '#0F172A', fontSize: '13.5px', marginBottom: '3px' }}>
                         {item.nama_item}
                       </div>
@@ -752,10 +858,10 @@ export default function FlashSaleManager() {
                     </td>
 
                     {/* Tipe Promo Pill */}
-                    <td style={{ padding: '12px 14px' }}>
+                    <td style={tdStyle()}>
                       <span
                         style={{
-                          fontSize: '11.5px',
+                          fontSize: '11px',
                           fontWeight: '700',
                           padding: '3px 8px',
                           borderRadius: '6px',
@@ -770,17 +876,17 @@ export default function FlashSaleManager() {
                     </td>
 
                     {/* Harga Asli (Strikethrough) */}
-                    <td style={{ padding: '12px 14px', textAlign: 'right', color: '#94A3B8', textDecoration: 'line-through', fontSize: '12.5px' }}>
+                    <td style={tdStyle({ textAlign: 'right', color: '#94A3B8', textDecoration: 'line-through', fontSize: '12.5px' })}>
                       Rp {formatRupiah(item.harga_asli)}
                     </td>
 
                     {/* Harga Flash Sale (Bold Red) */}
-                    <td style={{ padding: '12px 14px', textAlign: 'right', fontWeight: '800', color: '#DC2626', fontSize: '13.5px' }}>
+                    <td style={tdStyle({ textAlign: 'right', fontWeight: '800', color: '#DC2626', fontSize: '13.5px' })}>
                       Rp {formatRupiah(item.harga_diskon)}
                     </td>
 
                     {/* Diskon Badge */}
-                    <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                    <td style={tdStyle({ textAlign: 'center' })}>
                       <span
                         style={{
                           background: '#FEE2E2',
@@ -798,7 +904,7 @@ export default function FlashSaleManager() {
                     </td>
 
                     {/* Progres Terjual */}
-                    <td style={{ padding: '12px 14px' }}>
+                    <td style={tdStyle()}>
                       <div style={{ width: '100px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748B', fontWeight: '600', marginBottom: '3px' }}>
                           <span>Terjual</span>
@@ -818,8 +924,9 @@ export default function FlashSaleManager() {
                     </td>
 
                     {/* Status Toggle Button */}
-                    <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                    <td style={tdStyle({ textAlign: 'center' })}>
                       <button
+                        type="button"
                         onClick={() => handleToggleItemActive(item)}
                         title="Klik untuk mengubah status aktif/nonaktif"
                         style={{
@@ -839,51 +946,55 @@ export default function FlashSaleManager() {
                     </td>
 
                     {/* Aksi Buttons */}
-                    <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                    <td style={tdStyle({ textAlign: 'center' }, true)}>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
                         <button
+                          type="button"
                           onClick={() => openEditItem(item)}
                           title="Edit Item"
                           style={{
-                            width: '30px',
-                            height: '30px',
-                            background: '#F1F5F9',
+                            height: '28px',
+                            padding: '0 10px',
+                            background: '#FFFFFF',
                             border: '1px solid #CBD5E1',
                             borderRadius: '6px',
-                            fontSize: '12px',
+                            fontSize: '11.5px',
+                            fontWeight: '600',
                             cursor: 'pointer',
                             color: '#334155',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
                             transition: 'all 0.15s ease',
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = '#E2E8F0')}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = '#F1F5F9')}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#F8FAFC';
+                            e.currentTarget.style.borderColor = '#94A3B8';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#FFFFFF';
+                            e.currentTarget.style.borderColor = '#CBD5E1';
+                          }}
                         >
-                          ✎
+                          Edit
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeleteItem(item.id, item.nama_item)}
                           title="Hapus Item"
                           style={{
-                            width: '30px',
-                            height: '30px',
-                            background: '#FEE2E2',
+                            height: '28px',
+                            padding: '0 10px',
+                            background: '#FEF2F2',
                             border: '1px solid #FECACA',
                             borderRadius: '6px',
-                            fontSize: '12px',
+                            fontSize: '11.5px',
+                            fontWeight: '600',
                             cursor: 'pointer',
                             color: '#DC2626',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
                             transition: 'all 0.15s ease',
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = '#FCA5A5')}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = '#FEE2E2')}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = '#FEE2E2')}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = '#FEF2F2')}
                         >
-                          ✕
+                          Hapus
                         </button>
                       </div>
                     </td>
@@ -901,27 +1012,26 @@ export default function FlashSaleManager() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
+            background: 'rgba(15, 23, 42, 0.45)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
             backdropFilter: 'blur(3px)',
             padding: '16px',
-            animation: 'fadeIn 0.15s ease-out',
           }}
           onClick={() => setShowItemModal(false)}
         >
           <div
             style={{
               background: '#FFFFFF',
-              borderRadius: '16px',
-              maxWidth: '620px',
+              borderRadius: '14px',
+              maxWidth: '600px',
               width: '100%',
               maxHeight: '90vh',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
               border: '1px solid #E2E8F0',
               overflow: 'hidden',
             }}
@@ -931,46 +1041,32 @@ export default function FlashSaleManager() {
             <div
               style={{
                 padding: '18px 24px',
-                borderBottom: '1px solid #E5E7EB',
+                borderBottom: '1px solid #F1F5F9',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: '#FAFAFA',
               }}
             >
               <div>
-                <h3 style={{ fontSize: '17px', fontWeight: '800', color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#EA580C', fontSize: '18px' }}>⚡</span>
+                <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
                   {editId ? 'Edit Item Flash Sale' : 'Tambah Item Flash Sale'}
                 </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748B' }}>
-                  Atur produk promosi berjangka, harga diskon, dan status tayang di toko online.
+                <p style={{ margin: '3px 0 0 0', fontSize: '12.5px', color: '#64748B' }}>
+                  Atur produk promosi berjangka, harga diskon, dan status tayang di toko online
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowItemModal(false)}
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  border: '1px solid #E2E8F0',
-                  background: '#FFFFFF',
-                  fontSize: '15px',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '18px',
+                  color: '#94A3B8',
                   cursor: 'pointer',
-                  color: '#64748B',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#F1F5F9';
-                  e.currentTarget.style.color = '#0F172A';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#FFFFFF';
-                  e.currentTarget.style.color = '#64748B';
+                  lineHeight: 1,
+                  padding: '4px 6px',
+                  borderRadius: '6px',
                 }}
               >
                 ✕
@@ -978,14 +1074,13 @@ export default function FlashSaleManager() {
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleSaveItem} style={{ flex: 1, overflowY: 'auto', padding: '22px 24px' }}>
+            <form onSubmit={handleSaveItem} style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
               
               {/* Ambil Cepat dari Inventori Toko */}
-              <div style={{ marginBottom: '18px', background: '#F8FAFC', padding: '14px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+              <div style={{ marginBottom: '18px', background: '#F8FAFC', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '12.5px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📦</span>
-                    <span>Pilih Cepat dari Inventori Toko (Opsional)</span>
+                  <label style={{ fontSize: '12px', fontWeight: '700', color: '#0F172A' }}>
+                    Pilih Cepat dari Inventori Toko (Opsional)
                   </label>
                   {form.barang_id && (
                     <button
@@ -1006,35 +1101,191 @@ export default function FlashSaleManager() {
                   )}
                 </div>
 
-                <select
-                  value={form.barang_id || ''}
-                  onChange={handleSelectBarang}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #CBD5E1',
-                    fontSize: '13px',
-                    background: '#FFFFFF',
-                    color: '#0F172A',
-                    outline: 'none',
-                  }}
-                >
-                  <option value="">-- Pilih Barang dari Inventori Toko --</option>
-                  {barangList.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.nama_barang} ({b.barcode}) — Harga Toko: Rp {formatRupiah(b.harga_jual)} | Stok: {b.stok}
-                    </option>
-                  ))}
-                </select>
-                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '6px' }}>
-                  💡 Jika dipilih, nama barang, foto, dan harga asli akan otomatis terisi serta terhubung dengan stok produk fisik toko.
+                {/* Custom 10-Item Scrollable Dropdown */}
+                <div ref={dropdownRef} style={{ position: 'relative' }}>
+                  {/* Dropdown Trigger */}
+                  <div
+                    onClick={() => {
+                      setIsBarangDropdownOpen((prev) => !prev);
+                      if (!isBarangDropdownOpen) setVisibleBarangCount(10);
+                    }}
+                    style={{
+                      width: '100%',
+                      minHeight: '38px',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: isBarangDropdownOpen ? '1.5px solid #0F172A' : '1px solid #CBD5E1',
+                      fontSize: '13px',
+                      background: '#FFFFFF',
+                      color: selectedBarang ? '#0F172A' : '#64748B',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.15s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                      {selectedBarang ? (
+                        <span style={{ fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {selectedBarang.nama_barang} {selectedBarang.barcode ? `(${selectedBarang.barcode})` : ''} — Rp {formatRupiah(selectedBarang.harga_jual)} | Stok: {selectedBarang.stok}
+                        </span>
+                      ) : (
+                        <span>-- Pilih Barang dari Inventori Toko --</span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94A3B8', fontSize: '11px' }}>
+                      {selectedBarang && (
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectBarang('');
+                          }}
+                          title="Hapus pilihan"
+                          style={{ padding: '2px 6px', borderRadius: '4px', cursor: 'pointer', color: '#EF4444', fontWeight: 'bold' }}
+                        >
+                          ✕
+                        </span>
+                      )}
+                      <span style={{ fontSize: '10px' }}>{isBarangDropdownOpen ? '▲' : '▼'}</span>
+                    </div>
+                  </div>
+
+                  {/* Dropdown Popup Menu (Initial 10 items, infinite scroll down) */}
+                  {isBarangDropdownOpen && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 4px)',
+                        left: 0,
+                        right: 0,
+                        background: '#FFFFFF',
+                        border: '1px solid #CBD5E1',
+                        borderRadius: '8px',
+                        boxShadow: '0 12px 24px -4px rgba(15, 23, 42, 0.18)',
+                        zIndex: 100,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {/* Search Bar inside Dropdown */}
+                      <div style={{ padding: '8px 10px', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
+                        <input
+                          type="text"
+                          placeholder="Ketik untuk mencari barang atau barcode..."
+                          value={barangSearch}
+                          onChange={(e) => {
+                            setBarangSearch(e.target.value);
+                            setVisibleBarangCount(10);
+                          }}
+                          autoFocus
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            width: '100%',
+                            height: '32px',
+                            padding: '0 10px',
+                            borderRadius: '6px',
+                            border: '1px solid #CBD5E1',
+                            fontSize: '12px',
+                            color: '#0F172A',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+
+                      {/* Scrollable Container (Showing 10 items, scroll to load more) */}
+                      <div
+                        onScroll={handleDropdownScroll}
+                        style={{
+                          maxHeight: '230px',
+                          overflowY: 'auto',
+                        }}
+                      >
+                        {displayedBarangList.length === 0 ? (
+                          <div style={{ padding: '16px', textAlign: 'center', color: '#94A3B8', fontSize: '12.5px' }}>
+                            Tidak ada barang yang cocok dengan pencarian
+                          </div>
+                        ) : (
+                          displayedBarangList.map((b) => {
+                            const isSelected = String(b.id) === String(form.barang_id);
+                            return (
+                              <div
+                                key={b.id}
+                                onClick={() => {
+                                  handleSelectBarang(b.id);
+                                  setIsBarangDropdownOpen(false);
+                                  setBarangSearch('');
+                                }}
+                                style={{
+                                  padding: '9px 12px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  cursor: 'pointer',
+                                  borderBottom: '1px solid #F1F5F9',
+                                  background: isSelected ? '#EFF6FF' : '#FFFFFF',
+                                  transition: 'background 0.1s ease',
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!isSelected) e.currentTarget.style.background = '#F8FAFC';
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (!isSelected) e.currentTarget.style.background = '#FFFFFF';
+                                }}
+                              >
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <div style={{ fontSize: '12.5px', fontWeight: '600', color: isSelected ? '#1D4ED8' : '#0F172A' }}>
+                                    {b.nama_barang} {b.barcode ? `(${b.barcode})` : ''}
+                                  </div>
+                                  <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                                    Harga Toko: Rp {formatRupiah(b.harga_jual)} · Stok: {b.stok}
+                                  </div>
+                                </div>
+                                {isSelected && (
+                                  <span style={{ color: '#1D4ED8', fontSize: '12px', fontWeight: 'bold', marginLeft: '8px' }}>
+                                    ✓
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+
+                        {/* Footer Indicator / Load more */}
+                        {visibleBarangCount < filteredBarangList.length && (
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setVisibleBarangCount((prev) => Math.min(prev + 10, filteredBarangList.length));
+                            }}
+                            style={{
+                              padding: '8px 12px',
+                              textAlign: 'center',
+                              background: '#F8FAFC',
+                              borderTop: '1px solid #E2E8F0',
+                              color: '#2563EB',
+                              fontSize: '11.5px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Menampilkan {displayedBarangList.length} dari {filteredBarangList.length} barang (Scroll untuk muat lagi)
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '5px' }}>
+                  Jika dipilih, nama barang, foto, dan harga asli akan otomatis terisi serta terhubung dengan stok produk fisik.
                 </div>
               </div>
 
-              {/* Tipe Promo: Modern Segmented Cards */}
+              {/* Tipe Promo */}
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
                   Tipe Promo <span style={{ color: '#EF4444' }}>*</span>
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -1043,8 +1294,8 @@ export default function FlashSaleManager() {
                     style={{
                       padding: '10px 14px',
                       borderRadius: '8px',
-                      border: form.tipe === 'product' ? '2px solid #03AC0E' : '1px solid #CBD5E1',
-                      background: form.tipe === 'product' ? '#F0FDF4' : '#FFFFFF',
+                      border: form.tipe === 'product' ? '2px solid #0F172A' : '1px solid #CBD5E1',
+                      background: form.tipe === 'product' ? '#F8FAFC' : '#FFFFFF',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -1058,11 +1309,11 @@ export default function FlashSaleManager() {
                       value="product"
                       checked={form.tipe === 'product'}
                       onChange={() => setForm({ ...form, tipe: 'product' })}
-                      style={{ accentColor: '#03AC0E' }}
+                      style={{ accentColor: '#0F172A' }}
                     />
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'product' ? '#065F46' : '#1E293B' }}>
-                        🛍️ Produk Fisik
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'product' ? '#0F172A' : '#475569' }}>
+                        Produk Fisik
                       </div>
                       <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
                         Bisa dipesan ke keranjang belanja
@@ -1075,8 +1326,8 @@ export default function FlashSaleManager() {
                     style={{
                       padding: '10px 14px',
                       borderRadius: '8px',
-                      border: form.tipe === 'digital' ? '2px solid #3B82F6' : '1px solid #CBD5E1',
-                      background: form.tipe === 'digital' ? '#EFF6FF' : '#FFFFFF',
+                      border: form.tipe === 'digital' ? '2px solid #0F172A' : '1px solid #CBD5E1',
+                      background: form.tipe === 'digital' ? '#F8FAFC' : '#FFFFFF',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -1090,11 +1341,11 @@ export default function FlashSaleManager() {
                       value="digital"
                       checked={form.tipe === 'digital'}
                       onChange={() => setForm({ ...form, tipe: 'digital' })}
-                      style={{ accentColor: '#3B82F6' }}
+                      style={{ accentColor: '#0F172A' }}
                     />
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'digital' ? '#1D4ED8' : '#1E293B' }}>
-                        ⚡ Promo Digital / Jasa
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: form.tipe === 'digital' ? '#0F172A' : '#475569' }}>
+                        Promo Digital / Jasa
                       </div>
                       <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
                         Arahkan ke pulsa, emas, atau SMM
@@ -1106,8 +1357,8 @@ export default function FlashSaleManager() {
 
               {/* Target Aksi (Hanya Muncul jika Tipe Digital) */}
               {form.tipe === 'digital' && (
-                <div style={{ marginBottom: '18px', background: '#F0F9FF', padding: '12px 14px', borderRadius: '8px', border: '1px solid #BAE6FD' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#0369A1', marginBottom: '6px' }}>
+                <div style={{ marginBottom: '18px', background: '#F8FAFC', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
                     Target Aksi / Link Ketika Tombol Diklik
                   </label>
                   <select
@@ -1115,11 +1366,13 @@ export default function FlashSaleManager() {
                     onChange={(e) => setForm({ ...form, target_link: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
+                      height: '38px',
+                      padding: '0 12px',
                       borderRadius: '6px',
-                      border: '1px solid #7DD3FC',
+                      border: '1px solid #CBD5E1',
                       fontSize: '13px',
                       background: '#FFFFFF',
+                      boxSizing: 'border-box',
                     }}
                   >
                     <option value="deal-emas">Scroll ke Bagian Logam Mulia Emas 24K</option>
@@ -1132,7 +1385,7 @@ export default function FlashSaleManager() {
 
               {/* Nama Item Flash Sale */}
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
                   Nama Item Flash Sale <span style={{ color: '#EF4444' }}>*</span>
                 </label>
                 <input
@@ -1141,21 +1394,13 @@ export default function FlashSaleManager() {
                   value={form.nama_item}
                   onChange={(e) => setForm({ ...form, nama_item: e.target.value })}
                   placeholder="Contoh: Kaos Polos Pria Premium / Hijab Bella Square"
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #CBD5E1',
-                    fontSize: '13px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                  }}
+                  style={formInputStyle}
                 />
               </div>
 
               {/* URL Gambar Produk dengan Live Preview */}
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
                   URL Gambar Produk (Opsional)
                 </label>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -1164,56 +1409,50 @@ export default function FlashSaleManager() {
                     value={form.gambar}
                     onChange={(e) => setForm({ ...form, gambar: e.target.value })}
                     placeholder="https://... atau data:image/..."
-                    style={{
-                      flex: 1,
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      fontSize: '13px',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                    }}
+                    style={{ ...formInputStyle, flex: 1 }}
                   />
                   {form.gambar ? (
                     <img
                       src={form.gambar}
                       alt="Preview"
                       style={{
-                        width: '40px',
-                        height: '40px',
+                        width: '38px',
+                        height: '38px',
                         borderRadius: '6px',
                         objectFit: 'cover',
                         border: '1px solid #E2E8F0',
                         flexShrink: 0,
                       }}
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   ) : (
                     <div
                       style={{
-                        width: '40px',
-                        height: '40px',
+                        width: '38px',
+                        height: '38px',
                         borderRadius: '6px',
                         background: '#F1F5F9',
                         border: '1px dashed #CBD5E1',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '16px',
+                        fontSize: '11px',
                         color: '#94A3B8',
                         flexShrink: 0,
                       }}
                     >
-                      🖼️
+                      Foto
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Harga Asli / Coret & Harga Flash Sale */}
+              {/* Harga Asli & Harga Flash Sale */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
                     Harga Normal / Coret <span style={{ color: '#EF4444' }}>*</span>
                   </label>
                   <input
@@ -1225,20 +1464,12 @@ export default function FlashSaleManager() {
                       handlePriceChange('harga_asli', val ? Number(val) : '');
                     }}
                     placeholder="Rp 0"
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      fontSize: '13px',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                    }}
+                    style={formInputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#EF4444', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#DC2626', marginBottom: '6px' }}>
                     Harga Flash Sale (Promo) <span style={{ color: '#EF4444' }}>*</span>
                   </label>
                   <input
@@ -1251,15 +1482,10 @@ export default function FlashSaleManager() {
                     }}
                     placeholder="Rp 0"
                     style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
+                      ...formInputStyle,
                       border: '1.5px solid #EF4444',
-                      fontSize: '13px',
                       fontWeight: '700',
-                      color: '#EF4444',
-                      boxSizing: 'border-box',
-                      outline: 'none',
+                      color: '#DC2626',
                       background: '#FFF5F5',
                     }}
                   />
@@ -1269,7 +1495,7 @@ export default function FlashSaleManager() {
               {/* Diskon Badge & Progress Terjual */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
                     Label / Badge Diskon
                   </label>
                   <input
@@ -1277,21 +1503,13 @@ export default function FlashSaleManager() {
                     value={form.diskon_persen}
                     onChange={(e) => setForm({ ...form, diskon_persen: e.target.value })}
                     placeholder="Contoh: -20%"
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      fontSize: '13px',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                    }}
+                    style={formInputStyle}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
-                    Estimasi Terjual: <b>{form.terjual_pct || 0}%</b>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Estimasi Terjual: <strong>{form.terjual_pct || 0}%</strong>
                   </label>
                   <input
                     type="number"
@@ -1300,53 +1518,26 @@ export default function FlashSaleManager() {
                     value={form.terjual_pct}
                     onChange={(e) => setForm({ ...form, terjual_pct: e.target.value })}
                     placeholder="75"
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      fontSize: '13px',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                    }}
+                    style={formInputStyle}
                   />
-                  <div style={{ width: '100%', height: '6px', background: '#F1F5F9', borderRadius: '4px', overflow: 'hidden', marginTop: '6px' }}>
-                    <div
-                      style={{
-                        width: `${Math.min(100, Math.max(0, Number(form.terjual_pct) || 0))}%`,
-                        height: '100%',
-                        background: '#EF4444',
-                        borderRadius: '4px',
-                        transition: 'width 0.2s ease',
-                      }}
-                    />
-                  </div>
                 </div>
               </div>
 
               {/* Urutan & Status Aktif */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '14px', marginBottom: '12px', alignItems: 'center' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
-                    Urutan Tampil
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Urutan
                   </label>
                   <input
                     type="number"
                     value={form.urutan}
                     onChange={(e) => setForm({ ...form, urutan: Number(e.target.value) })}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      fontSize: '13px',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                    }}
+                    style={formInputStyle}
                   />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', paddingTop: '22px' }}>
+                <div style={{ paddingTop: '22px' }}>
                   <label
                     style={{
                       display: 'inline-flex',
@@ -1354,7 +1545,7 @@ export default function FlashSaleManager() {
                       gap: '8px',
                       fontSize: '13px',
                       cursor: 'pointer',
-                      fontWeight: '700',
+                      fontWeight: '600',
                       color: form.aktif ? '#065F46' : '#64748B',
                       background: form.aktif ? '#ECFDF5' : '#F1F5F9',
                       padding: '8px 14px',
@@ -1366,25 +1557,26 @@ export default function FlashSaleManager() {
                       type="checkbox"
                       checked={Boolean(form.aktif)}
                       onChange={(e) => setForm({ ...form, aktif: e.target.checked ? 1 : 0 })}
-                      style={{ accentColor: '#03AC0E' }}
+                      style={{ accentColor: '#0F172A' }}
                     />
-                    <span>{form.aktif ? '✓ Tampilkan di Toko' : '✕ Disembunyikan'}</span>
+                    <span>{form.aktif ? '✓ Tampilkan di Toko' : 'Disembunyikan'}</span>
                   </label>
                 </div>
               </div>
 
               {/* Modal Footer Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '18px', borderTop: '1px solid #E5E7EB', marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '18px', borderTop: '1px solid #F1F5F9', marginTop: '14px' }}>
                 <button
                   type="button"
                   onClick={() => setShowItemModal(false)}
                   style={{
-                    padding: '9px 18px',
+                    height: '36px',
+                    padding: '0 18px',
                     borderRadius: '8px',
                     border: '1px solid #CBD5E1',
                     background: '#FFFFFF',
-                    color: '#475569',
-                    fontSize: '13px',
+                    color: '#334155',
+                    fontSize: '12.5px',
                     fontWeight: '600',
                     cursor: 'pointer',
                   }}
@@ -1395,21 +1587,21 @@ export default function FlashSaleManager() {
                   type="submit"
                   disabled={savingItem}
                   style={{
-                    padding: '9px 22px',
+                    height: '36px',
+                    padding: '0 20px',
                     borderRadius: '8px',
                     border: 'none',
-                    background: '#03AC0E',
+                    background: '#0F172A',
                     color: '#FFFFFF',
-                    fontSize: '13px',
-                    fontWeight: '700',
+                    fontSize: '12.5px',
+                    fontWeight: '600',
                     cursor: savingItem ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 2px 6px rgba(3, 172, 14, 0.3)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
+                    opacity: savingItem ? 0.7 : 1,
                   }}
                 >
-                  <span>✓</span>
                   <span>{savingItem ? 'Menyimpan...' : 'Simpan Item Flash Sale'}</span>
                 </button>
               </div>
@@ -1422,3 +1614,49 @@ export default function FlashSaleManager() {
     </div>
   );
 }
+
+const thStyle = (extra = {}, isLast = false) => ({
+  padding: '12px 14px',
+  fontSize: '11px',
+  fontWeight: '700',
+  color: '#475569',
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+  borderBottom: '2px solid #CBD5E1',
+  borderRight: isLast ? 'none' : '1px solid #E2E8F0',
+  whiteSpace: 'nowrap',
+  verticalAlign: 'middle',
+  ...extra,
+});
+
+const tdStyle = (extra = {}, isLast = false) => ({
+  padding: '12px 14px',
+  verticalAlign: 'middle',
+  borderBottom: '1px solid #F1F5F9',
+  borderRight: isLast ? 'none' : '1px solid #E2E8F0',
+  ...extra,
+});
+
+const settingInputStyle = {
+  width: '100%',
+  height: '38px',
+  padding: '0 12px',
+  borderRadius: '8px',
+  border: '1px solid #CBD5E1',
+  fontSize: '13px',
+  color: '#0F172A',
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+const formInputStyle = {
+  width: '100%',
+  height: '38px',
+  padding: '0 12px',
+  borderRadius: '8px',
+  border: '1px solid #CBD5E1',
+  fontSize: '13px',
+  color: '#0F172A',
+  boxSizing: 'border-box',
+  outline: 'none',
+};

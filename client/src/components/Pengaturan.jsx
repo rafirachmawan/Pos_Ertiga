@@ -205,44 +205,44 @@ const Pengaturan = () => {
   }
 
   return (
-    <div>
-      {/* Header */}
+    <div style={{ maxWidth: '1240px', margin: '0 auto', paddingBottom: '40px' }}>
+      {/* 1. Header Bar */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '18px',
+          marginBottom: '22px',
           gap: '16px',
           flexWrap: 'wrap',
         }}
       >
         <div>
           <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#0F172A', letterSpacing: '-0.02em', margin: 0 }}>
-            Pengaturan
+            Pengaturan Toko & POS
           </h2>
-          <p style={{ color: '#64748B', marginTop: '3px', fontSize: '13px', margin: 0 }}>
-            Konfigurasi identitas toko, format struk, printer kasir, dan backup database
+          <p style={{ color: '#64748B', marginTop: '4px', fontSize: '13px', margin: '4px 0 0 0' }}>
+            Kelola identitas usaha, logo branding, printer thermal kasir, dan cadangan data
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           {saved && (
             <div
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '6px',
                 background: '#ECFDF5',
                 color: '#059669',
                 border: '1px solid #A7F3D0',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                fontSize: '12px',
+                padding: '7px 14px',
+                borderRadius: '8px',
+                fontSize: '12.5px',
                 fontWeight: '600',
               }}
             >
-              <span>✓</span> Tersimpan!
+              ✓ Pengaturan Tersimpan!
             </div>
           )}
 
@@ -250,8 +250,8 @@ const Pengaturan = () => {
             type="button"
             onClick={testPrint}
             style={{
-              height: '34px',
-              padding: '0 14px',
+              height: '38px',
+              padding: '0 16px',
               background: '#FFFFFF',
               color: '#334155',
               border: '1px solid #CBD5E1',
@@ -259,7 +259,11 @@ const Pengaturan = () => {
               fontWeight: '600',
               cursor: 'pointer',
               fontSize: '12.5px',
+              transition: 'all 0.15s ease',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#94A3B8'; e.currentTarget.style.background = '#F8FAFC'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.background = '#FFFFFF'; }}
           >
             Tes Cetak Struk
           </button>
@@ -269,8 +273,8 @@ const Pengaturan = () => {
             onClick={savePengaturan}
             disabled={saving}
             style={{
-              height: '34px',
-              padding: '0 16px',
+              height: '38px',
+              padding: '0 20px',
               background: '#0F172A',
               color: '#FFFFFF',
               border: 'none',
@@ -279,7 +283,11 @@ const Pengaturan = () => {
               cursor: saving ? 'not-allowed' : 'pointer',
               fontSize: '12.5px',
               opacity: saving ? 0.7 : 1,
+              transition: 'background 0.15s ease',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
             }}
+            onMouseEnter={(e) => { if (!saving) e.currentTarget.style.background = '#1E293B'; }}
+            onMouseLeave={(e) => { if (!saving) e.currentTarget.style.background = '#0F172A'; }}
           >
             {saving ? 'Menyimpan...' : 'Simpan Pengaturan'}
           </button>
@@ -303,32 +311,33 @@ const Pengaturan = () => {
         </div>
       )}
 
-      {/* Main 2-Column Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.45fr 1fr', gap: '22px', alignItems: 'start' }}>
+      {/* 2. Main 2-Column Responsive Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.45fr) minmax(320px, 1fr)', gap: '22px', alignItems: 'start' }}>
         
-        {/* Left Column: Form Settings */}
-        <form onSubmit={savePengaturan} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        {/* Left Column: Form Settings in 3 Structured Cards */}
+        <form onSubmit={savePengaturan} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* Card 1: Informasi Toko */}
+          {/* Card 1: Identitas & Branding Toko */}
           <div
             style={{
               background: '#FFFFFF',
-              borderRadius: '10px',
+              borderRadius: '12px',
               border: '1px solid #E2E8F0',
-              padding: '20px 22px',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              padding: '22px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
             }}
           >
-            <div style={{ marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9' }}>
+            <div style={{ marginBottom: '18px', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9' }}>
               <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
-                Informasi Toko
+                Identitas & Branding Toko
               </h3>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: 0 }}>
-                Identitas toko yang dicetak pada bagian kepala (header) struk
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: '3px 0 0' }}>
+                Nama toko dan logo branding yang ditampilkan pada aplikasi POS, website, dan struk
               </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Nama Toko */}
               <div>
                 <label style={labelStyle}>
                   Nama Toko <span style={{ color: '#EF4444' }}>*</span>
@@ -338,62 +347,56 @@ const Pengaturan = () => {
                   required
                   value={form.nama_toko}
                   onChange={(e) => setForm({ ...form, nama_toko: e.target.value })}
-                  placeholder="Contoh: POS ERTIGA"
+                  placeholder="Contoh: Ertiga Store"
                   style={inputStyle}
                 />
               </div>
 
-              {/* Pengaturan Logo Toko & Website (Icon Kotak 'E') */}
+              {/* Logo & Ikon Toko - Clean Card */}
               <div
                 style={{
                   background: '#F8FAFC',
                   border: '1px solid #E2E8F0',
                   borderRadius: '10px',
                   padding: '16px',
-                  marginTop: '4px',
                 }}
               >
-                <div style={{ marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ fontSize: '13.5px', fontWeight: '700', color: '#0F172A' }}>
-                      Logo Toko (Icon Kotak Hijau 'E')
-                    </span>
-                    <span
-                      style={{
-                        background: '#DCFCE7',
-                        color: '#166534',
-                        fontSize: '10.5px',
-                        fontWeight: '700',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      Website & POS
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '12px', color: '#64748B', margin: '3px 0 0' }}>
-                    Atur logo icon kotak hijau di navbar toko online dan aplikasi POS. Bisa menggunakan inisial huruf (default 'E') atau upload gambar logo toko Anda.
-                  </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>
+                    Logo & Ikon Toko
+                  </label>
+                  <span
+                    style={{
+                      background: '#DCFCE7',
+                      color: '#166534',
+                      fontSize: '10.5px',
+                      fontWeight: '700',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    Website & POS
+                  </span>
                 </div>
 
-                {/* Live Preview Box */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    background: '#FFFFFF',
-                    border: '1px solid #CBD5E1',
-                    borderRadius: '8px',
-                    padding: '10px 14px',
-                    marginBottom: '14px',
-                  }}
-                >
+                {/* Horizontal Branding Row: Preview & Action */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  background: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '12px 14px',
+                  marginBottom: '14px',
+                  flexWrap: 'wrap'
+                }}>
+                  {/* Logo Avatar Box */}
                   <div
                     style={{
-                      width: '42px',
-                      height: '42px',
-                      borderRadius: '8px',
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '10px',
                       background: form.logo_url
                         ? '#FFFFFF'
                         : 'linear-gradient(135deg, #03AC0E 0%, #008709 100%)',
@@ -403,8 +406,8 @@ const Pengaturan = () => {
                       justifyContent: 'center',
                       color: '#FFFFFF',
                       fontWeight: '800',
-                      fontSize: '20px',
-                      boxShadow: '0 2px 6px rgba(3, 172, 14, 0.25)',
+                      fontSize: '22px',
+                      boxShadow: '0 2px 6px rgba(3, 172, 14, 0.2)',
                       overflow: 'hidden',
                       flexShrink: 0,
                     }}
@@ -414,72 +417,92 @@ const Pengaturan = () => {
                         src={form.logo_url}
                         alt="Logo Toko"
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     ) : (
                       <span>
                         {form.logo_text ||
-                          (form.nama_toko
-                            ? form.nama_toko.charAt(0).toUpperCase()
-                            : 'E')}
+                          (form.nama_toko ? form.nama_toko.charAt(0).toUpperCase() : 'E')}
                       </span>
                     )}
                   </div>
-                  <div>
-                    <div
-                      style={{
-                        fontSize: '15px',
-                        fontWeight: '800',
-                        color: '#03AC0E',
-                        lineHeight: '1.2',
-                      }}
-                    >
-                      {form.nama_toko || 'POS ERTIGA'}
+
+                  {/* Brand Tag info */}
+                  <div style={{ flex: 1, minWidth: '160px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '800', color: '#03AC0E', lineHeight: '1.2' }}>
+                      {form.nama_toko || 'Ertiga Store'}
                     </div>
-                    <span
-                      style={{
-                        fontSize: '9.5px',
-                        fontWeight: '700',
-                        color: '#FFFFFF',
-                        background: '#EE4D2D',
-                        padding: '1px 6px',
-                        borderRadius: '4px',
-                        letterSpacing: '0.04em',
-                        display: 'inline-block',
-                        marginTop: '2px',
-                      }}
-                    >
-                      OFFICIAL STORE
-                    </span>
+                    <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                      {form.logo_url ? 'Menggunakan gambar logo kustom' : `Menggunakan inisial huruf '${form.logo_text || 'E'}'`}
+                    </div>
                   </div>
-                  <div
-                    style={{
-                      marginLeft: 'auto',
-                      fontSize: '11px',
-                      color: '#94A3B8',
-                      fontWeight: '600',
-                      background: '#F1F5F9',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    Preview Navbar
+
+                  {/* Upload button & clear */}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <label
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        padding: '7px 14px',
+                        background: '#0F172A',
+                        color: '#FFFFFF',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'background 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#1E293B'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#0F172A'; }}
+                    >
+                      Pilih Gambar Logo
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                        style={{ display: 'none' }}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const compressed = await compressLogoImage(file);
+                            setForm((prev) => ({
+                              ...prev,
+                              logo_url: compressed,
+                            }));
+                          } catch (err) {
+                            alert('Gagal memproses gambar: ' + err.message);
+                          }
+                        }}
+                      />
+                    </label>
+
+                    {form.logo_url && (
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, logo_url: '' })}
+                        style={{
+                          padding: '7px 12px',
+                          background: '#FEF2F2',
+                          color: '#DC2626',
+                          border: '1px solid #FECACA',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Hapus Gambar
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Form Inputs for Logo */}
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1.6fr',
-                    gap: '12px',
-                    marginBottom: '12px',
-                  }}
-                >
+                {/* Sub Inputs: Inisial & URL */}
+                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '12px' }}>
                   <div>
-                    <label style={labelStyle}>Inisial Huruf (Icon Kotak)</label>
+                    <label style={{ fontSize: '11px', fontWeight: '600', color: '#64748B', display: 'block', marginBottom: '4px' }}>
+                      Inisial Huruf
+                    </label>
                     <input
                       type="text"
                       maxLength={4}
@@ -491,110 +514,32 @@ const Pengaturan = () => {
                         })
                       }
                       placeholder="E"
-                      style={inputStyle}
+                      style={{ ...inputStyle, textAlign: 'center', fontWeight: '700' }}
                     />
-                    <small
-                      style={{
-                        fontSize: '11px',
-                        color: '#64748B',
-                        marginTop: '3px',
-                        display: 'block',
-                      }}
-                    >
-                      Tampil jika tidak menggunakan gambar
-                    </small>
                   </div>
 
                   <div>
-                    <label style={labelStyle}>File Gambar Logo Toko</label>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '2px' }}>
-                      <label
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '8px 14px',
-                          background: '#0F172A',
-                          color: '#FFFFFF',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <span>📁 Pilih Gambar Logo</span>
-                        <input
-                          type="file"
-                          accept="image/png, image/jpeg, image/webp, image/svg+xml"
-                          style={{ display: 'none' }}
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            try {
-                              const compressed = await compressLogoImage(file);
-                              setForm((prev) => ({
-                                ...prev,
-                                logo_url: compressed,
-                              }));
-                            } catch (err) {
-                              alert('Gagal memproses gambar: ' + err.message);
-                            }
-                          }}
-                        />
-                      </label>
-
-                      {form.logo_url && (
-                        <button
-                          type="button"
-                          onClick={() => setForm({ ...form, logo_url: '' })}
-                          style={{
-                            padding: '8px 12px',
-                            background: '#FEE2E2',
-                            color: '#991B1B',
-                            border: '1px solid #FECACA',
-                            borderRadius: '6px',
-                            fontSize: '11.5px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Hapus Gambar (Gunakan Huruf '{form.logo_text || 'E'}')
-                        </button>
-                      )}
-                    </div>
+                    <label style={{ fontSize: '11px', fontWeight: '600', color: '#64748B', display: 'block', marginBottom: '4px' }}>
+                      Atau Masukkan Link / URL Gambar (Opsional)
+                    </label>
+                    <input
+                      type="text"
+                      value={
+                        form.logo_url && !form.logo_url.startsWith('data:')
+                          ? form.logo_url
+                          : ''
+                      }
+                      onChange={(e) =>
+                        setForm({ ...form, logo_url: e.target.value })
+                      }
+                      placeholder="https://contoh.com/logo-toko.png"
+                      style={inputStyle}
+                    />
                   </div>
-                </div>
-
-                <div>
-                  <label style={labelStyle}>
-                    Atau Masukkan Link / URL Gambar Logo (Opsional)
-                  </label>
-                  <input
-                    type="text"
-                    value={
-                      form.logo_url && !form.logo_url.startsWith('data:')
-                        ? form.logo_url
-                        : ''
-                    }
-                    onChange={(e) =>
-                      setForm({ ...form, logo_url: e.target.value })
-                    }
-                    placeholder="https://contoh.com/logo-toko.png"
-                    style={inputStyle}
-                  />
-                  <small
-                    style={{
-                      fontSize: '11px',
-                      color: '#64748B',
-                      marginTop: '3px',
-                      display: 'block',
-                    }}
-                  >
-                    Bisa berupa URL gambar online atau upload file gambar langsung di atas.
-                  </small>
                 </div>
               </div>
 
+              {/* Alamat Toko Fisik */}
               <div>
                 <label style={labelStyle}>Alamat Toko Fisik</label>
                 <textarea
@@ -605,26 +550,50 @@ const Pengaturan = () => {
                   style={textareaStyle}
                 />
               </div>
+            </div>
+          </div>
 
+          {/* Card 2: Integrasi Website & Kontak WhatsApp */}
+          <div
+            style={{
+              background: '#FFFFFF',
+              borderRadius: '12px',
+              border: '1px solid #E2E8F0',
+              padding: '22px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+            }}
+          >
+            <div style={{ marginBottom: '18px', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
+                Integrasi Website & Kontak
+              </h3>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: '3px 0 0' }}>
+                Koneksi toko online untuk pesan WhatsApp otomatis dan QR Code pada struk kasir
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* WhatsApp */}
               <div>
                 <label style={labelStyle}>
-                  Nomor WhatsApp Toko (Customer Service & Checkout Online)
+                  Nomor WhatsApp Toko (Customer Service & Checkout)
                 </label>
                 <input
                   type="text"
                   value={form.telepon}
                   onChange={(e) => setForm({ ...form, telepon: e.target.value })}
-                  placeholder="Contoh: 081234567890 atau 6281234567890"
+                  placeholder="Contoh: 081234567890"
                   style={inputStyle}
                 />
                 <small style={{ fontSize: '11px', color: '#64748B', marginTop: '4px', display: 'block' }}>
-                  Nomor ini digunakan website toko online untuk menerima chat pelanggan dan pesan checkout WhatsApp otomatis.
+                  Digunakan untuk menerima pesanan checkout otomatis dan chat pelanggan dari website toko.
                 </small>
               </div>
 
+              {/* Link Website */}
               <div>
                 <label style={labelStyle}>
-                  Link Website Toko Online (Barcode Struk Kasir)
+                  Link Toko Online (Untuk QR Code Struk Kasir)
                 </label>
                 <input
                   type="text"
@@ -634,43 +603,32 @@ const Pengaturan = () => {
                   style={inputStyle}
                 />
                 <small style={{ fontSize: '11px', color: '#64748B', marginTop: '4px', display: 'block' }}>
-                  Link ini akan dicetak di atas barcode struk kasir. Saat barcode di-scan menggunakan kamera HP pelanggan, otomatis akan diarahkan ke alamat website ini.
+                  Link ini akan dicetak dalam bentuk QR code di struk agar pelanggan dapat langsung scan dan belanja online.
                 </small>
-              </div>
-
-              <div>
-                <label style={labelStyle}>Catatan / Pesan Kaki Struk</label>
-                <textarea
-                  rows={2}
-                  value={form.pesan_struk}
-                  onChange={(e) => setForm({ ...form, pesan_struk: e.target.value })}
-                  placeholder="Terima kasih atas kunjungan Anda!&#10;Barang yang sudah dibeli tidak dapat ditukar."
-                  style={textareaStyle}
-                />
               </div>
             </div>
           </div>
 
-          {/* Card 2: Konfigurasi Printer Struk */}
+          {/* Card 3: Konfigurasi Printer Struk & Pesan */}
           <div
             style={{
               background: '#FFFFFF',
-              borderRadius: '10px',
+              borderRadius: '12px',
               border: '1px solid #E2E8F0',
-              padding: '20px 22px',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              padding: '22px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
             }}
           >
-            <div style={{ marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9' }}>
+            <div style={{ marginBottom: '18px', paddingBottom: '12px', borderBottom: '1px solid #F1F5F9' }}>
               <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
-                Konfigurasi Printer
+                Konfigurasi Printer & Struk Kasir
               </h3>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: 0 }}>
-                Pengaturan perangkat pencetak struk kasir thermal
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: '3px 0 0' }}>
+                Pengaturan perangkat pencetak struk thermal dan pesan penutup pada kertas struk
               </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '14px' }}>
                 <div>
                   <label style={labelStyle}>Pilihan Printer</label>
@@ -707,14 +665,14 @@ const Pengaturan = () => {
               </div>
 
               {/* Checkbox auto print */}
-              <div style={{ paddingTop: '4px' }}>
+              <div style={{ paddingTop: '2px' }}>
                 <label
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '8px',
                     fontSize: '13px',
-                    color: '#334155',
+                    color: '#1E293B',
                     cursor: 'pointer',
                     fontWeight: '500',
                   }}
@@ -723,65 +681,38 @@ const Pengaturan = () => {
                     type="checkbox"
                     checked={Number(form.auto_print) === 1}
                     onChange={(e) => setForm({ ...form, auto_print: e.target.checked ? 1 : 0 })}
-                    style={{ cursor: 'pointer' }}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#0F172A' }}
                   />
                   Cetak struk secara otomatis saat transaksi selesai
                 </label>
               </div>
+
+              {/* Catatan / Pesan Kaki Struk */}
+              <div>
+                <label style={labelStyle}>Catatan / Pesan Penutup Struk</label>
+                <textarea
+                  rows={2}
+                  value={form.pesan_struk}
+                  onChange={(e) => setForm({ ...form, pesan_struk: e.target.value })}
+                  placeholder="Terima kasih atas kunjungan Anda!&#10;Barang yang sudah dibeli tidak dapat ditukar."
+                  style={textareaStyle}
+                />
+              </div>
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              type="submit"
-              disabled={saving}
-              style={{
-                padding: '10px 22px',
-                background: '#0F172A',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: '600',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                opacity: saving ? 0.7 : 1,
-              }}
-            >
-              {saving ? 'Menyimpan...' : 'Simpan Pengaturan'}
-            </button>
-
-            <button
-              type="button"
-              onClick={testPrint}
-              style={{
-                padding: '10px 18px',
-                background: '#FFFFFF',
-                color: '#334155',
-                border: '1px solid #CBD5E1',
-                borderRadius: '8px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '13px',
-              }}
-            >
-              Tes Cetak Struk
-            </button>
-          </div>
-
         </form>
 
-        {/* Right Column: Receipt Preview & Backup Management */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        {/* Right Column: Sticky Live Receipt Preview & Database Backup */}
+        <div style={{ position: 'sticky', top: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* Live Thermal Receipt Preview */}
           <div
             style={{
               background: '#FFFFFF',
-              borderRadius: '10px',
+              borderRadius: '12px',
               border: '1px solid #E2E8F0',
               overflow: 'hidden',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
             }}
           >
             <div style={{ padding: '14px 18px', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
@@ -792,8 +723,8 @@ const Pengaturan = () => {
                 <span
                   style={{
                     fontSize: '11px',
-                    fontWeight: '600',
-                    color: '#64748B',
+                    fontWeight: '700',
+                    color: '#475569',
                     background: '#FFFFFF',
                     padding: '2px 8px',
                     borderRadius: '4px',
@@ -806,14 +737,14 @@ const Pengaturan = () => {
             </div>
 
             {/* Receipt Paper Simulation */}
-            <div style={{ padding: '20px', background: '#F1F5F9', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ padding: '24px 20px', background: '#F1F5F9', display: 'flex', justifyContent: 'center' }}>
               <div
                 style={{
-                  width: form.lebar_struk === 58 ? '220px' : '260px',
+                  width: form.lebar_struk === 58 ? '230px' : '270px',
                   background: '#FFFFFF',
-                  padding: '16px',
-                  borderRadius: '4px',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07)',
+                  padding: '18px 16px',
+                  borderRadius: '6px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   fontFamily: 'monospace',
                   fontSize: '11px',
                   color: '#1E293B',
@@ -825,7 +756,7 @@ const Pengaturan = () => {
               >
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                  <div style={{ fontWeight: '800', fontSize: '13px', color: '#0F172A' }}>
+                  <div style={{ fontWeight: '800', fontSize: '13.5px', color: '#0F172A' }}>
                     {form.nama_toko || 'NAMA TOKO'}
                   </div>
                   {form.alamat_toko ? (
@@ -881,7 +812,7 @@ const Pengaturan = () => {
                     <div style={{ fontSize: '8px', fontWeight: '600', color: '#2563EB', wordBreak: 'break-all', marginTop: '1px', lineHeight: '1.2' }}>
                       {(form.url_website || 'https://pos-ertiga-yl9x.vercel.app/').trim()}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', margin: '4px auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', margin: '6px auto' }}>
                       <QRCodeSvg
                         value={(form.url_website || 'https://pos-ertiga-yl9x.vercel.app/').trim()}
                         size={Number(form.lebar_struk) === 58 ? 85 : 100}
@@ -906,17 +837,17 @@ const Pengaturan = () => {
           <div
             style={{
               background: '#FFFFFF',
-              borderRadius: '10px',
+              borderRadius: '12px',
               border: '1px solid #E2E8F0',
-              padding: '18px 20px',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
             }}
           >
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '14px' }}>
               <h3 style={{ fontSize: '14.5px', fontWeight: '700', color: '#0F172A', margin: 0 }}>
                 Pencadangan Database
               </h3>
-              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: 0 }}>
+              <p style={{ fontSize: '12px', color: '#64748B', marginTop: '3px', margin: '3px 0 0' }}>
                 Cadangkan data transaksi, produk, dan laporan secara berkala
               </p>
             </div>
@@ -926,15 +857,15 @@ const Pengaturan = () => {
                 style={{
                   background: '#F8FAFC',
                   border: '1px solid #E2E8F0',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
                   marginBottom: '14px',
-                  fontSize: '11.5px',
+                  fontSize: '12px',
                   color: '#475569',
                 }}
               >
                 <div>Backup terakhir: <strong>{new Date(backupStatus.lastBackupAt).toLocaleString('id-ID')}</strong></div>
-                <div style={{ color: '#94A3B8', marginTop: '2px' }}>
+                <div style={{ color: '#94A3B8', marginTop: '2px', fontSize: '11px' }}>
                   Disimpan maksimal {backupStatus?.maxLocalBackups || 7} arsip lokal.
                 </div>
               </div>
@@ -943,10 +874,10 @@ const Pengaturan = () => {
                 style={{
                   background: '#F8FAFC',
                   border: '1px solid #E2E8F0',
-                  borderRadius: '6px',
-                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
                   marginBottom: '14px',
-                  fontSize: '11.5px',
+                  fontSize: '12px',
                   color: '#94A3B8',
                 }}
               >
@@ -961,16 +892,19 @@ const Pengaturan = () => {
                 disabled={backupLoading}
                 style={{
                   width: '100%',
-                  padding: '8px 14px',
+                  padding: '9px 14px',
                   background: '#0F172A',
                   color: '#FFFFFF',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   fontSize: '12.5px',
                   fontWeight: '600',
                   cursor: backupLoading ? 'not-allowed' : 'pointer',
                   opacity: backupLoading ? 0.7 : 1,
+                  transition: 'background 0.15s ease',
                 }}
+                onMouseEnter={(e) => { if (!backupLoading) e.currentTarget.style.background = '#1E293B'; }}
+                onMouseLeave={(e) => { if (!backupLoading) e.currentTarget.style.background = '#0F172A'; }}
               >
                 {backupLoading ? 'Memproses Backup...' : 'Backup Database Sekarang'}
               </button>
@@ -984,11 +918,14 @@ const Pengaturan = () => {
                     background: '#FFFFFF',
                     color: '#334155',
                     border: '1px solid #CBD5E1',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     fontSize: '12px',
                     fontWeight: '600',
                     cursor: 'pointer',
+                    transition: 'all 0.15s ease',
                   }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.borderColor = '#94A3B8'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
                 >
                   Unduh File .sqlite
                 </button>
@@ -1002,11 +939,14 @@ const Pengaturan = () => {
                       background: '#FFFFFF',
                       color: '#334155',
                       border: '1px solid #CBD5E1',
-                      borderRadius: '6px',
+                      borderRadius: '8px',
                       fontSize: '12px',
                       fontWeight: '600',
                       cursor: 'pointer',
+                      transition: 'all 0.15s ease',
                     }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.borderColor = '#94A3B8'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
                   >
                     Buka Folder Data
                   </button>
@@ -1029,36 +969,40 @@ const Pengaturan = () => {
 };
 
 const labelStyle = {
-  fontSize: '12px',
+  fontSize: '12.5px',
   fontWeight: '600',
-  color: '#475569',
+  color: '#334155',
   display: 'block',
   marginBottom: '6px',
 };
 
 const inputStyle = {
   width: '100%',
-  height: '36px',
+  height: '38px',
   padding: '0 12px',
   borderRadius: '8px',
-  border: '1px solid #CBD5E1',
+  border: '1px solid #E2E8F0',
   fontSize: '13px',
   color: '#0F172A',
   background: '#FFFFFF',
   boxSizing: 'border-box',
+  outline: 'none',
+  transition: 'border-color 0.15s ease',
 };
 
 const textareaStyle = {
   width: '100%',
-  padding: '8px 12px',
+  padding: '10px 12px',
   borderRadius: '8px',
-  border: '1px solid #CBD5E1',
+  border: '1px solid #E2E8F0',
   fontSize: '13px',
   color: '#0F172A',
   background: '#FFFFFF',
   boxSizing: 'border-box',
   resize: 'vertical',
   fontFamily: 'inherit',
+  outline: 'none',
+  transition: 'border-color 0.15s ease',
 };
 
 export default Pengaturan;

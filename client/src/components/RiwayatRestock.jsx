@@ -442,16 +442,50 @@ const RiwayatRestock = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
             <tr>
-              <th style={{ padding: '12px 18px', fontSize: '11.5px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '220px' }}>
+              <th style={{
+                padding: '12px 18px',
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#64748B',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                width: '240px',
+                borderRight: '1px solid #E2E8F0'
+              }}>
                 Tanggal & Waktu
               </th>
-              <th style={{ padding: '12px 18px', fontSize: '11.5px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <th style={{
+                padding: '12px 18px',
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#64748B',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                borderRight: '1px solid #E2E8F0'
+              }}>
                 Barang
               </th>
-              <th style={{ padding: '12px 18px', fontSize: '11.5px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '150px' }}>
+              <th style={{
+                padding: '12px 18px',
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#64748B',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                width: '160px',
+                textAlign: 'center',
+                borderRight: '1px solid #E2E8F0'
+              }}>
                 Jumlah Masuk
               </th>
-              <th style={{ padding: '12px 18px', fontSize: '11.5px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <th style={{
+                padding: '12px 18px',
+                fontSize: '11px',
+                fontWeight: '700',
+                color: '#64748B',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em'
+              }}>
                 Keterangan
               </th>
             </tr>
@@ -487,15 +521,25 @@ const RiwayatRestock = () => {
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F8FAFC')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
-                  {/* Tanggal */}
-                  <td style={{ padding: '14px 18px', fontSize: '12.5px', color: '#64748B' }}>
+                  {/* Tanggal & Waktu */}
+                  <td style={{
+                    padding: '14px 18px',
+                    fontSize: '12.5px',
+                    color: '#64748B',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #F1F5F9'
+                  }}>
                     <div style={{ fontWeight: '500', color: '#334155' }}>
                       {formatDateTime(sm.tanggal)}
                     </div>
                   </td>
 
                   {/* Barang */}
-                  <td style={{ padding: '14px 18px' }}>
+                  <td style={{
+                    padding: '14px 18px',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #F1F5F9'
+                  }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontWeight: '600', color: '#0F172A', fontSize: '13.5px' }}>
                         {sm.nama_barang}
@@ -520,20 +564,26 @@ const RiwayatRestock = () => {
                     </div>
                   </td>
 
-                  {/* Jumlah */}
-                  <td style={{ padding: '14px 18px' }}>
+                  {/* Jumlah Masuk */}
+                  <td style={{
+                    padding: '14px 18px',
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                    borderRight: '1px solid #F1F5F9'
+                  }}>
                     <span
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: '4px',
                         background: '#ECFDF5',
                         color: '#059669',
                         border: '1px solid #A7F3D0',
-                        padding: '3px 9px',
+                        padding: '3px 10px',
                         borderRadius: '6px',
                         fontSize: '12.5px',
-                        fontWeight: '600',
+                        fontWeight: '700',
                       }}
                     >
                       +{sm.qty} {sm.satuan || 'pcs'}
@@ -541,7 +591,12 @@ const RiwayatRestock = () => {
                   </td>
 
                   {/* Keterangan */}
-                  <td style={{ padding: '14px 18px', fontSize: '13px', color: '#475569' }}>
+                  <td style={{
+                    padding: '14px 18px',
+                    fontSize: '13px',
+                    color: '#475569',
+                    verticalAlign: 'middle'
+                  }}>
                     {sm.keterangan ? (
                       <span>{sm.keterangan}</span>
                     ) : (

@@ -657,7 +657,7 @@ const Inventory = () => {
                 <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '110px', borderRight: '1px solid #E2E8F0' }}>
                   Kategori
                 </th>
-                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '100px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
+                <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '100px', textAlign: 'center', borderRight: '1px solid #E2E8F0' }}>
                   Harga Modal
                 </th>
                 <th style={{ padding: '11px 8px', fontSize: '11px', fontWeight: '700', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', width: '100px', textAlign: 'right', borderRight: '1px solid #E2E8F0' }}>
@@ -761,32 +761,8 @@ const Inventory = () => {
 
                   {/* 3. Nama Barang */}
                   <td style={{ padding: '10px 12px', verticalAlign: 'middle', borderRight: '1px solid #F1F5F9' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                        <span>{item.nama_barang}</span>
-                        {Number(item.tampil_online) === 1 && (
-                          <span
-                            title={`Tampil di toko online • ${item.berat_gram || 0}g`}
-                            style={{
-                              fontSize: '10px',
-                              fontWeight: '700',
-                              background: '#EFF6FF',
-                              color: '#2563EB',
-                              border: '1px solid #BFDBFE',
-                              padding: '1px 5px',
-                              borderRadius: '4px',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            Online{item.berat_gram ? ` · ${item.berat_gram}g` : ''}
-                          </span>
-                        )}
-                      </div>
-                      {item.deskripsi && (
-                        <div style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '240px' }}>
-                          {item.deskripsi}
-                        </div>
-                      )}
+                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>
+                      {item.nama_barang}
                     </div>
                   </td>
 
@@ -1073,628 +1049,430 @@ const Inventory = () => {
         </div>
       </div>
 
-      {/* ── Modal Tambah / Edit Produk Lengkap ──────────────── */}
+      {/* ── Modal Tambah / Edit Produk ──────────────── */}
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxHeight: '90vh', overflowY: 'auto', padding: '28px 32px', maxWidth: '620px' }}>
-            <h3 style={{ fontSize: '19px', fontWeight: '800', color: '#0F172A', margin: '0 0 20px 0' }}>
-              {formData.id ? 'Edit Barang & Produk' : 'Tambah Barang Baru'}
-            </h3>
+          <div className="modal-content" style={{ maxHeight: '92vh', overflowY: 'auto', padding: 0, maxWidth: '600px' }}>
+
+            {/* ── Modal Header ── */}
+            <div style={{
+              padding: '20px 28px', borderBottom: '1px solid #E2E8F0',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              position: 'sticky', top: 0, background: '#FFFFFF', zIndex: 2,
+            }}>
+              <div>
+                <h3 style={{ fontSize: '17px', fontWeight: '800', color: '#0F172A', margin: 0 }}>
+                  {formData.id ? 'Edit Barang & Produk' : 'Tambah Barang Baru'}
+                </h3>
+                <p style={{ fontSize: '11.5px', color: '#94A3B8', margin: '3px 0 0', fontWeight: '500' }}>
+                  Data produk untuk kasir POS & katalog website toko online
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeModal}
+                style={{ background: '#F1F5F9', border: 'none', width: '32px', height: '32px', borderRadius: '8px', fontSize: '16px', color: '#64748B', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >✕</button>
+            </div>
             
             <form onSubmit={handleSubmit}>
-              
-              {/* Gambar Produk: Tab Upload atau Link URL */}
-              <div className="form-group" style={{ background: '#F8FAFC', padding: '16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <label style={{ margin: 0, fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>
-                    Foto Produk (Katalog Web & Kasir)
-                  </label>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setImageInputMode('upload')}
-                      style={{
-                        padding: '4px 10px',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        borderRadius: '4px',
-                        background: imageInputMode === 'upload' ? '#0F172A' : '#E2E8F0',
-                        color: imageInputMode === 'upload' ? '#FFFFFF' : '#475569',
-                      }}
-                    >
-                      Upload File
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setImageInputMode('url')}
-                      style={{
-                        padding: '4px 10px',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        borderRadius: '4px',
-                        background: imageInputMode === 'url' ? '#0F172A' : '#E2E8F0',
-                        color: imageInputMode === 'url' ? '#FFFFFF' : '#475569',
-                      }}
-                    >
-                      Link / URL Gambar
-                    </button>
-                  </div>
-                </div>
+              <div style={{ padding: '24px 28px' }}>
 
-                {/* Preview Image */}
-                {(formData.gambar || (imageInputMode === 'url' && imageUrlInput)) && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
-                    <img
-                      src={imageInputMode === 'url' && imageUrlInput ? imageUrlInput : formData.gambar}
-                      alt="Preview"
-                      style={{ width: '90px', height: '90px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #CBD5E1' }}
-                    />
-                    <div>
+                {/* ── SECTION 1: Foto Produk ── */}
+                <div style={{ marginBottom: '22px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>Foto Produk Utama</span>
+                    <div style={{ display: 'flex', gap: '4px', background: '#F1F5F9', borderRadius: '6px', padding: '2px' }}>
                       <button
                         type="button"
-                        onClick={() => {
-                          setFormData({ ...formData, gambar: '' });
-                          setImageUrlInput('');
-                        }}
+                        onClick={() => setImageInputMode('upload')}
                         style={{
-                          padding: '5px 10px',
-                          background: '#FEE2E2',
-                          color: '#DC2626',
-                          border: '1px solid #FECACA',
-                          borderRadius: '6px',
-                          fontSize: '11.5px',
-                          fontWeight: '700',
+                          padding: '5px 12px', fontSize: '11px', fontWeight: '700', borderRadius: '5px', border: 'none', cursor: 'pointer',
+                          background: imageInputMode === 'upload' ? '#0F172A' : 'transparent',
+                          color: imageInputMode === 'upload' ? '#FFFFFF' : '#64748B',
+                          transition: 'all 0.15s ease',
                         }}
-                      >
-                        ✕ Hapus Foto
-                      </button>
-                      <small style={{ display: 'block', color: '#64748B', marginTop: '4px', fontSize: '11px' }}>
-                        Foto akan ditampilkan di etalase web dan POS kasir
-                      </small>
+                      >Upload File</button>
+                      <button
+                        type="button"
+                        onClick={() => setImageInputMode('url')}
+                        style={{
+                          padding: '5px 12px', fontSize: '11px', fontWeight: '700', borderRadius: '5px', border: 'none', cursor: 'pointer',
+                          background: imageInputMode === 'url' ? '#0F172A' : 'transparent',
+                          color: imageInputMode === 'url' ? '#FFFFFF' : '#64748B',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >Link URL</button>
                     </div>
                   </div>
-                )}
 
-                {/* Input berdasarkan mode */}
-                {imageInputMode === 'upload' ? (
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      style={{ padding: '8px', boxShadow: 'none', background: '#FFFFFF', width: '100%', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                    />
-                    <small style={{ color: '#64748B', display: 'block', marginTop: '4px', fontSize: '11px' }}>
-                      Mendukung format JPG, PNG, WEBP. Kompresi otomatis aktif.
-                    </small>
-                  </div>
-                ) : (
-                  <div>
+                  {/* Preview + Upload Area */}
+                  {(formData.gambar || (imageInputMode === 'url' && imageUrlInput)) ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                      <img
+                        src={imageInputMode === 'url' && imageUrlInput ? imageUrlInput : formData.gambar}
+                        alt="Preview"
+                        style={{ width: '72px', height: '72px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #E2E8F0', flexShrink: 0 }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', fontWeight: '600', color: '#059669', marginBottom: '4px' }}>✓ Foto siap digunakan</div>
+                        <div style={{ fontSize: '11px', color: '#64748B' }}>Tampil di etalase web & layar kasir POS</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setFormData({ ...formData, gambar: '' }); setImageUrlInput(''); }}
+                        style={{ padding: '6px 12px', background: '#FEE2E2', color: '#DC2626', border: 'none', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}
+                      >Hapus</button>
+                    </div>
+                  ) : imageInputMode === 'upload' ? (
+                    <label style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      padding: '20px', border: '2px dashed #CBD5E1', borderRadius: '10px', cursor: 'pointer',
+                      background: '#FAFBFC', transition: 'border-color 0.15s ease', gap: '6px',
+                    }}>
+                      <span style={{ fontSize: '28px' }}>📷</span>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>Pilih foto dari komputer / HP</span>
+                      <span style={{ fontSize: '11px', color: '#94A3B8' }}>JPG, PNG, WebP — maks 5 MB, kompresi otomatis</span>
+                      <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                    </label>
+                  ) : (
                     <input
                       type="url"
                       placeholder="Tempel link foto gambar (cth: https://images.unsplash.com/...)"
                       value={imageUrlInput}
                       onChange={(e) => setImageUrlInput(e.target.value)}
-                      style={{ padding: '9px 12px', width: '100%', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12.5px', boxSizing: 'border-box' }}
+                      style={{ padding: '10px 14px', width: '100%', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '12.5px', boxSizing: 'border-box', boxShadow: 'none' }}
                     />
-                  </div>
-                )}
-              </div>
-
-              {/* Galeri Foto Tambahan (Multi Image untuk Detail Produk Web) */}
-              <div className="form-group" style={{ background: '#F0FDF4', padding: '16px', borderRadius: '10px', border: '1px solid #BBF7D0', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <label style={{ margin: 0, fontWeight: '700', fontSize: '13px', color: '#166534' }}>
-                    📸 Galeri Foto Tambahan (Maks. 8 Foto)
-                  </label>
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: '#15803D' }}>
-                    {(formData.galeri_gambar || []).length} / 8 Foto
-                  </span>
-                </div>
-                <small style={{ color: '#4B5563', display: 'block', marginBottom: '12px', fontSize: '11px', lineHeight: '1.4' }}>
-                  Foto tambahan akan ditampilkan di thumbnail halaman detail produk storefront web. Anda bisa mengupload foto langsung dari galeri/perangkat atau memasukkan URL foto.
-                </small>
-
-                {/* List existing gallery images */}
-                {(formData.galeri_gambar || []).length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
-                    {(formData.galeri_gambar || []).map((url, idx) => (
-                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#FFFFFF', padding: '6px 10px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '700', color: '#64748B', width: '20px' }}>
-                          #{idx + 1}
-                        </span>
-                        <img
-                          src={url}
-                          alt={`Galeri ${idx + 1}`}
-                          style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #CBD5E1', flexShrink: 0, background: '#F8FAFC' }}
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                        <input
-                          type="text"
-                          value={url.startsWith('data:image') ? '[Foto Upload File]' : url}
-                          readOnly={url.startsWith('data:image')}
-                          onChange={(e) => {
-                            if (url.startsWith('data:image')) return;
-                            const updated = [...formData.galeri_gambar];
-                            updated[idx] = e.target.value;
-                            setFormData({ ...formData, galeri_gambar: updated });
-                          }}
-                          style={{ flex: 1, padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid #CBD5E1', boxSizing: 'border-box', background: url.startsWith('data:image') ? '#F1F5F9' : '#FFFFFF' }}
-                          placeholder="https://..."
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updated = formData.galeri_gambar.filter((_, i) => i !== idx);
-                            setFormData({ ...formData, galeri_gambar: updated });
-                          }}
-                          style={{
-                            width: '28px', height: '28px', borderRadius: '6px', background: '#FEE2E2', color: '#DC2626',
-                            border: '1px solid #FECACA', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '13px', fontWeight: '700', cursor: 'pointer', flexShrink: 0,
-                          }}
-                          title="Hapus foto ini"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Upload & Add buttons */}
-                {(formData.galeri_gambar || []).length < 8 && (
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <label
-                      style={{
-                        padding: '8px 14px', fontSize: '12px', fontWeight: '700', borderRadius: '6px',
-                        background: '#03AC0E', color: '#FFFFFF', cursor: 'pointer',
-                        display: 'inline-flex', alignItems: 'center', gap: '6px',
-                      }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                      </svg>
-                      📁 Upload Foto dari Perangkat
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleGalleryFileUpload}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData({ ...formData, galeri_gambar: [...(formData.galeri_gambar || []), ''] });
-                      }}
-                      style={{
-                        padding: '8px 14px', fontSize: '12px', fontWeight: '600', borderRadius: '6px',
-                        background: '#DCFCE7', color: '#166534', border: '1px solid #BBF7D0', cursor: 'pointer',
-                        display: 'inline-flex', alignItems: 'center', gap: '6px',
-                      }}
-                    >
-                      + Tambah URL Gambar
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* 1. Nama Barang (Full Width) */}
-              <div className="form-group" style={{ marginBottom: '14px' }}>
-                <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
-                  Nama Barang / Produk
-                </label>
-                <input
-                  name="nama_barang"
-                  placeholder="Contoh: Baju Anak Lengan Pendek Katun..."
-                  value={formData.nama_barang}
-                  onChange={handleChange}
-                  required
-                  style={{
-                    height: '42px',
-                    padding: '0 14px',
-                    fontSize: '13.5px',
-                    borderRadius: '8px',
-                    border: '1px solid #CBD5E1',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    boxShadow: 'none',
-                  }}
-                />
-              </div>
-
-              {/* 2. Kategori Produk & Kode Barang / SKU (Side by Side) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-                {/* Kategori */}
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
-                    Kategori Produk
-                  </label>
-                  <select
-                    name="kategori_id"
-                    value={formData.kategori_id || ''}
-                    onChange={handleChange}
-                    style={{
-                      height: '42px',
-                      padding: '0 32px 0 12px',
-                      fontSize: '13px',
-                      borderRadius: '8px',
-                      border: '1px solid #CBD5E1',
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      boxShadow: 'none',
-                      backgroundPosition: 'right 10px center',
-                    }}
-                  >
-                    <option value="">-- Tanpa Kategori --</option>
-                    {kategoriList.map((k) => (
-                      <option key={k.id} value={k.id}>
-                        {k.kode ? `[${k.kode}] ` : ''}{k.nama_kategori}
-                      </option>
-                    ))}
-                  </select>
+                  )}
                 </div>
 
-                {/* Kode Barang / SKU */}
-                <div className="form-group" style={{ margin: 0 }}>
+                {/* ── Galeri Foto Tambahan ── */}
+                <div style={{ marginBottom: '22px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0', padding: '14px 16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label style={{ margin: 0, fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>
-                      Kode Barang / SKU
-                    </label>
-                    {barcodePrefix && (
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#334155' }}>Galeri Foto Tambahan</span>
+                    <span style={{ fontSize: '11px', fontWeight: '600', color: '#94A3B8' }}>
+                      {(formData.galeri_gambar || []).length} / 8
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 10px', lineHeight: '1.4' }}>
+                    Foto tambahan tampil di halaman detail produk website. Maks 8 foto.
+                  </p>
+
+                  {/* List existing gallery images */}
+                  {(formData.galeri_gambar || []).length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+                      {(formData.galeri_gambar || []).map((url, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', padding: '6px 8px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                          <img
+                            src={url}
+                            alt={`Galeri ${idx + 1}`}
+                            style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #E2E8F0', flexShrink: 0, background: '#F8FAFC' }}
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                          <input
+                            type="text"
+                            value={url.startsWith('data:image') ? '[Foto Upload File]' : url}
+                            readOnly={url.startsWith('data:image')}
+                            onChange={(e) => {
+                              if (url.startsWith('data:image')) return;
+                              const updated = [...formData.galeri_gambar];
+                              updated[idx] = e.target.value;
+                              setFormData({ ...formData, galeri_gambar: updated });
+                            }}
+                            style={{ flex: 1, padding: '6px 10px', fontSize: '11.5px', borderRadius: '6px', border: '1px solid #E2E8F0', boxSizing: 'border-box', background: url.startsWith('data:image') ? '#F1F5F9' : '#FFFFFF', boxShadow: 'none' }}
+                            placeholder="https://..."
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = formData.galeri_gambar.filter((_, i) => i !== idx);
+                              setFormData({ ...formData, galeri_gambar: updated });
+                            }}
+                            style={{ width: '26px', height: '26px', borderRadius: '6px', background: '#FEE2E2', color: '#DC2626', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '700', cursor: 'pointer', flexShrink: 0 }}
+                          >✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Upload & Add buttons */}
+                  {(formData.galeri_gambar || []).length < 8 && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <label style={{
+                        padding: '7px 14px', fontSize: '11.5px', fontWeight: '600', borderRadius: '6px',
+                        background: '#0F172A', color: '#FFFFFF', cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
+                      }}>
+                        📁 Upload Foto
+                        <input type="file" accept="image/*" multiple onChange={handleGalleryFileUpload} style={{ display: 'none' }} />
+                      </label>
                       <button
                         type="button"
-                        onClick={() => {
-                          if (!isManualBarcode) {
-                            setIsManualBarcode(true);
-                          } else {
-                            setIsManualBarcode(false);
-                            setFormData((prev) => ({
-                              ...prev,
-                              barcode: `${barcodePrefix}${barcodeNumber}`,
-                            }));
-                          }
-                        }}
+                        onClick={() => { setFormData({ ...formData, galeri_gambar: [...(formData.galeri_gambar || []), ''] }); }}
                         style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#2563EB',
-                          fontSize: '11px',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          padding: 0,
+                          padding: '7px 14px', fontSize: '11.5px', fontWeight: '600', borderRadius: '6px',
+                          background: '#FFFFFF', color: '#334155', border: '1px solid #CBD5E1', cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
                         }}
-                      >
-                        {isManualBarcode ? `← Gunakan Kode [${barcodePrefix}]` : 'Manual / Scan →'}
-                      </button>
-                    )}
-                  </div>
-
-                  {!isManualBarcode && barcodePrefix ? (
-                    <div>
-                      <div style={{ display: 'flex', width: '100%', height: '42px' }}>
-                        {/* Badge Kode Otomatis dari Kategori yang Dipilih */}
-                        <div
-                          style={{
-                            minWidth: '55px',
-                            padding: '0 12px',
-                            height: '42px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: '#E2E8F0',
-                            color: '#0F172A',
-                            fontWeight: '800',
-                            fontSize: '14px',
-                            borderRadius: '8px 0 0 8px',
-                            border: '1px solid #CBD5E1',
-                            borderRight: 'none',
-                            letterSpacing: '0.04em',
-                            fontFamily: 'monospace',
-                            boxSizing: 'border-box',
-                            userSelect: 'none',
-                          }}
-                          title={`Kode otomatis dari kategori`}
-                        >
-                          {barcodePrefix}
-                        </div>
-
-                        {/* Input Nomor Barang Saja */}
-                        <input
-                          type="text"
-                          placeholder="Ketik angka nomor (cth: 001)..."
-                          value={barcodeNumber}
-                          onChange={handleBarcodeNumberChange}
-                          required
-                          style={{
-                            flex: 1,
-                            minWidth: 0,
-                            height: '42px',
-                            padding: '0 12px',
-                            fontSize: '13.5px',
-                            fontWeight: '600',
-                            borderRadius: '0 8px 8px 0',
-                            border: '1px solid #CBD5E1',
-                            boxSizing: 'border-box',
-                            boxShadow: 'none',
-                          }}
-                        />
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '11px',
-                          color: '#64748B',
-                          marginTop: '4px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                        }}
-                      >
-                        <span>SKU Jadi:</span>
-                        <strong
-                          style={{
-                            color: formData.barcode ? '#1E293B' : '#94A3B8',
-                            fontFamily: 'monospace',
-                            fontSize: '12px',
-                            background: formData.barcode ? '#EFF6FF' : '#F8FAFC',
-                            padding: '1px 6px',
-                            borderRadius: '4px',
-                            border: formData.barcode ? '1px solid #DBEAFE' : '1px solid #E2E8F0',
-                          }}
-                        >
-                          {formData.barcode || '-'}
-                        </strong>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <input
-                        name="barcode"
-                        placeholder={
-                          formData.kategori_id
-                            ? "Kategori ini belum ada kode di Master Data, ketik barcode manual..."
-                            : "Pilih kategori di sebelah kiri untuk kode otomatis atau ketik manual..."
-                        }
-                        value={formData.barcode}
-                        onChange={handleChange}
-                        required
-                        style={{
-                          height: '42px',
-                          padding: '0 12px',
-                          fontSize: '13px',
-                          borderRadius: '8px',
-                          border: '1px solid #CBD5E1',
-                          width: '100%',
-                          boxSizing: 'border-box',
-                          boxShadow: 'none',
-                        }}
-                      />
-                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
-                        {isManualBarcode
-                          ? 'Mode ketik manual / barcode scanner.'
-                          : 'Pilih kategori yang memiliki kode untuk kode otomatis.'}
-                      </div>
+                      >+ Tambah URL</button>
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* 3. Harga Modal & Jual */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
-                    Harga Modal (Rp)
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '13px', fontWeight: '600', pointerEvents: 'none' }}>
-                      Rp
-                    </span>
-                    <input
-                      type="text"
-                      value={displayHargaModal}
-                      onChange={(e) => handleCurrencyChange(e, 'harga_modal')}
-                      style={{ height: '42px', paddingLeft: '38px', paddingRight: '12px', fontSize: '13.5px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
-                      required
-                    />
+                {/* ── SECTION 2: Informasi Produk ── */}
+                <div style={{ marginBottom: '18px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>
+                    Informasi Produk
                   </div>
-                </div>
-                <div className="form-group" style={{ margin: 0 }}>
-                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', marginBottom: '6px', display: 'block' }}>
-                    Harga Jual (Rp)
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '13px', fontWeight: '600', pointerEvents: 'none' }}>
-                      Rp
-                    </span>
-                    <input
-                      type="text"
-                      value={displayHargaJual}
-                      onChange={(e) => handleCurrencyChange(e, 'harga_jual')}
-                      style={{ height: '42px', paddingLeft: '38px', paddingRight: '12px', fontSize: '13.5px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
 
-              {/* Stok & Satuan (DAPAT DIEDIT LANGSUNG) */}
-              <div className="form-group" style={{ display: 'flex', gap: '15px' }}>
-                <div style={{ flex: 2 }}>
-                  <label style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Jumlah Stok Barang</span>
-                    {formData.id && <span style={{ color: '#03AC0E', fontWeight: '700', fontSize: '11px' }}>✓ Bisa diatur langsung</span>}
-                  </label>
-                  <input
-                    type="number"
-                    name="stok"
-                    value={formData.stok}
-                    onChange={handleChange}
-                    required
-                    style={{ boxShadow: 'none' }}
-                  />
-                  <small style={{ color: '#64748B', display: 'block', marginTop: '4px', fontSize: '11px' }}>
-                    Masukkan jumlah fisik stok saat ini.
-                  </small>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label>Satuan</label>
-                  <select name="satuan" value={formData.satuan} onChange={handleChange} style={{ width: '100%', boxShadow: 'none' }}>
-                    <option value="pcs">Pcs</option>
-                    <option value="pack">Pack</option>
-                    <option value="lusin">Lusin</option>
-                    <option value="botol">Botol</option>
-                    <option value="box">Box</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Pengaturan Katalog Toko Online */}
-              <div
-                style={{
-                  background: '#F8FAFC',
-                  border: '1px solid #E2E8F0',
-                  borderRadius: '10px',
-                  padding: '14px 16px',
-                  marginTop: '16px',
-                }}
-              >
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A', marginBottom: '8px' }}>
-                  Pengaturan Katalog Website Online
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', alignItems: 'center' }}>
-                  <div>
-                    <label style={{ fontSize: '11.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
-                      Berat Produk (gram)
+                  {/* Nama Barang */}
+                  <div style={{ marginBottom: '14px' }}>
+                    <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#1E293B', marginBottom: '5px', display: 'block' }}>
+                      Nama Barang / Produk
                     </label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type="number"
-                        min="0"
-                        name="berat_gram"
-                        value={formData.berat_gram ?? 200}
+                    <input
+                      name="nama_barang"
+                      placeholder="Contoh: Baju Anak Lengan Pendek Katun..."
+                      value={formData.nama_barang}
+                      onChange={handleChange}
+                      required
+                      style={{ height: '40px', padding: '0 14px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
+                    />
+                  </div>
+
+                  {/* Kategori & Kode Barang */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#1E293B', marginBottom: '5px', display: 'block' }}>Kategori Produk</label>
+                      <select
+                        name="kategori_id"
+                        value={formData.kategori_id || ''}
                         onChange={handleChange}
-                        placeholder="Contoh: 250"
-                        style={{ width: '100%', height: '36px', fontSize: '13px', paddingRight: '46px', boxSizing: 'border-box', boxShadow: 'none' }}
-                      />
-                      <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', color: '#94A3B8' }}>
-                        gram
-                      </span>
+                        style={{ height: '40px', padding: '0 32px 0 12px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none', backgroundPosition: 'right 10px center' }}
+                      >
+                        <option value="">-- Tanpa Kategori --</option>
+                        {kategoriList.map((k) => (
+                          <option key={k.id} value={k.id}>
+                            {k.kode ? `[${k.kode}] ` : ''}{k.nama_kategori}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                        <label style={{ margin: 0, fontSize: '12.5px', fontWeight: '600', color: '#1E293B' }}>Kode Barang / SKU</label>
+                        {barcodePrefix && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!isManualBarcode) {
+                                setIsManualBarcode(true);
+                              } else {
+                                setIsManualBarcode(false);
+                                setFormData((prev) => ({ ...prev, barcode: `${barcodePrefix}${barcodeNumber}` }));
+                              }
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#2563EB', fontSize: '10.5px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
+                          >
+                            {isManualBarcode ? `← Otomatis [${barcodePrefix}]` : 'Manual →'}
+                          </button>
+                        )}
+                      </div>
+
+                      {!isManualBarcode && barcodePrefix ? (
+                        <div>
+                          <div style={{ display: 'flex', width: '100%', height: '40px' }}>
+                            <div style={{
+                              minWidth: '50px', padding: '0 10px', height: '40px',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              background: '#E2E8F0', color: '#0F172A', fontWeight: '800', fontSize: '13px',
+                              borderRadius: '8px 0 0 8px', border: '1px solid #CBD5E1', borderRight: 'none',
+                              letterSpacing: '0.04em', fontFamily: 'monospace', boxSizing: 'border-box', userSelect: 'none',
+                            }}>
+                              {barcodePrefix}
+                            </div>
+                            <input
+                              type="text"
+                              placeholder="001"
+                              value={barcodeNumber}
+                              onChange={handleBarcodeNumberChange}
+                              required
+                              style={{ flex: 1, minWidth: 0, height: '40px', padding: '0 12px', fontSize: '13px', fontWeight: '600', borderRadius: '0 8px 8px 0', border: '1px solid #CBD5E1', boxSizing: 'border-box', boxShadow: 'none' }}
+                            />
+                          </div>
+                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>SKU:</span>
+                            <strong style={{ color: formData.barcode ? '#1E293B' : '#94A3B8', fontFamily: 'monospace', fontSize: '11px', background: '#EFF6FF', padding: '1px 5px', borderRadius: '3px' }}>
+                              {formData.barcode || '-'}
+                            </strong>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <input
+                            name="barcode"
+                            placeholder={formData.kategori_id ? "Ketik barcode manual..." : "Pilih kategori dulu atau ketik manual..."}
+                            value={formData.barcode}
+                            onChange={handleChange}
+                            required
+                            style={{ height: '40px', padding: '0 12px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
+                          />
+                          <div style={{ fontSize: '10.5px', color: '#64748B', marginTop: '3px' }}>
+                            {isManualBarcode ? 'Mode manual / barcode scanner.' : 'Pilih kategori yang memiliki kode.'}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── SECTION 3: Harga & Stok ── */}
+                <div style={{ marginBottom: '18px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>
+                    Harga & Stok
+                  </div>
+
+                  {/* Harga Modal & Jual */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#1E293B', marginBottom: '5px', display: 'block' }}>Harga Modal (Rp)</label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '12.5px', fontWeight: '600', pointerEvents: 'none' }}>Rp</span>
+                        <input
+                          type="text"
+                          value={displayHargaModal}
+                          onChange={(e) => handleCurrencyChange(e, 'harga_modal')}
+                          style={{ height: '40px', paddingLeft: '36px', paddingRight: '12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#1E293B', marginBottom: '5px', display: 'block' }}>Harga Jual (Rp)</label>
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', fontSize: '12.5px', fontWeight: '600', pointerEvents: 'none' }}>Rp</span>
+                        <input
+                          type="text"
+                          value={displayHargaJual}
+                          onChange={(e) => handleCurrencyChange(e, 'harga_jual')}
+                          style={{ height: '40px', paddingLeft: '36px', paddingRight: '12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: '11.5px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>
-                      Kondisi Produk
-                    </label>
-                    <select
-                      name="kondisi"
-                      value={formData.kondisi || 'Baru'}
-                      onChange={handleChange}
-                      style={{
-                        width: '100%',
-                        height: '36px',
-                        fontSize: '13px',
-                        borderRadius: '6px',
-                        border: '1px solid #CBD5E1',
-                        padding: '0 10px',
-                        background: '#FFFFFF',
-                        color: '#0F172A',
-                        outline: 'none',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <option value="Baru">Baru</option>
-                      <option value="Bekas">Bekas / Preloved</option>
-                    </select>
+                  {/* Stok & Satuan */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#1E293B', marginBottom: '5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Jumlah Stok</span>
+                        {formData.id && <span style={{ color: '#059669', fontWeight: '600', fontSize: '10px' }}>✓ Bisa diatur langsung</span>}
+                      </label>
+                      <input
+                        type="number"
+                        name="stok"
+                        value={formData.stok}
+                        onChange={handleChange}
+                        required
+                        style={{ height: '40px', padding: '0 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12.5px', fontWeight: '600', color: '#1E293B', marginBottom: '5px', display: 'block' }}>Satuan</label>
+                      <select name="satuan" value={formData.satuan} onChange={handleChange} style={{ height: '40px', padding: '0 10px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid #CBD5E1', width: '100%', boxSizing: 'border-box', boxShadow: 'none', background: '#fff' }}>
+                        <option value="pcs">Pcs</option>
+                        <option value="pack">Pack</option>
+                        <option value="lusin">Lusin</option>
+                        <option value="botol">Botol</option>
+                        <option value="box">Box</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
-                <div style={{ marginTop: '12px', paddingTop: '4px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#0F172A', cursor: 'pointer', fontWeight: '700' }}>
+                {/* ── SECTION 4: Pengaturan Website ── */}
+                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '16px 18px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>
+                    Pengaturan Katalog Website
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                    <div>
+                      <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>Berat Produk</label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="number" min="0" name="berat_gram"
+                          value={formData.berat_gram ?? 200}
+                          onChange={handleChange}
+                          placeholder="250"
+                          style={{ width: '100%', height: '38px', fontSize: '12.5px', paddingRight: '46px', paddingLeft: '12px', boxSizing: 'border-box', boxShadow: 'none', borderRadius: '8px', border: '1px solid #CBD5E1' }}
+                        />
+                        <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', color: '#94A3B8' }}>gram</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '4px' }}>Kondisi</label>
+                      <select
+                        name="kondisi" value={formData.kondisi || 'Baru'} onChange={handleChange}
+                        style={{ width: '100%', height: '38px', fontSize: '12.5px', borderRadius: '8px', border: '1px solid #CBD5E1', padding: '0 10px', background: '#FFFFFF', color: '#0F172A', outline: 'none', cursor: 'pointer', boxShadow: 'none' }}
+                      >
+                        <option value="Baru">Baru</option>
+                        <option value="Bekas">Bekas / Preloved</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#0F172A', cursor: 'pointer', fontWeight: '600', padding: '8px 0' }}>
                     <input
                       type="checkbox"
                       checked={Number(formData.tampil_online) === 1}
                       onChange={(e) => setFormData({ ...formData, tampil_online: e.target.checked ? 1 : 0 })}
-                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#03AC0E' }}
                     />
                     Tampil di Website Toko Online
+                    <span style={{ fontSize: '10px', fontWeight: '600', color: Number(formData.tampil_online) === 1 ? '#059669' : '#94A3B8', marginLeft: '4px' }}>
+                      {Number(formData.tampil_online) === 1 ? '✓ Aktif' : '✗ Tidak'}
+                    </span>
                   </label>
-                  <small style={{ fontSize: '11px', color: '#64748B', marginTop: '3px', display: 'block' }}>
-                    {Number(formData.tampil_online) === 1 ? '✓ Ditampilkan di halaman web marketplace' : '✗ Hanya dijual kasir fisik'}
-                  </small>
+
+                  {/* Deskripsi Produk */}
+                  <div style={{ marginTop: '10px', paddingTop: '12px', borderTop: '1px solid #E2E8F0' }}>
+                    <label style={{ fontSize: '12px', fontWeight: '600', color: '#475569', display: 'block', marginBottom: '5px' }}>
+                      Deskripsi Produk
+                    </label>
+                    <textarea
+                      name="deskripsi"
+                      rows={3}
+                      value={formData.deskripsi || ''}
+                      onChange={handleChange}
+                      placeholder="Contoh: Bahan Cotton Combed 30s premium lembut & adem. Jahitan rantai rapi standar distro. Tersedia ukuran M, L, XL."
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', background: '#FFFFFF', fontSize: '12px', color: '#1E293B', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', lineHeight: '1.5', boxShadow: 'none' }}
+                    />
+                    <p style={{ fontSize: '10.5px', color: '#94A3B8', marginTop: '3px', margin: '3px 0 0' }}>
+                      Spesifikasi bahan, ukuran, keunggulan — tampil di halaman detail produk web.
+                    </p>
+                  </div>
                 </div>
 
-                {/* Deskripsi Produk / Baju untuk Toko Online */}
-                <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed #CBD5E1' }}>
-                  <label style={{ fontSize: '11.5px', fontWeight: '700', color: '#334155', display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span>Deskripsi Produk / Baju</span>
-                    <span style={{ fontSize: '10.5px', color: '#03AC0E', fontWeight: '600' }}>Tampil di Rincian Toko Web</span>
-                  </label>
-                  <textarea
-                    name="deskripsi"
-                    rows={3}
-                    value={formData.deskripsi || ''}
-                    onChange={handleChange}
-                    placeholder="Contoh: Bahan Cotton Combed 30s premium lembut & adem. Jahitan rantai rapi standar distro. Tersedia ukuran M, L, XL. Warna awet dan tidak mudah luntur."
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: '1.5px solid #CBD5E1',
-                      background: '#FFFFFF',
-                      fontSize: '12.5px',
-                      color: '#1E293B',
-                      boxSizing: 'border-box',
-                      resize: 'vertical',
-                      fontFamily: 'inherit',
-                      lineHeight: '1.45',
-                      boxShadow: 'none',
-                    }}
-                  />
-                  <small style={{ fontSize: '11px', color: '#64748B', marginTop: '3px', display: 'block' }}>
-                    Tuliskan spesifikasi bahan, ukuran, keunggulan, atau catatan produk agar pembeli di website yakin membeli.
-                  </small>
-                </div>
               </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E2E8F0' }}>
+              {/* ── Action Buttons (sticky bottom) ── */}
+              <div style={{
+                display: 'flex', justifyContent: 'flex-end', gap: '8px',
+                padding: '16px 28px', borderTop: '1px solid #E2E8F0',
+                background: '#FFFFFF', position: 'sticky', bottom: 0,
+              }}>
                 <button
                   type="button"
                   onClick={closeModal}
-                  style={{
-                    padding: '9px 18px',
-                    background: '#FFFFFF',
-                    color: '#475569',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '8px',
-                    fontWeight: '600',
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Batal
-                </button>
+                  style={{ padding: '10px 20px', background: '#FFFFFF', color: '#475569', border: '1px solid #E2E8F0', borderRadius: '8px', fontWeight: '600', fontSize: '13px', cursor: 'pointer' }}
+                >Batal</button>
                 <button
                   type="submit"
-                  style={{
-                    padding: '9px 18px',
-                    background: '#0F172A',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: '700',
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Simpan Produk
-                </button>
+                  style={{ padding: '10px 24px', background: '#0F172A', color: '#FFFFFF', border: 'none', borderRadius: '8px', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}
+                >Simpan Produk</button>
               </div>
 
             </form>
